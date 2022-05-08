@@ -29,5 +29,5 @@ function COMMAND_MULTI:Execute(ply, targetting, reason)
 end
 
 --post
-print("first", PYRITION:ConsoleCommandRegister("kick", COMMAND))
-print("second", PYRITION:ConsoleCommandRegister("kick multiple", COMMAND_MULTI))
+PYRITION:ConsoleCommandRegister("kick", COMMAND)
+PYRITION:ConsoleCommandRegister("kick multiple", COMMAND_MULTI)

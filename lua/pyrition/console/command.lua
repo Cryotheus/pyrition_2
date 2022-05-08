@@ -122,12 +122,6 @@ function PYRITION:ConsoleCommandGet(parents, modify)
 	local branch = commands
 	local count = #parents
 	
-	--goto nearest
-	--goto = {nearest = comm}
-	
-	--goto ?nearest
-	--goto = comm
-	
 	for index, parent in ipairs(parents) do
 		local twig = branch[parent]
 		
@@ -245,13 +239,9 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	self:ConsoleCommandSet(parents, command)
 	command:Initialize()
 	
-	print("register?")
-	
 	if existing_command then
 		command:OnReloaded(existing_command)
 		self:ConsoleCommandReloaded(existing_command, command)
-		
-		print("reload", command)
 	end
 	
 	return command
@@ -269,27 +259,24 @@ function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 		if index == count then
 			local children
 			
-			if is_pyrition_command(twig) then
+			if istable(twig) then
 				children = {}
 				
-				for key, child in pairs(twig) do
-					if is_pyrition_command(value) then
-						print("child command", child)
-						table.insert(children, child)
-					end
-				end
-			end
+				--build a table of child commands
+				for name, child in pairs(twig) do if is_pyrition_command(child) and name ~= "BaseClass" then children[name] = child end end
+				
+				--we empty and merge to maintain the same reference
+				table.Empty(twig)
+				
+				--we must set command_table to this reference we are trying to keep
+				command_table = table.Merge(twig, command_table)
+			else branch[parent] = command_table end
 			
-			branch[parent] = command_table
 			command_table.Name = parents[#parents]
 			command_table.Parents = table.Copy(parents)
 			
-			if children then
-				for index, child in ipairs(children) do
-					print("restoring", child.Name, child)
-					command_table[child.Name] = child
-				end
-			end
+			--if we had children commands in the command we are replacing, restore them
+			if children then table.Merge(command_table, children) end
 			
 			return command_table
 		elseif is_pyrition_command(twig) then branch = twig

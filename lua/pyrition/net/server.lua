@@ -120,7 +120,7 @@ end
 
 --pyrition hooks
 function PYRITION:PyritionNetPlayerInitialized(ply, emulated)
-	MsgC(color_significant, "[Pyrition] ", color_white, ply:Name() .. (map_transition and " fully loaded into the server after the map change." or " fully loaded into the server."))
+	MsgC(color_significant, "[Pyrition] ", color_white, ply:Name() .. (map_transition and " fully loaded into the server after the map change.\n" or " fully loaded into the server.\n"))
 	
 	for class, model_table in pairs(self.NetSyncModels) do
 		--more?

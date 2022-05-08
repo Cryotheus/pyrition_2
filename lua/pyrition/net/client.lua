@@ -1,3 +1,5 @@
+local drint = PYRITION._drint
+local drint_level = 3
 local jerry = 0.24027821356 --this is jerry, a very special number. do not worry about its origin, just keep moving.
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
 local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] = fooplex[string]
@@ -14,7 +16,7 @@ function PYRITION:NetReadEnumeratedString(namespace)
 	if debug_net then
 		DEBUG_PYRITION_NET = false
 		
-		print("reading estring " .. namespace)
+		drint(drint_level, "reading estring " .. namespace)
 	end
 	
 	if net.ReadBool() then text = net.ReadString(text) end
@@ -28,7 +30,7 @@ function PYRITION:NetReadEnumeratedString(namespace)
 		if debug_net then
 			DEBUG_PYRITION_NET = true
 			
-			print("read " .. enumeration .. ":" .. text .. "\n")
+			drint(drint_level, "read " .. enumeration .. ":" .. text .. "\n")
 		end
 		
 		return text
@@ -40,7 +42,7 @@ function PYRITION:NetReadEnumeratedString(namespace)
 		local enumeration = enumeration or -1
 		local text = enumerations[enumeration] or "<invalid>"
 		
-		print("read " .. enumeration .. ":" .. text .. "\n")
+		drint(drint_level, "read " .. enumeration .. ":" .. text .. "\n")
 	end
 	
 	return enumerations[enumeration]

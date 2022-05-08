@@ -1,9 +1,5 @@
 --pyrition functions
 function PYRITION:LanguageDisplay(option, key, phrases)
-	print("display!", option, key, phrases)
-	
-	if istable(phrases) then PrintTable(phrases) end
-	
 	local formatted = self:LanguageFormat(key, phrases)
 	local operation = self.LanguageOptions[option]
 	

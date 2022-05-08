@@ -15,7 +15,7 @@ end
 function PYRITION:LanguageRegister(key)
 	local phrase = language.GetPhrase(key)
 	
-	if phrase == key then return print("no localization for " .. key)
+	if phrase == key then return MsgC(Color(255, 32, 32), "[Pyrition] no localization for " .. key, "\n")
 	else
 		--more?
 		self:NetAddEnumeratedString("language", key)

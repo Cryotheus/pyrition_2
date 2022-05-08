@@ -24,7 +24,7 @@ if PYRITION then
 else PYRITION = {} end
 
 function PYRITION._drint(level, ...)
-	--print with developer only
+	--p rint with developer only
 	if developer:GetInt() >= level then print(...) end
 end
 

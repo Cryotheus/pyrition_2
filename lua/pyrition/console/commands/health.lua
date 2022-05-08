@@ -47,7 +47,7 @@ COMMAND_ARMOR_MAX.SetFunction = player_meta.SetMaxArmor
 COMMAND_MAX.SetFunction = entity_meta.SetMaxHealth
 
 --registration
-print("1:", PYRITION:ConsoleCommandRegister("armor", COMMAND_ARMOR))
-print("2:", PYRITION:ConsoleCommandRegister("armor max", COMMAND_ARMOR_MAX))
-print("3:", PYRITION:ConsoleCommandRegister("health", COMMAND))
-print("4:", PYRITION:ConsoleCommandRegister("health max", COMMAND_MAX))
+PYRITION:ConsoleCommandRegister("armor", COMMAND_ARMOR)
+PYRITION:ConsoleCommandRegister("armor max", COMMAND_ARMOR_MAX)
+PYRITION:ConsoleCommandRegister("health", COMMAND)
+PYRITION:ConsoleCommandRegister("health max", COMMAND_MAX)
