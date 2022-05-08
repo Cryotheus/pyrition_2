@@ -13,7 +13,7 @@ function COMMAND:Execute(ply, targetting, amount)
 	local targets = {ply}
 	
 	if amount == nil then amount = targetting
-	else targets, message = PYRITION:PlayerFind(targetting, ply) end
+	else targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply) end
 	if not targets then return false, message end
 	
 	local amount = tonumber(amount)

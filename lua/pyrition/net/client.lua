@@ -81,11 +81,11 @@ concommand.Add("pd", function(ply, command, arguments, arguments_string)
 end, nil, "Pyrition's debug command. If you are reading this and you're not on a test server, please report it.")
 
 --hooks
-hook.Add("AddToolMenuCategories", "PyritionNet", function() spawnmenu.AddToolCategory("Utilities", "PyritionDevelopers", "Pyrition (Developers)") end)
+hook.Add("AddToolMenuCategories", "PyritionNet", function() spawnmenu.AddToolCategory("Utilities", "PyritionDevelopers", "#pyrition.spawnmenu.categories.developer") end)
 hook.Add("InitPostEntity", "PyritionNet", function() PYRITION:NetClientInitialized(LocalPlayer()) end)
 
 hook.Add("PopulateToolMenu", "PyritionNet", function()
-	spawnmenu.AddToolMenuOption("Utilities", "PyritionDevelopers", "NetEnumerations", "Networking Enumerations", "", "", function(form)
+	spawnmenu.AddToolMenuOption("Utilities", "PyritionDevelopers", "NetEnumerations", "#pyrition.spawnmenu.categories.developer.net_enumerations", "", "", function(form)
 		local category_list
 		
 		form:ClearControls()
@@ -94,7 +94,7 @@ hook.Add("PopulateToolMenu", "PyritionNet", function()
 			local button = form:Button("Refresh")
 			
 			button:SetMaterial("icon16/arrow_refresh.png")
-			button:SetText("Refresh")
+			--button:SetText("Refresh")
 			
 			function button:DoClick() category_list:Refresh() end
 		end
@@ -110,7 +110,9 @@ hook.Add("PopulateToolMenu", "PyritionNet", function()
 			function category_list:Refresh()
 				self:Clear()
 				
-				for namespace, fooplex in pairs(net_enumerations) do
+				local net_enumeration_bits = PYRITION.NetEnumerationBits
+				
+				for namespace, fooplex in pairs(PYRITION.NetEnumeratedStrings) do
 					local bits = net_enumeration_bits[namespace]
 					local bits_maximum = 2 ^ bits
 					local category = self:Add(namespace .. " (" .. bits .. " 0d" .. bits_maximum .. ")")
@@ -131,12 +133,12 @@ hook.Add("PopulateToolMenu", "PyritionNet", function()
 						local text = fooplex[index]
 						
 						if text then category:Add("#" .. index .. " " .. text)
-						else category:Add("#" .. index .. " <unaccounted>"):SetEnabled(false) end
+						else category:Add(PYRITION:LanguageFormat("pyrition.spawnmenu.categories.developer.net_enumerations.unaccounted", {index = index})):SetEnabled(false) end
 					end
 					
 					if maximum_index < bits_maximum then
 						local difference = bits_maximum - maximum_index
-						local warning = difference == 1 and category:Add("An additional entry may exist, but it has not yet been received.") or category:Add("Up to " .. difference .. " additional entries may exist, but they have not yet been received.")
+						local warning = difference == 1 and category:Add("#pyrition.spawnmenu.categories.developer.net_enumerations.additional.singular") or category:Add(PYRITION:LanguageFormat("pyrition.spawnmenu.categories.developer.net_enumerations.additional", {difference = difference}))
 						
 						warning:SetEnabled(false)
 						warning:SetTextColor(Color(192, 0, 0))

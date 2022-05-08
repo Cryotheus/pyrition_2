@@ -46,15 +46,14 @@ hook.Add("PopulateToolMenu", "PyritionNetSync", function()
 			list_view = vgui.Create("DCategoryList", form)
 			list_view.PerformLayoutX = list_view.PerformLayout
 			
-			list_view:AddColumn("Class")
-			list_view:AddColumn("ID")
+			list_view:Add("Class")
+			list_view:Add("ID")
 			list_view:SetHeight(512)
 			
 			function list_view:Refresh()
 				local model_data = {}
-				local pyrition = PYRITION
 				
-				for name, models in pairs(pyrition.NetSyncActiveModels) do
+				for name, models in pairs(PYRITION.NetSyncActiveModels) do
 					for index, model in pairs(models) do
 						table.insert(model_data, {model.Created or 0, model.Identifier, name})
 					end
@@ -79,12 +78,10 @@ end)
 
 --net
 net.Receive("pyrition_sync", function()
-	local pyrition = PYRITION
-	
 	repeat
 		local class
 		
-		if net.ReadBool() then class = pyrition:NetReadEnumeratedString("sync_model")
+		if net.ReadBool() then class = PYRITION:NetReadEnumeratedString("sync_model")
 		else class = net.ReadString() end
 		
 		local debugging = DEBUG_PYRITION_NET
@@ -92,7 +89,7 @@ net.Receive("pyrition_sync", function()
 		
 		DEBUG_PYRITION_NET = class == debug_class
 		
-		pyrition:NetSyncGetModel(class, identifier)()
+		PYRITION:NetSyncGetModel(class, identifier)()
 		
 		DEBUG_PYRITION_NET = debugging
 		

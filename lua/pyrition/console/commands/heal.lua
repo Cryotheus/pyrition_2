@@ -3,7 +3,10 @@ local player_meta = FindMetaTable("Player")
 
 --command function
 function COMMAND:Execute(ply, targetting)
-	local targets, message = targetting and PYRITION:PlayerFind(targetting, supplicant) or {ply}
+	local targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply)
+	
+	print("so flay", type(targetting), targetting)
+	print("msg", targets, message)
 	
 	if targets then
 		for index, target in ipairs(targets) do

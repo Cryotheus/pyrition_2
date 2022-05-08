@@ -30,6 +30,9 @@ function MODEL:Read()
 					repeat table.insert(items, net.ReadString())
 					until not net.ReadBool()
 					
+					print("fetching table")
+					PrintTable(items)
+					
 					if is_player_list then phrases[tag] = PYRITION:LanguageListPlayers(items)
 					else phrases[tag] = PYRITION:LanguageList(items) end
 				else phrases[tag] = net.ReadString() end
@@ -65,6 +68,9 @@ function MODEL:Write(ply)
 				
 				net.WriteBool(true)
 				net.WriteBool(phrase.IsPlayerList or false)
+				
+				print("posting table")
+				PrintTable(phrase)
 				
 				for index, item in ipairs(phrase) do
 					if IsEntity(item) and item:IsPlayer() then item = item:Name() end

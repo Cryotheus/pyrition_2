@@ -18,14 +18,6 @@ function PYRITION:LanguageRegisterOption(option, operation) --options are the me
 	self:NetAddEnumeratedString("language_options", option)
 end
 
-function PYRITION:LanguageTranslate(key, fall_back, phrases)
-	local translated = language.GetPhrase(key)
-	
-	if fall_back and translated == key then translated = fall_back end
-	
-	return self:LanguageFormatTranslated(translated, phrases)
-end
-
 --post
 PYRITION:LanguageRegisterOption("center", function(formatted, key, phrases) LocalPlayer():PrintMessage(HUD_PRINTCENTER, formatted) end)
 PYRITION:LanguageRegisterOption("chat", function(formatted, key, phrases) chat.AddText(color_white, formatted) end)

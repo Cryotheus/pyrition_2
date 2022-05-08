@@ -75,6 +75,12 @@ function PYRITION:PlayerFindByUserID(user_id, supplicant)
 	return false
 end
 
+function PYRITION:PlayerFindWithFallback(needle, supplicant, fallback, single)
+	if needle and needle ~= "" then return self:PlayerFind(needle, supplicant, single) end
+	
+	return single and fallback or {fallback}
+end
+
 --pyrition hooks
 function PYRITION:PyritionPlayerFind(needle, supplicant, single)
 	if not needle or needle == "" then return false, "pyrition.player.find.targetless" end

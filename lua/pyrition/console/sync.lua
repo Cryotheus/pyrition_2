@@ -25,7 +25,7 @@ function MODEL:Read()
 		
 		table.insert(parents, name)
 		
-		PYRITION:ConsoleCommandRegister(parents, {Downloaded = true})
+		PYRITION:ConsoleCommandDownload(parents)
 		
 		--bool = child commands follow
 		if not net.ReadBool() then table.remove(parents) end

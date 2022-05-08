@@ -27,3 +27,6 @@ for key, value in pairs(net) do
 		end
 	end
 end
+
+resource.AddSingleFile("resource/localization/en/pyrition.properties")
+resource.AddSingleFile("resource/localization/en/pyrition_commands.properties")

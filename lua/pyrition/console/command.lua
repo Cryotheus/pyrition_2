@@ -44,7 +44,7 @@ local function network_execution(self, ply, ...)
 			if passed then net.WriteBool(true)
 			else passed = true end
 			
-			PYITION:NetWriteEnumeratedString("command", parent)
+			PYRITION:NetWriteEnumeratedString("command", parent)
 		end
 		
 		net.WriteBool(false)
@@ -52,11 +52,9 @@ local function network_execution(self, ply, ...)
 	
 	do --command arguments
 		local passed = false
-		
+	
 		for index, argument in ipairs({...}) do
-			if passed then net.WriteBool(true)
-			else passed = true end
-			
+			net.WriteBool(true)
 			net.WriteString(argument)
 		end
 		
@@ -64,6 +62,8 @@ local function network_execution(self, ply, ...)
 	end
 	
 	net.SendToServer()
+	
+	return true
 end
 
 function grow_command_tree(commands, maximum_depth, depth)
@@ -160,7 +160,8 @@ function PYRITION:PyritionConsoleCommandDownload(parents)
 		Parents = parents
 	}
 	
-	table.Inherit(command, command_indexing)
+	command = table.Merge(table.Copy(command_indexing), command)
+	--table.Inherit(command, command_indexing)
 	setmetatable(command, command_meta)
 	MsgC(color_white, "Downloaded command mirror " .. command, "\n")
 	
@@ -184,7 +185,7 @@ function PYRITION:PyritionConsoleCommandExecute(ply, command, ...)
 		end
 	end
 	
-	if CLIENT then
+	if CLIENT and phrases then
 		local mods = {}
 		
 		--convert tables into strings
@@ -231,7 +232,8 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	end
 	
 	--finally set meta
-	table.Inherit(command, command_indexing)
+	command = table.Merge(table.Copy(command_indexing), command)
+	--table.Inherit(command, command_indexing)
 	setmetatable(command, command_meta)
 	
 	if existing_command then existing_command:OnReload(command) end

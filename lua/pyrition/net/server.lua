@@ -1,5 +1,5 @@
 util.AddNetworkString("pyrition")
---util.AddNetworkString("pyrition_teach")
+util.AddNetworkString("pyrition_teach")
 
 --locals
 local color_significant = Color(255, 128, 64)
@@ -11,7 +11,7 @@ local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace]
 local net_enumeration_players = PYRITION.NetEnumerationPlayers or {} --dictionary[ply] = dictionary[namespace] = report[string]
 local net_enumeration_updates = PYRITION.NetEnumerationUpdates or {}
 local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] = duplex[string]
-local teaching_queue
+local teaching_queue = {}
 
 --local functions
 local function bits(number) return number == 1 and 1 or math.ceil(math.log(number, 2)) end
@@ -88,7 +88,7 @@ function PYRITION:NetReadEnumeratedString(namespace, ply)
 		return text
 	end
 	
-	return enumerations[net.ReadUInt(net_enumeration_bits[namespace])]
+	return enumerations[net.ReadUInt(net_enumeration_bits[namespace]) + 1]
 end
 
 function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
@@ -208,8 +208,8 @@ hook.Add("Think", "PyritionNet", function()
 		table.Empty(net_enumeration_updates)
 	end
 	
-	--[[
-	if teaching_queue then
+	---[[
+	if next(teaching_queue) then
 		for ply, namespaces in pairs(teaching_queue) do
 			net.Start("pyrition_teach")
 			
@@ -240,7 +240,7 @@ hook.Add("Think", "PyritionNet", function()
 			net.Send(ply)
 		end
 		
-		teaching_queue = nil
+		table.Empty(teaching_queue)
 	end --]]
 	
 	--else teaching_queue[ply] = {[namespace] = {[enumeration] = true}} end

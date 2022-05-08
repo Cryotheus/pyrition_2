@@ -1,8 +1,9 @@
+--local functions
 local function command_callback(ply, command, arguments)
 	local arguments_count = #arguments
 	local command, depth = PYRITION:ConsoleCommandGet(arguments, true)
 	
-	if depth == 0 then PYRITION:LanguageQueue(ply, "pyrition.unknown.command")
+	if depth == 0 then PYRITION:LanguageQueue(ply, "pyrition.command.unknown")
 	else
 		local subbed_arguments = {}
 		
@@ -10,7 +11,8 @@ local function command_callback(ply, command, arguments)
 		
 		local success, message, phrases = PYRITION:ConsoleCommandExecute(ply, command, unpack(subbed_arguments))
 		
-		PYRITION:LanguageQueue(ply, message, table.Merge({player = ply:Name()}, phrases or {}))
+		if message then PYRITION:LanguageQueue(ply, message, table.Merge({player = ply:Name()}, phrases or {}))
+		elseif not success then PYRITION:LanguageQueue(ply, "pyrition.command.failed", table.Merge({command = table.concat(command, " ")}, phrases or {})) end
 	end
 end
 
