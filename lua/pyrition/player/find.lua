@@ -77,7 +77,7 @@ end
 
 --pyrition hooks
 function PYRITION:PyritionPlayerFind(needle, supplicant, single)
-	if needle == "" then return false, "pyrition.player.find.targetless" end
+	if not needle or needle == "" then return false, "pyrition.player.find.targetless" end
 	
 	local first_character = string.Left(needle, 1)
 	local invert = false

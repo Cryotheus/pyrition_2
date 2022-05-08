@@ -10,7 +10,7 @@ function COMMAND:Execute(ply, targetting)
 	
 	if targets then
 		local kill_function = self.KillFunction
-		local slain = {}
+		local slain = {IsPlayerList = true}
 		
 		for index, target in ipairs(targets) do
 			if target:Alive() then
@@ -21,10 +21,10 @@ function COMMAND:Execute(ply, targetting)
 		
 		if table.IsEmpty(slain) then return false, "No living targets to slay." end
 		
-		return true, "[:player] slayed [:targets]."
+		return true, "[:player] slayed [:targets].", {targets = slain}
 	end
 	
-	return false, message or "No valid targets."
+	return false, message
 end
 
 --post

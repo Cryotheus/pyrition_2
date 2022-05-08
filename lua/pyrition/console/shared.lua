@@ -1,5 +1,4 @@
---console commands
-concommand.Add("pyrition", function(ply, command, arguments)
+local function command_callback(ply, command, arguments)
 	local arguments_count = #arguments
 	local command, depth = PYRITION:ConsoleCommandGet(arguments, true)
 	
@@ -13,8 +12,16 @@ concommand.Add("pyrition", function(ply, command, arguments)
 		
 		PYRITION:LanguageQueue(ply, message, table.Merge({player = ply:Name()}, phrases or {}))
 	end
-end, function(command, arguments_string)
-	if SERVER then return {"The server does not have auto-completes."} end
-	
-	return PYRITION:ConsoleComplete(command, arguments_string)
-end, SERVER and "Master command for Pyrition" or "Master command for Pyrition (SERVER)")
+end
+
+--console commands
+if game.SinglePlayer() then
+	if SERVER then concommand.Add("sv_pyrition", command_callback, function() return {"The server cannot use autocompletion."} end, "Master command for Pyrition (server sided for single-player, not available in a networked game)")
+	else concommand.Add("pyrition", command_callback, function(command, arguments_string) return PYRITION:ConsoleComplete(command, arguments_string) end, PYRITION:LanguageTranslate("pyrition.command.help", "Master command for Pyrition (fall back)")) end
+else
+	concommand.Add("pyrition", command_callback, function(command, arguments_string)
+		if SERVER then return end
+		
+		return PYRITION:ConsoleComplete(command, arguments_string)
+	end, PYRITION:LanguageTranslate("pyrition.command.help", "Master command for Pyrition (fall back)"))
+end

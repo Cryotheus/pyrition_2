@@ -7,10 +7,10 @@ function COMMAND:Execute(ply, targetting)
 	if targets then
 		for index, target in ipairs(targets) do target:Spawn() end
 		
-		return true, "[:player] respawned [:targets]."
+		return true, "pyrition.commands.respawn.success", {targets = targets}
 	end
 	
-	return false, message or "No valid targets."
+	return false, message
 end
 
 --post

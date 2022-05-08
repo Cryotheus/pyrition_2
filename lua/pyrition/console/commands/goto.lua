@@ -16,15 +16,20 @@
 local COMMAND = {}
 
 --command function
-function COMMAND:Execute(ply, targetting, reason)
-	if not targetting then return false, "pyrition.player.find.targetless" end
-	
+function COMMAND:Execute(ply, targetting)
 	local target, message = PYRITION:PlayerFind(targetting, ply, true)
 	
 	if target then
 		--target
+		local landings, landing_count = PYRITION:PlayerLanding(target, {ply})
 		
-		return true, "pyrition.commands.goto.success", {target = target:Name()}
+		if landing_count == 1 then
+			ply:SetPos(landings[1])
+			
+			return true, "pyrition.commands.goto.success", {target = target:Name()}
+		end
+		
+		return false, "pyrition.player.landing"
 	end
 	
 	return false, message

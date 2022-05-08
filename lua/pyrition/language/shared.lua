@@ -3,18 +3,27 @@ local language_options = PYRITION.LanguageOptions or {}
 --globals
 PYRITION.LanguageOptions = language_options
 
---pyrition functions
-function PYRITION:LanguageFormat(key, phrases)
-	if phrases then return (string.gsub(language.GetPhrase(key), "%[%:(.-)%]", phrases))
-	else return language.GetPhrase(key) end
-end
+--local functions
+local function replace_tags(text, phrases) return (string.gsub(text, "%[%:(.-)%]", phrases)) end
 
-function PYRITION:LanguageRegisterOption(option, operation)
+--pyrition functions
+function PYRITION:LanguageFormat(key, phrases) return phrases and replace_tags(language.GetPhrase(key), phrases) or language.GetPhrase(key) end
+function PYRITION:LanguageFormatTranslated(text, phrases) return phrases and replace_tags(text, phrases) or text end
+
+function PYRITION:LanguageRegisterOption(option, operation) --options are the media of message delivery
 	language_options[option] = operation
 	
 	if CLIENT then return end
 	
 	self:NetAddEnumeratedString("language_options", option)
+end
+
+function PYRITION:LanguageTranslate(key, fall_back, phrases)
+	local translated = language.GetPhrase(key)
+	
+	if fall_back and translated == key then translated = fall_back end
+	
+	return self:LanguageFormatTranslated(translated, phrases)
 end
 
 --post
