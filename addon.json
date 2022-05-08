@@ -1,0 +1,21 @@
+{
+	"author": "Cryotheum",
+	"title": "Pyrition",
+	"type": "tool",
+	"tags": [
+		"fun",
+		"build"
+	],
+	"ignore": [
+		"*.bat",
+		"*.gma",
+		"*.pdn",
+		"*.txt",
+		"*.zip",
+		".git*",
+		"license",
+		"LICENSE",
+		"*.md",
+		"wiki/*"
+	]
+}
