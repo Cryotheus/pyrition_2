@@ -19,9 +19,9 @@ function COMMAND:Execute(ply, targetting)
 			end
 		end
 		
-		if table.IsEmpty(slain) then return false, "No living targets to slay." end
+		if table.IsEmpty(slain) then return false, "pyrition.commands.slay.missed" end
 		
-		return true, "[:player] slayed [:targets].", {targets = slain}
+		return true, "pyrition.commands.slay.success", {targets = slain}
 	end
 	
 	return false, message

@@ -3,7 +3,7 @@ util.AddNetworkString("pyrition_sync")
 --locals
 local drint = PYRITION._drint
 local drint_level = 2
-local maximum_sync_bits = 2000
+local maximum_sync_bits = 500000 --65533 bytes, minus the header bytes
 local model_indices = PYRITION.NetSyncModelIndices or {}
 local player_rebuilds = {}
 local player_syncs = {}
@@ -150,8 +150,6 @@ hook.Add("Think", "PyritionNetSync", function()
 end)
 
 --net
-net.Receive("pyrition_sync", function(length, ply)
-	
-end)
+--net.Receive("pyrition_sync", function(length, ply) end)
 
 PYRITION:NetAddEnumeratedString("sync_model")

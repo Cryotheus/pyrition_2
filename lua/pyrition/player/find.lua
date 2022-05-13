@@ -75,14 +75,14 @@ function PYRITION:PlayerFindByUserID(user_id, supplicant)
 	return false
 end
 
-function PYRITION:PlayerFindWithFallback(needle, supplicant, fallback, single)
-	if needle and needle ~= "" then return self:PlayerFind(needle, supplicant, single) end
+function PYRITION:PlayerFindWithFallback(needle, supplicant, fallback, single, exclude_supplicant)
+	if needle and needle ~= "" then return self:PlayerFind(needle, supplicant, single, exclude_supplicant) end
 	
 	return single and fallback or {fallback}
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerFind(needle, supplicant, single)
+function PYRITION:PyritionPlayerFind(needle, supplicant, single, exclude_supplicant)
 	if not needle or needle == "" then return false, "pyrition.player.find.targetless" end
 	
 	local first_character = string.Left(needle, 1)
@@ -135,10 +135,17 @@ function PYRITION:PyritionPlayerFind(needle, supplicant, single)
 		else return false, "pyrition.player.find.invalid" end
 	end
 	
-	if players and next(players) then
-		players.IsPlayerList = true
+	if players then
+		if exclude_supplicant then
+			--remove the supplicant from the table
+			for index, ply in ipairs(players) do if ply == supplicant then table.remove(players, index) end end
+		end
 		
-		return players
+		if next(players) then
+			players.IsPlayerList = true
+			
+			return players
+		end
 	end
 	
 	return false, "pyrition.player.find.invalid"

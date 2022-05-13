@@ -11,6 +11,7 @@ local config = {
 	
 	console = {
 		commands = {
+			bring = 66,		--1000 010
 			goto = 66,		--1000 010
 			heal = 66,		--1000 010
 			health = 66,	--1000 010

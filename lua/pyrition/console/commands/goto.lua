@@ -1,26 +1,10 @@
---TODO: commands
---bring
---cleanup
---freeze
---god
---goto
---jail
---map
---message
---noclip
---return
---send
---slap
---strip
---who
 local COMMAND = {}
 
 --command function
 function COMMAND:Execute(ply, targetting)
-	local target, message = PYRITION:PlayerFind(targetting, ply, true)
+	local target, message = PYRITION:PlayerFind(targetting, ply, true, true)
 	
 	if target then
-		--target
 		local landings, landing_count = PYRITION:PlayerLanding(target, {ply})
 		
 		if landing_count == 1 then
@@ -29,7 +13,7 @@ function COMMAND:Execute(ply, targetting)
 			return true, "pyrition.commands.goto.success", {target = target:Name()}
 		end
 		
-		return false, "pyrition.player.landing"
+		return false, "pyrition.player.landing.fail"
 	end
 	
 	return false, message

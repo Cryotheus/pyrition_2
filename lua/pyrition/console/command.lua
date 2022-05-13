@@ -116,11 +116,12 @@ end
 function command_meta:__tostring() return "PyritionCommand [" .. table.concat(self.Parents, ".") .. "]" end
 
 --pyrition functions
-function PYRITION:ConsoleCommandGet(parents, modify)
+function PYRITION:ConsoleCommandGet(parents, modify, max_depth)
 	if isstring(parents) then parents = {parents} end
 	
 	local branch = commands
 	local count = #parents
+	local max_depth = max_depth or math.huge
 	
 	for index, parent in ipairs(parents) do
 		local twig = branch[parent]
@@ -129,7 +130,10 @@ function PYRITION:ConsoleCommandGet(parents, modify)
 			if modify then parents[index] = string.sub(parent, 2) end
 			
 			return branch, index - 1
-		elseif is_pyrition_command(twig) then branch = twig
+		elseif is_pyrition_command(twig) then
+			if index > max_depth then return twig, index end
+			
+			branch = twig
 		else return branch, index - 1 end
 	end
 	
