@@ -1,5 +1,31 @@
-local COMMAND = {}
-local COMMAND_MULTI = {}
+local COMMAND = {
+	Arguments = {
+		Required = 1,
+		
+		{
+			Single = true,
+			Type = "Player"
+		},
+		
+		{
+			Maximum = 448,
+			Type = "String"
+		}
+	}
+}
+
+local COMMAND_MULTI = {
+	Arguments = {
+		Required = 1,
+		
+		{Type = "Player"},
+		
+		{
+			Maximum = 448,
+			Type = "String"
+		}
+	}
+}
 
 --command function
 function COMMAND:Execute(ply, targetting, reason)

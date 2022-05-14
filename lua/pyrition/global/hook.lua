@@ -14,11 +14,18 @@ function PYRITION:GlobalHookCreate(key)
 end
 
 function PYRITION:GlobalHookRefresh()
+	local hook_roster = {}
+	
+	--editing PYRITION while using pairs on it cause some values to get skipped
 	for key, value in pairs(self) do
 		if isfunction(value) and string.StartWith(key, "Pyrition") then
-			local short_key = string.sub(key, 9)
-			
-			if not self[short_key] then self[short_key] = function(self, ...) return hook.Call(key, self, ...) end end
+			table.insert(hook_roster, key)
 		end
+	end
+	
+	for index, key in ipairs(hook_roster) do
+		local short_key = string.sub(key, 9)
+		
+		if not self[short_key] then self[short_key] = function(self, ...) return hook.Call(key, self, ...) end end
 	end
 end

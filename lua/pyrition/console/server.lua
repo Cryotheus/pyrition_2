@@ -19,11 +19,7 @@ net.Receive("pyrition_command", function(length, ply)
 	
 	local command = PYRITION:ConsoleCommandGetExisting(parents)
 	
-	if command then
-		local success, message, phrases = PYRITION:ConsoleCommandExecute(ply, command, unpack(arguments))
-		
-		if message then PYRITION:LanguageQueue(ply, message, table.Merge({player = ply:Name()}, phrases or {}))
-		elseif not success then PYRITION:LanguageQueue(ply, "pyrition.command.failed", table.Merge({command = table.concat(command, " ")}, phrases or {})) end
+	if command then PYRITION:ConsoleExecute(ply, command, arguments)
 	else PYRITION:LanguageQueue(ply, "pyrition.command.unknown") end
 end)
 

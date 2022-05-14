@@ -30,12 +30,17 @@ function MODEL:Read()
 					repeat table.insert(items, net.ReadString())
 					until not net.ReadBool()
 					
-					print("fetching table")
-					PrintTable(items)
-					
 					if is_player_list then phrases[tag] = PYRITION:LanguageListPlayers(items)
 					else phrases[tag] = PYRITION:LanguageList(items) end
-				else phrases[tag] = net.ReadString() end
+				else
+					local phrase = net.ReadString()
+					
+					--if prefixed with #, localize the string
+					--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal" weirdo
+					if string.StartWith(phrase, "\\#") then print("drug escaped", phrase) phrases[tag] = string.sub(phrase, 2)
+					elseif string.StartWith(phrase, "#") then print("drug localized", phrase) phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
+					else print("drug raw", phrase) phrases[tag] = phrase end
+				end
 			until not net.ReadBool()
 		end
 		
@@ -69,9 +74,6 @@ function MODEL:Write(ply)
 				net.WriteBool(true)
 				net.WriteBool(phrase.IsPlayerList or false)
 				
-				print("posting table")
-				PrintTable(phrase)
-				
 				for index, item in ipairs(phrase) do
 					if IsEntity(item) and item:IsPlayer() then item = item:Name() end
 					
@@ -86,7 +88,7 @@ function MODEL:Write(ply)
 				net.WriteBool(false)
 			else
 				net.WriteBool(false)
-				net.WriteString(phrase)
+				net.WriteString(tostring(phrase))
 			end
 		end
 		

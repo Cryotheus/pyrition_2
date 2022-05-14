@@ -17,6 +17,8 @@ local config = {
 			health = 66,	--1000 010
 			kick = 66,		--1000 010
 			respawn = 66,	--1000 010
+			send = 66,		--1000 010
+			slap = 66,		--1000 010
 			slay = 66,		--1000 010
 		},
 		
@@ -59,6 +61,7 @@ local config = {
 	player = {
 		find = 31,		--011 111
 		landing = 26,	--011 010
+		slap = 26,		--011 010
 	}
 }
 

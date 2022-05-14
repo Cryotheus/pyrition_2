@@ -8,27 +8,43 @@
 --noclip
 --return
 --send
---slap
 --strip
 --who
-local COMMAND = {}
+local COMMAND = {
+	Arguments = {
+		Required = 0,
+		
+		{Type = "Player"},
+		
+		{
+			Default = 0,
+			Minimum = 0,
+			Type = "Integer"
+		}
+	}
+}
 
 --command function
 function COMMAND:Execute(ply, targetting, damage)
 	local targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply)
 	
 	if targets then
+		local damage = tonumber(damage)
 		local slapped = {IsPlayerList = true}
 		
-		for index, target in ipairs(targets) do
-			if target:Alive() then
-				slap(target)
-				if PYRITION:PlayerSlap(ply, true, false) then
-					table.insert(slapped, target) end
-			end
+		if damage then
+			math.max(damage, 0)
+			
+			if damage == 0 then damage = false end
 		end
 		
-		if table.IsEmpty(slapped) then return false, "No living targets to slap." end
+		for index, target in ipairs(targets) do
+			--you can slap dead people :)))
+			--correction: that's on the TODO list, you WILL be able to slap people once I make shared player ragdolls
+			if PYRITION:PlayerSlap(ply, true, damage or false, true) then table.insert(slapped, target) end
+		end
+		
+		if #slapped == 0 then return false, "No slappable targets." end
 		
 		return true, "[:player] slapped [:targets].", {targets = slapped}
 	end

@@ -1,5 +1,5 @@
 local COMMAND = {}
-local COMMAND_FORCED = {}
+--local COMMAND_FORCED = {}
 
 --command function
 function COMMAND:Execute(ply, targetting)
@@ -20,8 +20,8 @@ function COMMAND:Execute(ply, targetting)
 	return false, message
 end
 
-local COMMAND_FORCED = table.Copy(COMMAND)
+--local COMMAND_FORCED = table.Copy(COMMAND)
 
 --post
 PYRITION:ConsoleCommandRegister("bring", COMMAND)
-PYRITION:ConsoleCommandRegister("bring force", COMMAND_FORCED)
+--PYRITION:ConsoleCommandRegister("bring force", COMMAND_FORCED)

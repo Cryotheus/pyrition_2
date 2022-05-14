@@ -158,6 +158,7 @@ function PYRITION:PyritionConsoleCommandDownload(parents)
 	if existing then return existing end
 	
 	local command = {
+		Arguments = {},
 		Downloaded = true,
 		Execute = network_execution,
 		Name = parents[#parents],
@@ -165,7 +166,7 @@ function PYRITION:PyritionConsoleCommandDownload(parents)
 	}
 	
 	command = table.Merge(table.Copy(command_indexing), command)
-	--table.Inherit(command, command_indexing)
+	
 	setmetatable(command, command_meta)
 	MsgC(color_white, "Downloaded command mirror " .. command, "\n")
 	
@@ -235,9 +236,19 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 		command = table.Merge(table.Copy(base), command)
 	end
 	
+	local arguments = command.Arguments
+	
+	if arguments then --do cool stuff
+	else
+		command.Arguments = {}
+		
+		--scream at the developer
+		ErrorNoHalt('ID10T-7: Registered a command "' .. table.concat(parents, ".") .. '" without an Arguments table. Auto-completion will not be generated. To silence this error, provide an empty Arguments table in your COMMAND table.\n')
+	end
+	
 	--finally set meta
 	command = table.Merge(table.Copy(command_indexing), command)
-	--table.Inherit(command, command_indexing)
+	
 	setmetatable(command, command_meta)
 	
 	if existing_command then existing_command:OnReload(command) end
@@ -251,6 +262,10 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	end
 	
 	return command
+end
+
+function PYRITION:PyritionConsoleCommandRegisterArgument(type, filter_function)
+	
 end
 
 function PYRITION:PyritionConsoleCommandReloaded(old_command, new_command) MsgC(Color(255, 192, 46), '[Pyrition] Reloaded "' .. old_command .. '"\n') end

@@ -9,14 +9,37 @@ local function command_callback(ply, command, arguments)
 		
 		for index = depth + 1, arguments_count do table.insert(subbed_arguments, arguments[index]) end
 		
-		local success, message, phrases = PYRITION:ConsoleCommandExecute(ply, command, unpack(subbed_arguments))
-		
-		if message then PYRITION:LanguageQueue(ply, message, table.Merge({player = ply:Name()}, phrases or {}))
-		elseif not success then PYRITION:LanguageQueue(ply, "pyrition.command.failed", table.Merge({command = table.concat(command, " ")}, phrases or {})) end
+		PYRITION:ConsoleExecute(ply, command, subbed_arguments)
 	end
 end
 
+local function command_localization(command) return "#pyrition.commands." .. table.concat(command.Parents, ".") end
+
 --pyrition functions
+function PYRITION:ConsoleExecute(ply, command, arguments)
+	local command_arguments = command.Arguments or {}
+	local required = command_arguments.Required or 0
+	
+	if #arguments < required then
+		if required == 1 then PYRITION:LanguageQueue(ply, "command.failed.required_arguments.singular", {command = command_localization(command)})
+		else PYRITION:LanguageQueue(ply, "command.failed.required_arguments", {command = command_localization(command), count = required}) end
+		
+		return false
+	end
+	
+	local success, message, phrases = PYRITION:ConsoleCommandExecute(ply, command, unpack(arguments))
+		
+	if message then PYRITION:LanguageQueue(ply, message, table.Merge({player = ply:Name()}, phrases or {}))
+	elseif success then
+		if not command.Downloaded then
+			--we don't send a message for downloaded commands
+			PYRITION:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
+		end
+	else PYRITION:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
+	
+	return success
+end
+
 function PYRITION:ConsoleParseArguments(arguments_string)
 	--parse a chat message that we know is a command
 	local building

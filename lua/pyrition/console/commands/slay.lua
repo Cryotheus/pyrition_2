@@ -19,7 +19,7 @@ function COMMAND:Execute(ply, targetting)
 			end
 		end
 		
-		if table.IsEmpty(slain) then return false, "pyrition.commands.slay.missed" end
+		if #slain == 0 then return false, "pyrition.commands.slay.missed" end
 		
 		return true, "pyrition.commands.slay.success", {targets = slain}
 	end
