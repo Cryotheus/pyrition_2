@@ -49,20 +49,23 @@ end
 
 local function calculate_radian_max(radius, radian_increment, first_apparition_radius) return tau - (first_apparition_radius / radius + radian_increment) end
 
-local function destination_suitable(apparition, position, bounding_mins, bounding_maxs, force)
+local function destination_suitable(apparition, position, bounding_mins, bounding_maxs)
 	--check if we can put a player there without them suffering
 	local success
 	position, success = calculate_drop(0, position + max_ascension_vector, position, position + max_drop_vector, bounding_mins, bounding_maxs)
 	
-	if success or force then return position end
+	if success then return position end
 	
 	return false
 end
 
 local function find_suitable_landings(target, apparitions, force)
+	local apparition_count = #apparitions
 	local destination_count = 0
 	local destinations = {}
+	local filtered_apparitions = {}
 	local first_apparition_radius
+	local forced_apparitions = {}
 	local last_radius
 	local previous_apparition_radius
 	local radian
@@ -70,10 +73,22 @@ local function find_suitable_landings(target, apparitions, force)
 	local target_minimum, target_maximum = target:GetCollisionBounds()
 	local target_position = target:GetPos()
 	local target_radius = (target_minimum - target_maximum):Length2D()
+	local unsuitable_locations = {}
 	
 	drop_trace_data.filter = apparitions
 	
-	for apparition_index, apparition in ipairs(apparitions) do
+	--first we want to put players that can be forced into a position at the end of the list
+	for index, apparition in ipairs(apparitions) do
+		if force or apparition:GetMoveType() == MOVETYPE_NOCLIP then table.insert(forced_apparitions, apparition)
+		else table.insert(filtered_apparitions, apparition) end
+	end
+	
+	local safe_apparition_count = #filtered_apparitions
+	
+	for index, apparition in ipairs(forced_apparitions) do table.insert(filtered_apparitions, apparition) end
+	
+	--then we itterate through and try to fit as many players as possible in safe spaces
+	for apparition_index, apparition in ipairs(filtered_apparitions) do
 		local apparition_force = force or apparition:GetMoveType() == MOVETYPE_NOCLIP
 		local apparition_minimum, apparition_maximum = apparition:GetCollisionBounds()
 		local landing
@@ -102,7 +117,8 @@ local function find_suitable_landings(target, apparitions, force)
 		for attempt = 1, max_attempts do
 			radian = radian + radian_increment
 			
-			landing = destination_suitable(apparition, Vector(math.cos(radian) * radius, math.sin(radian) * radius, 0) + target_position, apparition_minimum, apparition_maximum, force)
+			local calculated = Vector(math.cos(radian) * radius, math.sin(radian) * radius, 0) + target_position
+			landing = destination_suitable(apparition, calculated, apparition_minimum, apparition_maximum)
 			
 			if radian >= radian_max then
 				first_apparition_radius = apparition_radius
@@ -116,15 +132,26 @@ local function find_suitable_landings(target, apparitions, force)
 			end
 			
 			--if we found a landing, then go on to the next player
-			if landing then break end
+			if landing then break
+			else table.insert(unsuitable_locations, calculated) end
 		end
 		
-		if landing then
-			destination_count = destination_count + 1
-			destinations[apparition_index] = landing
-		else break end
+		if landing then destination_count = table.insert(destinations, landing) end
 		
 		previous_apparition_radius = apparition_radius
+	end
+	
+	--if we do not have enough landings
+	if math.max(destination_count, safe_apparition_count) < apparition_count then
+		--add players that can be forced into unsuitable locations into the list anyways
+		for index = safe_apparition_count + 1, apparition_count do
+			local location = table.remove(unsuitable_locations, 1)
+			
+			if location then
+				local apparition = filtered_apparitions[index]
+				destination_count = table.insert(destinations, location)
+			else print("not enough locations") break end
+		end
 	end
 	
 	return destinations, destination_count

@@ -1,12 +1,22 @@
-local COMMAND = {}
---local COMMAND_FORCED = {}
+local COMMAND = {
+	Arguments = {
+		Required = 1,
+		
+		{
+			Selfless = true,
+			Type = "Player"
+		}
+	},
+	
+	Force = false
+}
 
 --command function
 function COMMAND:Execute(ply, targetting)
 	local targets, message = PYRITION:PlayerFind(targetting, ply, false, true)
 	
 	if targets then
-		local landings, landing_count = PYRITION:PlayerLanding(ply, targets)
+		local landings, landing_count = PYRITION:PlayerLanding(ply, targets, self.Force)
 		
 		if landing_count == #targets then
 			for index, target in ipairs(targets) do PYRITION:PlayerTeleport(target, landings[index], "bring", ply:Name()) end
@@ -20,8 +30,6 @@ function COMMAND:Execute(ply, targetting)
 	return false, message
 end
 
---local COMMAND_FORCED = table.Copy(COMMAND)
-
 --post
 PYRITION:ConsoleCommandRegister("bring", COMMAND)
---PYRITION:ConsoleCommandRegister("bring force", COMMAND_FORCED)
+PYRITION:ConsoleCommandRegister("bring force", table.Merge({Force = true}, COMMAND))

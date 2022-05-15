@@ -2,7 +2,7 @@ local COMMAND = {Arguments = {{Type = "Player"}}}
 
 --local functions
 local function is_noclipped(ply) return ply:GetMoveType() == MOVETYPE_NOCLIP end
---noclip
+
 --command functions
 function COMMAND:Execute(ply, targetting)
 	local targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply)
@@ -33,5 +33,5 @@ end
 
 --post
 PYRITION:ConsoleCommandRegister("noclip", COMMAND)
-PYRITION:ConsoleCommandRegister("noclip enable", table.Merge({Noclip = false}, COMMAND))
-PYRITION:ConsoleCommandRegister("noclip disable", table.Merge({Noclip = true}, COMMAND))
+PYRITION:ConsoleCommandRegister("noclip enable", table.Merge({Noclip = true}, COMMAND))
+PYRITION:ConsoleCommandRegister("noclip disable", table.Merge({Noclip = false}, COMMAND))
