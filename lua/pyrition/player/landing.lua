@@ -150,7 +150,7 @@ local function find_suitable_landings(target, apparitions, force)
 			if location then
 				local apparition = filtered_apparitions[index]
 				destination_count = table.insert(destinations, location)
-			else print("not enough locations") break end
+			else break end
 		end
 	end
 	

@@ -16,8 +16,6 @@ end
 function PYRITION:PlayerTeleport(ply, destination, teleport_type, note)
 	local history = teleport_history[ply]
 	
-	print("perform teleport", ply, destination, teleport_type, note)
-	
 	if history then if table.insert(history, create_history_entry(ply, teleport_type, note)) > teleport_history_length then table.remove(history, 1) end
 	else teleport_history[ply] = {create_history_entry(ply, teleport_type, note)} end
 	
