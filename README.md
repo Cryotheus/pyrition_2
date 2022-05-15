@@ -20,4 +20,4 @@ Some of my projects will be rewritten using Pyrition. Yet another partial list i
 * War Lab
 
 ## For Developers
-Check out the [Wiki](wiki)
+Check out the [Wiki](https://github.com/Cryotheus/pyrition_2/wiki).
