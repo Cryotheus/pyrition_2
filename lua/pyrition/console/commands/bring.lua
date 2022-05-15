@@ -9,7 +9,7 @@ function COMMAND:Execute(ply, targetting)
 		local landings, landing_count = PYRITION:PlayerLanding(ply, targets)
 		
 		if landing_count == #targets then
-			for index, target in ipairs(targets) do PYRITION:PlayerTeleport(target, landings[index]) end
+			for index, target in ipairs(targets) do PYRITION:PlayerTeleport(target, landings[index], "bring", ply:Name()) end
 			
 			return true, "pyrition.commands.bring.success", {targets = targets}
 		else return false, "pyrition.player.landing.insufficient" end

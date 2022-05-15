@@ -10,6 +10,7 @@ local COMMAND = {
 		}
 	}
 }
+
 --local COMMAND_FORCED = {}
 
 --command function
@@ -21,7 +22,7 @@ function COMMAND:Execute(ply, traveller_targetting, targetting)
 		local landings, landing_count = PYRITION:PlayerLanding(target, travellers)
 		
 		if landing_count == #travellers then
-			for index, traveller in ipairs(travellers) do PYRITION:PlayerTeleport(traveller, landings[index]) end
+			for index, traveller in ipairs(travellers) do PYRITION:PlayerTeleport(traveller, landings[index], "send", target:Name()) end
 			
 			return true, "[:player] sent [:travellers] to [:target].", {target = target:Name(), travellers = travellers}
 		else return false, "pyrition.player.landing.insufficient" end

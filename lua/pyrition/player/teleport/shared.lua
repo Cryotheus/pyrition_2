@@ -1,6 +1,6 @@
 --locals
 local teleport_history = PYRITION.PlayerTeleportHistory or {}
-local teleport_history_length = 4
+local teleport_history_length = 8
 local teleport_history_length_bits = PYRITION._Bits(teleport_history_length)
 
 --globals

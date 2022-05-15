@@ -32,15 +32,20 @@ function MODEL:Read()
 		
 		if index == 1 then table.Empty(teleport_history) end
 		
-		teleport_history[index] = net.ReadVector()
+		teleport_history[index] = {
+			Note = net.ReadString(),
+			Position = net.ReadVector(),
+			Type = PYRITION:NetReadEnumeratedString("teleport_type"),
+			Unix = net.ReadUInt(32),
+		}
 	end
 end
 
 function MODEL:Write(ply)
 	local index = self.Index
-	local position = self.History[index]
+	local data = self.History[index]
 	
-	if position then
+	if data then
 		if self.First then
 			self.First = false
 			
@@ -49,7 +54,10 @@ function MODEL:Write(ply)
 		
 		net.WriteBool(true)
 		net.WriteUInt(index - 1, teleport_history_length_bits)
-		net.WriteVector(position)
+		net.WriteString(data.Note)
+		net.WriteVector(data.Position)
+		PYRITION:NetWriteEnumeratedString("teleport_type", data.Type, ply)
+		net.WriteUInt(data.Unix, 32)
 		
 		self.Index = index + 1
 		
@@ -66,3 +74,5 @@ end
 
 --post
 PYRITION:NetSyncModelRegister("teleport", MODEL)
+
+if SERVER then PYRITION:NetAddEnumeratedString("teleport_type", "bring", "goto", "jail", "send") end

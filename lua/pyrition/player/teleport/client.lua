@@ -63,11 +63,12 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 			list_view = vgui.Create("DListView", form)
 			PYRITION.PlayerTeleportHistoryList = list_view
 			
-			list_view:AddColumn("##")
-			list_view:AddColumn("#pyrition.spawnmenu.categories.user.teleport.location")
+			list_view:AddColumn("##"):SetFixedWidth(16)
+			list_view:AddColumn("#pyrition.command")
+			list_view:AddColumn("#pyrition.spawnmenu.categories.user.teleport.note")
+			list_view:AddColumn("#pyrition.spawnmenu.categories.user.teleport.age")
 			list_view:Dock(TOP)
 			list_view:DockMargin(0, 4, 0, 0)
-			list_view:SetHeight(teleport_history_length * 17 + 17)
 			list_view:SetMultiSelect(false)
 			
 			function list_view:DoDoubleClick(index, row_panel) button:DoClick() end
@@ -76,28 +77,43 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 				button.TeleportIndex = index
 				
 				button:SetEnabled(true)
-				button:SetText(PYRITION:LanguageFormat("pyrition.spawnmenu.categories.user.teleport.button.selected", {index = calculate_reverse_index(index, #teleport_history)}))
+				button:SetText(PYRITION:LanguageFormat("pyrition.spawnmenu.categories.user.teleport.button.selected", {index = tostring(index)}))
 			end
-			
-			--function list_view:PerformLayout(width, height) self:SizeToChildren(false, true) end
 			
 			function list_view:Refresh()
 				local button_index = button.TeleportIndex
 				local history_length = #teleport_history
 				
 				self:Clear()
+				self:SetHeight(history_length * 17 + 17)
 				
-				for index, location in ipairs(table.Reverse(teleport_history)) do
-					self:AddLine(
-						tostring(calculate_reverse_index(index, history_length)),
-						math.Round(location.x) .. ", " .. math.Round(location.y) .. ", " .. math.Round(location.z)
-					)
+				for index, data in ipairs(teleport_history) do
+					local unix = data.Unix
+					
+					local time_label = self:AddLine(
+						tostring(index),
+						data.Type,
+						data.Note,
+						unix
+					).Columns[4]
+					
+					function time_label:Think()
+						local text = string.NiceTime(os.time() - unix)
+						
+						if self.UpdatedText ~= text then
+							self.UpdatedText = text
+							
+							self:SetText(text)
+						end
+					end
 				end
 				
 				if history_length > 0 then
 					self:ClearSelection()
 					self:SelectItem(self.Sorted[history_length])
 				end
+				
+				self:SortByColumn(1, true)
 			end
 			
 			list_view:Refresh()
