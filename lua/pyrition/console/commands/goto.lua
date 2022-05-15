@@ -8,7 +8,7 @@ function COMMAND:Execute(ply, targetting)
 		local landings, landing_count = PYRITION:PlayerLanding(target, {ply})
 		
 		if landing_count == 1 then
-			ply:SetPos(landings[1])
+			PYRITION:PlayerTeleport(ply, landings[1])
 			
 			return true, "pyrition.commands.goto.success", {target = target:Name()}
 		end

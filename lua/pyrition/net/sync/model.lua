@@ -6,6 +6,7 @@ local _R = debug.getregistry()
 local model_indexing = {
 	CanWrite = function(self, march) return select(2, net.BytesWritten()) < self.MaximumBits end,
 	EnumerateClass = true,
+	FinishRead = function() end,
 	FinishWrite = function() end,
 	Initialize = function() return true end,
 	IsPyritionSyncModel = true,

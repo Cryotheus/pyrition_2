@@ -14,7 +14,7 @@ PYRITION.NetSyncModelIndices = model_indices
 PYRITION.NetSyncPlayers = player_syncs
 
 --pyrition functions
-function PYRITION:NetSyncAdd(class, ply, ...)
+function PYRITION:NetSyncAdd(class, ply)
 	local index = model_indices[class] or 1
 	local model = self:NetSyncModelCreate(class, ply)
 	local syncs = player_syncs[ply]
@@ -110,7 +110,9 @@ hook.Add("Think", "PyritionNetSync", function()
 			while model:CanWrite() and success == nil do success, message = model(ply) end
 			
 			if success == true then
+				model:FinishWrite()
 				net.WriteBool(true)
+				
 				drint(1, "completed " .. class)
 				table.insert(completed, index)
 			elseif success == nil then --ran out of space to write

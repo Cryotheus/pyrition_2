@@ -1,15 +1,3 @@
---TODO: commands
---cleanup
---freeze
---god
---jail
---map
---message
---noclip
---return
---send
---strip
---who
 local COMMAND = {
 	Arguments = {
 		Required = 0,
@@ -44,9 +32,9 @@ function COMMAND:Execute(ply, targetting, damage)
 			if PYRITION:PlayerSlap(ply, true, damage or false, true) then table.insert(slapped, target) end
 		end
 		
-		if #slapped == 0 then return false, "No slappable targets." end
+		if #slapped == 0 then return false, "pyrition.commands.slap.missed" end
 		
-		return true, "[:player] slapped [:targets].", {targets = slapped}
+		return true, "pyrition.commands.slap.success", {targets = slapped}
 	end
 	
 	return false, message

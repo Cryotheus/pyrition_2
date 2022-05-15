@@ -89,12 +89,18 @@ net.Receive("pyrition_sync", function()
 		
 		DEBUG_PYRITION_NET = class == debug_class
 		
-		PYRITION:NetSyncGetModel(class, identifier)()
+		local model = PYRITION:NetSyncGetModel(class, identifier)
+		
+		model()
 		
 		DEBUG_PYRITION_NET = debugging
 		
 		local complete = net.ReadBool()
 		
-		if complete then active_models[class][identifier] = nil end
+		if complete then
+			model:FinishRead()
+			
+			active_models[class][identifier] = nil
+		end
 	until not net.ReadBool()
 end)

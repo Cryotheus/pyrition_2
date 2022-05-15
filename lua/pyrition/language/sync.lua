@@ -37,9 +37,9 @@ function MODEL:Read()
 					
 					--if prefixed with #, localize the string
 					--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal" weirdo
-					if string.StartWith(phrase, "\\#") then print("drug escaped", phrase) phrases[tag] = string.sub(phrase, 2)
-					elseif string.StartWith(phrase, "#") then print("drug localized", phrase) phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
-					else print("drug raw", phrase) phrases[tag] = phrase end
+					if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)
+					elseif string.StartWith(phrase, "#") then phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
+					else phrases[tag] = phrase end
 				end
 			until not net.ReadBool()
 		end

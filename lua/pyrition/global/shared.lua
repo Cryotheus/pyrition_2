@@ -29,7 +29,6 @@ function PYRITION._drint(level, ...)
 end
 
 --TODO: commands
---bring
 --cleanup
 --freeze
 --god
@@ -40,7 +39,4 @@ end
 --noclip
 --respawn
 --return
---send
---slap
---strip
 --who

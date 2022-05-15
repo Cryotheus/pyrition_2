@@ -2,6 +2,7 @@ util.AddNetworkString("pyrition")
 util.AddNetworkString("pyrition_teach")
 
 --locals
+local bits = PYRITION._Bits
 local color_significant = Color(255, 128, 64)
 local drint = PYRITION._drint
 local drint_level = 2
@@ -14,8 +15,6 @@ local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] =
 local teaching_queue = {}
 
 --local functions
-local function bits(number) return number == 1 and 1 or math.ceil(math.log(number, 2)) end
-
 local function recipient_pairs(recipients)
 	if IsEntity(recipients) then recipients = {recipients}
 	elseif type(recipients) == "CRecipientFilter" then recipients = recipients:GetPlayers() end

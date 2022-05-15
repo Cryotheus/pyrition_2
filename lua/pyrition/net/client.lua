@@ -1,3 +1,5 @@
+--locals
+local bits = PYRITION._Bits
 local drint = PYRITION._drint
 local drint_level = 3
 local jerry = 0.24027821356 --this is jerry, a very special number. do not worry about its origin, just keep moving.

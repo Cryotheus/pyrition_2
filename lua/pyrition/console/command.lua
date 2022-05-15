@@ -35,6 +35,7 @@ function build_command_list(commands, maximum_depth, depth, returns)
 end
 
 local function network_execution(self, ply, ...)
+	--used for server-side commands that are executable by the client
 	net.Start("pyrition_command")
 	
 	do --command namespace
@@ -117,7 +118,7 @@ function command_meta:__tostring() return "PyritionCommand [" .. table.concat(se
 
 --pyrition functions
 function PYRITION:ConsoleCommandGet(parents, modify, max_depth)
-	if isstring(parents) then parents = {parents} end
+	if isstring(parents) then parents = string.Split(parents, " ") end
 	
 	local branch = commands
 	local count = #parents
@@ -141,6 +142,8 @@ function PYRITION:ConsoleCommandGet(parents, modify, max_depth)
 end
 
 function PYRITION:ConsoleCommandGetExisting(parents)
+	if isstring(parents) then parents = string.Split(parents, " ") end
+	
 	local branch, count = self:ConsoleCommandGet(parents)
 	
 	if count == #parents then return branch end
@@ -158,7 +161,7 @@ function PYRITION:PyritionConsoleCommandDownload(parents)
 	if existing then return existing end
 	
 	local command = {
-		Arguments = {},
+		Arguments = {Required = 0},
 		Downloaded = true,
 		Execute = network_execution,
 		Name = parents[#parents],
@@ -238,9 +241,9 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	
 	local arguments = command.Arguments
 	
-	if arguments then --do cool stuff
+	if arguments then if not arguments.Required then arguments.Required = 0 end
 	else
-		command.Arguments = {}
+		command.Arguments = {Required = 0}
 		
 		--scream at the developer
 		ErrorNoHalt('ID10T-7: Registered a command "' .. table.concat(parents, ".") .. '" without an Arguments table. Auto-completion will not be generated. To silence this error, provide an empty Arguments table in your COMMAND table.\n')
