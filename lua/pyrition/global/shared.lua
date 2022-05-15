@@ -27,16 +27,3 @@ function PYRITION._drint(level, ...)
 	--p rint with developer only
 	if developer:GetInt() >= level then print(...) end
 end
-
---TODO: commands
---cleanup
---freeze
---god
---goto
---jail
---map
---message
---noclip
---respawn
---return
---who
