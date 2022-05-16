@@ -2,11 +2,11 @@ local COMMAND = {
 	Arguments = {
 		Required = 2,
 		
-		{Type = "Player"},
+		{Class = "Player"},
 		
 		{
 			Single = true,
-			Type = "Player"
+			Class = "Player"
 		}
 	}
 }

@@ -20,11 +20,10 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 		form:ClearControls()
 		
 		do --button
-			button = vgui.Create("DButton", form)
+			button = form:Button("#pyrition.spawnmenu.categories.user.teleport.button")
 			
 			button:Dock(TOP)
 			button:SetEnabled(false)
-			button:SetText("#pyrition.spawnmenu.categories.user.teleport.button")
 			
 			function button:DoClick()
 				local command = PYRITION:ConsoleCommandGetExisting("return using")
@@ -35,11 +34,10 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 		end
 		
 		do --refresh button
-			local button = vgui.Create("DButton", form)
+			local button = form:Button("Refresh")
 			
 			button:Dock(TOP)
 			button:SetMaterial("icon16/arrow_refresh.png")
-			button:SetText("Refresh")
 			
 			function button:DoClick()
 				self.Usable = RealTime() + 1
@@ -66,7 +64,6 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 			list_view:AddColumn("#pyrition.spawnmenu.categories.user.teleport.note")
 			list_view:AddColumn("#pyrition.spawnmenu.categories.user.teleport.age")
 			list_view:Dock(TOP)
-			list_view:DockMargin(0, 4, 0, 0)
 			list_view:SetMultiSelect(false)
 			
 			function list_view:DoDoubleClick(index, row_panel) button:DoClick() end
@@ -83,7 +80,7 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 				local history_length = #teleport_history
 				
 				self:Clear()
-				self:SetHeight(history_length * 17 + 17)
+				self:SetHeight(math.max(history_length + 1, 2) * 17)
 				
 				for index, data in ipairs(teleport_history) do
 					local unix = data.Unix
@@ -109,12 +106,16 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 				if history_length > 0 then
 					self:ClearSelection()
 					self:SelectItem(self.Sorted[history_length])
+				else
+					button:SetEnabled(false)
+					button:SetText("#pyrition.spawnmenu.categories.user.teleport.button")
 				end
 				
 				self:SortByColumn(1, true)
 			end
 			
 			list_view:Refresh()
+			form:AddItem(list_view)
 		end
 	end)
 end)

@@ -31,7 +31,13 @@ function MODEL:Write(ply)
 	local index = self.Index
 	local item = self.Items[index]
 	
-	net.WriteBool(true)
+	if item then net.WriteBool(true)
+	else --empty maps list
+		net.WriteBool(false)
+		
+		return true
+	end
+	
 	net.WriteUInt(index - 1, self.Bits)
 	PYRITION:NetWriteEnumeratedString("map", item, ply)
 	

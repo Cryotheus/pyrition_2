@@ -1,23 +1,37 @@
+local current_map = game.GetMap()
 local maps = PYRITION.MapList
 
 --hooks
-
---hooks
-hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
-	spawnmenu.AddToolMenuOption("Utilities", "Pyrition", "Teleport", "#pyrition.spawnmenu.categories.user.teleport", "", "", function(form)
+hook.Add("PopulateToolMenu", "PyritionMap", function()
+	spawnmenu.AddToolMenuOption("Utilities", "Pyrition", "Map", "#pyrition.spawnmenu.categories.user.map", "", "", function(form)
 		local button
+		local button_admin
 		local list_view
 		
 		form:ClearControls()
 		
 		do --button
-			button = vgui.Create("DButton", form)
+			button = form:Button("#pyrition.spawnmenu.categories.user.map.button")
 			
 			button:Dock(TOP)
 			button:SetEnabled(false)
-			button:SetText("Choose a map")
 			
 			function button:DoClick()
+				local command = PYRITION:ConsoleCommandGetExisting("map vote")
+				local map = self.Map
+				
+				if command and map then PYRITION:ConsoleExecute(LocalPlayer(), command, {map}) end
+			end
+		end
+		
+		do --admin button
+			button_admin = form:Button("#pyrition.spawnmenu.categories.user.map.button")
+			
+			button_admin:Dock(TOP)
+			button_admin:SetEnabled(false)
+			button_admin:SetVisible(true)
+			
+			function button_admin:DoClick()
 				local command = PYRITION:ConsoleCommandGetExisting("map")
 				local map = self.Map
 				
@@ -26,11 +40,10 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 		end
 		
 		do --refresh button
-			local button = vgui.Create("DButton", form)
+			local button = form:Button("Refresh")
 			
 			button:Dock(TOP)
 			button:SetMaterial("icon16/arrow_refresh.png")
-			button:SetText("Refresh")
 			
 			function button:DoClick()
 				self.Usable = RealTime() + 1
@@ -51,36 +64,62 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 		do --list
 			list_view = vgui.Create("DListView", form)
 			
-			list_view:AddColumn("##"):SetFixedWidth(16)
+			list_view:AddColumn("##"):SetFixedWidth(32)
 			list_view:AddColumn("Map")
+			list_view:AddColumn("Votes")
 			list_view:Dock(TOP)
-			list_view:DockMargin(0, 4, 0, 0)
 			list_view:SetMultiSelect(false)
 			
 			function list_view:DoDoubleClick(index, row_panel) button:DoClick() end
 			
 			function list_view:OnRowSelected(index, row_panel)
-				button.Map = row_panel.Columns[2]
+				local map = maps[index]
+				button.Map = map
+				button_admin.Map = map
 				
 				button:SetEnabled(true)
-				button:SetText(PYRITION:LanguageFormat("pyrition.spawnmenu.categories.user.map.button.selected", {map = tostring(map)}))
+				button:SetText(PYRITION:LanguageFormat("pyrition.spawnmenu.categories.user.map.button.selected", {map = map}))
+				
+				button_admin:SetEnabled(true)
+				button_admin:SetText(PYRITION:LanguageFormat("pyrition.spawnmenu.categories.user.map.button_admin.selected", {map = map}))
 			end
 			
 			function list_view:Refresh()
-				local history_length = #teleport_history
+				local maps_length = #maps
+				local selected_index
+				local selected_map = button.Map
 				
 				self:Clear()
-				self:SetHeight(history_length * 17 + 17)
+				self:SetHeight(math.max(maps_length + 1, 2) * 17)
 				
-				for index, data in ipairs(maps) do
-					self:AddLine(
-						tostring(index),
-						map
-					)
+				for index, map in ipairs(maps) do
+					local line = self:AddLine(tostring(index), map, "0")
+					
+					if map == selected_map then selected_index = index end
+					
+					if map == current_map then
+						for index, label in ipairs(line.Columns) do
+							label:SetFont("DermaDefaultBold")
+							label:SetTextColor(Color(16, 112, 32))
+						end
+					end
+				end
+				
+				--maintain same selection
+				if selected_index then
+					self:ClearSelection()
+					self:SelectItem(self.Sorted[selected_index])
+				else
+					button:SetEnabled(false)
+					button:SetText("#pyrition.spawnmenu.categories.user.map.button")
+					
+					button_admin:SetEnabled(false)
+					button_admin:SetText("#pyrition.spawnmenu.categories.user.map.button")
 				end
 			end
 			
 			list_view:Refresh()
+			form:AddItem(list_view)
 		end
 	end)
 end)

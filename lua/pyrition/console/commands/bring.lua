@@ -4,7 +4,7 @@ local COMMAND = {
 		
 		{
 			Selfless = true,
-			Type = "Player"
+			Class = "Player"
 		}
 	},
 	

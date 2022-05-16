@@ -2,6 +2,22 @@
 local duplex_set
 
 --local functions
+local function duplex_destroy(duplex)
+	--turn a duplex into a list
+	for index, value in ipairs(duplex) do duplex[value] = nil end
+	
+	return duplex
+end
+
+local function duplex_extract(duplex)
+	--get a list from a duplex
+	local copy = {}
+	
+	for index, value in ipairs(duplex) do copy[index] = value end
+	
+	return copy
+end
+
 local function duplex_insert(duplex, value, set_value)
 	if isnumber(value) then return duplex_set(duplex, value, set_value) end
 	
@@ -69,18 +85,16 @@ function duplex_set(duplex, position, value)
 end
 
 local function duplex_sort(duplex, sorter)
-	local copy = {}
+	local list = duplex_extract(duplex)
 	
-	for index, value in ipairs(duplex) do copy[index] = value end
+	table.sort(list, sorter)
 	
-	table.sort(copy, sorter)
-	
-	for index, value in ipairs(copy) do
+	for index, value in ipairs(list) do
 		duplex[index] = value
 		duplex[value] = index
 	end
 	
-	return duplex, copy
+	return duplex, list
 end
 
 local function duplex_unset(duplex, value)
@@ -105,6 +119,8 @@ local function duplex_unset(duplex, value)
 end
 
 --globals
+PYRITION._DuplexDestroy = duplex_destroy
+PYRITION._DuplexExtract = duplex_extract
 PYRITION._DuplexInsert = duplex_insert
 PYRITION._DuplexIsFooplex = duplex_is_fooplex
 PYRITION._DuplexRemove = duplex_remove
@@ -114,6 +130,8 @@ PYRITION._DuplexUnset = duplex_unset
 
 --[[ copy paste this in your locals header
 
+local duplex_destroy = PYRITION._DuplexDestroy
+local duplex_extract = PYRITION._DuplexExtract
 local duplex_insert = PYRITION._DuplexInsert
 local duplex_is_fooplex = PYRITION._DuplexIsFooplex
 local duplex_remove = PYRITION._DuplexRemove

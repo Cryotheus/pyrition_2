@@ -4,12 +4,12 @@ local COMMAND = {
 		
 		{
 			Single = true,
-			Type = "Player"
+			Class = "Player"
 		},
 		
 		{
 			Maximum = 448,
-			Type = "String"
+			Class = "String"
 		}
 	}
 }
@@ -18,11 +18,11 @@ local COMMAND_MULTI = {
 	Arguments = {
 		Required = 1,
 		
-		{Type = "Player"},
+		{Class = "Player"},
 		
 		{
 			Maximum = 448,
-			Type = "String"
+			Class = "String"
 		}
 	}
 }

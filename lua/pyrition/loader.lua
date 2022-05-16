@@ -29,6 +29,7 @@ local config = {
 		
 		client = 61,	--111 101
 		command = 55,	--110 111
+		arguments = 63,	--110 111
 		server = 58,	--111 010
 		shared = 55,	--110 111
 		sync = 55,		--110 111
@@ -46,6 +47,13 @@ local config = {
 		debug = 45,		--101 101
 		shared = 47,	--101 111
 		server = 42,	--101 010
+		sync = 55,		--110 111
+	},
+	
+	map = {
+		client = 53,	--110 101
+		shared = 47,	--101 111
+		server = 50,	--110 010
 		sync = 55,		--110 111
 	},
 	

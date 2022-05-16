@@ -24,8 +24,7 @@ local prefix_functions = {
 		end
 	end,
 	
-	--everyone
-	["*"] = function(needle, supplicant) return player.GetAll() end
+	["*"] = function(needle, supplicant) return player.GetAll() end --everyone
 }
 
 --globals

@@ -1,15 +1,15 @@
-local COMMAND = {Arguments = {{Type = "Player"}}}
+local COMMAND = {Arguments = {{Class = "Player"}}}
 
 local COMMAND_TO = {
 	Arguments = {
 		Required = 2,
 		
-		{Type = "Player"},
+		{Class = "Player"},
 		
 		{
 			Maximum = PYRITION.PlayerTeleportHistoryLength,
 			Minimum = 1,
-			Type = "Integer"
+			Class = "Integer"
 		}
 	}
 }

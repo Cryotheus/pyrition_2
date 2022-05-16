@@ -1,5 +1,6 @@
 --locals
 local build_command_list
+local command_arguments = PYRITION.ConsoleCommandArguments or {}
 local commands = PYRITION.ConsoleCommands or {}
 local grow_command_tree
 local is_pyrition_command
@@ -84,6 +85,7 @@ function is_pyrition_command(object) return istable(object) and object.IsPyritio
 
 --globals
 _R.PyritionCommand = command_meta
+PYRITION.ConsoleCommandArguments = command_arguments
 PYRITION.ConsoleCommands = commands
 PYRITION._IsPyritionCommand = is_pyrition_command
 
@@ -267,8 +269,20 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	return command
 end
 
-function PYRITION:PyritionConsoleCommandRegisterArgument(type, filter_function)
+function PYRITION:PyritionConsoleCommandRegisterArgument(class, filter_function, auto_complete, write_function, read_function)
+	assert(isstring(class) and isfunction(filter_function) and isfunction(auto_complete), "ID10T-10: Argument mismatch in registering command arguments.")
 	
+	self:NetAddEnumeratedString("command_argument", class)
+	
+	command_arguments[class] = {
+		--first return should be a bool for validity of argument
+		--second return should be the value itself, and is ignored if invalid
+		--third return is a message
+		filter_function,
+		
+		--return should be a list of strings for the command's completion
+		auto_complete
+	}
 end
 
 function PYRITION:PyritionConsoleCommandReloaded(old_command, new_command) MsgC(Color(255, 192, 46), '[Pyrition] Reloaded "' .. old_command .. '"\n') end
@@ -316,5 +330,6 @@ end
 
 --post
 PYRITION:GlobalHookCreate("ConsoleCommandRegister")
+PYRITION:GlobalHookCreate("ConsoleCommandRegisterArgument")
 PYRITION:GlobalHookCreate("ConsoleCommandReloaded")
 PYRITION:GlobalHookCreate("ConsoleCommandSet")

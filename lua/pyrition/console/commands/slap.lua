@@ -2,12 +2,12 @@ local COMMAND = {
 	Arguments = {
 		Required = 0,
 		
-		{Type = "Player"},
+		{Class = "Player"},
 		
 		{
 			Default = 0,
 			Minimum = 0,
-			Type = "Integer"
+			Class = "Integer"
 		}
 	}
 }

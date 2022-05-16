@@ -6,9 +6,6 @@ local color_magenta = Color(255, 0, 255)
 local color_red = Color(255, 0, 0)
 local color_yellow = Color(255, 255, 0)
 
---globals
-PYRITION = PYRITION or {}
-
 --local functions, these are stolen from my Expression 2 scripts lol
 local function power_lerp(fraction, power, alpha, bravo) return Lerp(fraction, alpha ^ power, bravo ^ power) ^ (1 / power) end
 local function quadratic_lerp(fraction, alpha, bravo) return Lerp(fraction, alpha ^ 2, bravo ^ 2) ^ 0.5 end
