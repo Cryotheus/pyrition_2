@@ -7,6 +7,7 @@
 local config = {
 	hooks = 79,		--1001 111
 	duplex = 23,	--0010 111
+	gradient = 23,	--0010 111
 	loader = 4,		--0000 100
 	
 	console = {
@@ -16,6 +17,7 @@ local config = {
 			heal = 66,			--1000 010
 			health = 66,		--1000 010
 			kick = 66,			--1000 010
+			map = 66,			--1000 010
 			noclip = 66,		--1000 010
 			respawn = 66,		--1000 010
 			["return"] = 66,	--1000 010

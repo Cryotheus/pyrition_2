@@ -6,6 +6,7 @@ local bits = PYRITION._Bits
 local color_significant = Color(255, 128, 64)
 local drint = PYRITION._drint
 local drint_level = 2
+local duplex_insert = PYRITION._DuplexInsert
 local loading_players = {} --dictionary[ply] = ply:TimeConnected false if message emulated
 local load_time = 30
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
@@ -152,7 +153,7 @@ function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 			text = first
 		end
 		
-		self:DuplexInsert(duplex, text)
+		duplex_insert(duplex, text)
 	end
 	
 	--update bits

@@ -12,8 +12,6 @@ function PYRITION:PlayerTeleportRefreshGUI()
 end
 
 --hooks
-hook.Add("AddToolMenuCategories", "PyritionPlayerTeleport", function() spawnmenu.AddToolCategory("Utilities", "Pyrition", "#pyrition") end)
-
 hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Pyrition", "Teleport", "#pyrition.spawnmenu.categories.user.teleport", "", "", function(form)
 		local button
