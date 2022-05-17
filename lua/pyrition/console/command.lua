@@ -123,7 +123,7 @@ function PYRITION:ConsoleCommandFilterArgument(settings, ply, argument)
 	local class = settings.Class
 	local command_argument_data = command_arguments[class]
 	
-	assert(command_argument_data, "ID10T-11: Attempt to filter command argument with non-existent ... WIP")
+	assert(command_argument_data, "ID10T-11: Attempt to filter command argument with non-existent command argument class " .. tostring(class) .. ".")
 	
 	--TODO: WIP!!!
 end
