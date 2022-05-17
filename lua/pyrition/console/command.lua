@@ -119,6 +119,29 @@ end
 function command_meta:__tostring() return "PyritionCommand [" .. table.concat(self.Parents, ".") .. "]" end
 
 --pyrition functions
+function PYRITION:ConsoleCommandFilterArgument(settings, ply, argument)
+	local class = settings.Class
+	local command_argument_data = command_arguments[class]
+	
+	assert(command_argument_data, "ID10T-11: Attempt to filter command argument with non-existent ... WIP")
+	
+	--TODO: WIP!!!
+end
+
+function PYRITION:ConsoleCommandFilterArguments(command, ply, arguments)
+	local command_arguments = command.Arguments
+	local required = command.Required
+	
+	for index, argument in ipairs(arguments) do
+		local command_argument = command_arguments[index]
+		local valid, value, message = self:ConsoleCommandFilterArgument(command_argument, ply, argument)
+		
+		if index <= required then
+			
+		elseif not valid then return false, message end
+	end
+end
+
 function PYRITION:ConsoleCommandGet(parents, modify, max_depth)
 	if isstring(parents) then parents = string.Split(parents, " ") end
 	

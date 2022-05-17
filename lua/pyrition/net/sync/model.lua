@@ -51,7 +51,7 @@ function model_meta:__tostring() return "PyritionSyncModel [" .. self.Class .. "
 function PYRITION:NetSyncModelCreate(class, ply)
 	local model = sync_models[class]
 	
-	assert(model, "ID10T-6: Attempted to create non-existant sync model class " .. tostring(class))
+	assert(model, "ID10T-6: Attempted to create non-existent sync model class " .. tostring(class))
 	
 	model = table.Copy(model)
 	model.Player = ply

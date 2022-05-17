@@ -11,7 +11,7 @@ function PYRITION:NetReadEnumeratedString(namespace)
 	local enumerations = net_enumerations[namespace]
 	local text
 	
-	assert(enumerations, 'ID10T-2/C: Attempt to read enumerated string using non-existant namespace "' .. tostring(namespace) .. '"')
+	assert(enumerations, 'ID10T-2/C: Attempt to read enumerated string using non-existent namespace "' .. tostring(namespace) .. '"')
 	
 	local debug_net = DEBUG_PYRITION_NET
 	
@@ -53,7 +53,7 @@ end
 function PYRITION:NetWriteEnumeratedString(namespace, text)
 	local enumerations = net_enumerations[namespace]
 	
-	assert(enumerations, 'ID10T-3/C: Attempt to write enumerated string using non-existant namespace "' .. namespace .. '"')
+	assert(enumerations, 'ID10T-3/C: Attempt to write enumerated string using non-existent namespace "' .. namespace .. '"')
 	
 	local enumeration = enumerations[text]
 	
