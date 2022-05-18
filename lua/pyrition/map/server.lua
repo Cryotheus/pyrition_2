@@ -17,7 +17,13 @@ function PYRITION:MapBuildList()
 	
 	local map_files = file.Find("maps/*.bsp", "GAME")
 	
-	for index, map_file in ipairs(map_files) do duplex_insert(maps, string.sub(map_file, 1, -5)) end
+	for index, map_file in ipairs(map_files) do
+		print("inserting #" .. index .. " - " .. map_file)
+		duplex_insert(maps, string.StripExtension(map_file))
+	end
+	
+	print("result")
+	PrintTable(maps)
 	
 	--duplex_sort(maps)
 	PYRITION:NetAddEnumeratedString("map", maps)

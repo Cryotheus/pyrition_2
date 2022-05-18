@@ -295,7 +295,7 @@ end
 function PYRITION:PyritionConsoleCommandRegisterArgument(class, filter_function, auto_complete, write_function, read_function)
 	assert(isstring(class) and isfunction(filter_function) and isfunction(auto_complete), "ID10T-10: Argument mismatch in registering command arguments.")
 	
-	self:NetAddEnumeratedString("command_argument", class)
+	if SERVER then self:NetAddEnumeratedString("command_argument", class) end
 	
 	command_arguments[class] = {
 		--first return should be a bool for validity of argument

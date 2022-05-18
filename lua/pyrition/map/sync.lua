@@ -38,6 +38,8 @@ function MODEL:Write(ply)
 		return true
 	end
 	
+	print("writing #" .. index .. " - " .. item)
+	
 	net.WriteUInt(index - 1, self.Bits)
 	PYRITION:NetWriteEnumeratedString("map", item, ply)
 	

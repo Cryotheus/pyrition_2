@@ -143,6 +143,9 @@ function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 	--add enumerations
 	for index, text in ipairs(texts) do
 		if istable(text) then --unpack table arguments
+			--we don't want to modify the original table
+			text = table.Copy(text)
+			
 			local first = table.remove(text, 1)
 			local next_index = index + 1
 			

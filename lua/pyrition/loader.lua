@@ -5,26 +5,26 @@
 --motivation: whats that
 
 local config = {
-	hooks = 79,		--1001 111
+	hooks = 127,	--1111 111
 	duplex = 23,	--0010 111
 	gradient = 23,	--0010 111
 	loader = 4,		--0000 100
 	
 	console = {
 		commands = {
-			bring = 66,			--1000 010
-			goto = 66,			--1000 010
-			heal = 66,			--1000 010
-			health = 66,		--1000 010
-			kick = 66,			--1000 010
-			map = 66,			--1000 010
-			noclip = 66,		--1000 010
-			respawn = 66,		--1000 010
-			["return"] = 66,	--1000 010
-			send = 66,			--1000 010
-			slap = 66,			--1000 010
-			slay = 66,			--1000 010
-			strip = 66,			--1000 010
+			bring = 74,			--1001 010
+			goto = 74,			--1001 010
+			heal = 74,			--1001 010
+			health = 74,		--1001 010
+			kick = 74,			--1001 010
+			map = 74,			--1001 010
+			noclip = 74,		--1001 010
+			respawn = 74,		--1001 010
+			["return"] = 74,	--1001 010
+			send = 74,			--1001 010
+			slap = 74,			--1001 010
+			slay = 74,			--1001 010
+			strip = 74,			--1001 010
 		},
 		
 		client = 61,	--111 101
@@ -51,10 +51,10 @@ local config = {
 	},
 	
 	map = {
-		client = 53,	--110 101
-		shared = 47,	--101 111
-		server = 50,	--110 010
-		sync = 55,		--110 111
+		client = 69,	--1000 101
+		shared = 63,	--0111 111
+		server = 66,	--1000 010
+		sync = 71,		--1000 111
 	},
 	
 	net = {
