@@ -6,12 +6,23 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Pyrition", "Map", "#pyrition.spawnmenu.categories.user.map", "", "", function(form)
 		local button
 		local button_admin
+		local image
 		local list_view
+		local perform_layout = form.PerformLayout
 		
 		form:ClearControls()
 		
+		function form:PerformLayout(width, height)
+			perform_layout(self, width, height)
+			
+			local image = form.MapThumbnail
+			
+			image:SetTall(image:GetWide())
+		end
+		
 		do --button
 			button = form:Button("#pyrition.spawnmenu.categories.user.map.button")
+			form.VoteButton = button
 			
 			button:Dock(TOP)
 			button:SetEnabled(false)
@@ -26,6 +37,7 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 		
 		do --admin button
 			button_admin = form:Button("#pyrition.spawnmenu.categories.user.map.button")
+			form.AdminButton = button_admin
 			
 			button_admin:Dock(TOP)
 			button_admin:SetEnabled(false)
@@ -41,6 +53,7 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 		
 		do --refresh button
 			local button = form:Button("Refresh")
+			form.RefreshButton = button
 			
 			button:Dock(TOP)
 			button:SetMaterial("icon16/arrow_refresh.png")
@@ -63,6 +76,7 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 		
 		do --list
 			list_view = vgui.Create("DListView", form)
+			form.MapListView = list_view
 			
 			list_view:AddColumn("##"):SetFixedWidth(32)
 			list_view:AddColumn("Map")
@@ -74,6 +88,7 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 			
 			function list_view:OnRowSelected(index, row_panel)
 				local map = maps[index]
+				local material_name = "maps/thumb/" .. map .. ".png"
 				button.Map = map
 				button_admin.Map = map
 				
@@ -82,6 +97,11 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 				
 				button_admin:SetEnabled(true)
 				button_admin:SetText(PYRITION:LanguageFormat("pyrition.spawnmenu.categories.user.map.button_admin.selected", {map = map}))
+				
+				if file.Exists(material_name, "GAME") then
+					image:SetMaterial(material_name)
+					image:SetVisible(true)
+				else image:SetVisible(false) end
 			end
 			
 			function list_view:Refresh()
@@ -120,6 +140,15 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 			
 			list_view:Refresh()
 			form:AddItem(list_view)
+		end
+		
+		do --thumbnail
+			image = vgui.Create("DImage", form)
+			form.MapThumbnail = image
+			
+			form:AddItem(image)
+			image:SetMaterial("matsys_regressiontest/background")
+			image:SetVisible(false)
 		end
 	end)
 end)

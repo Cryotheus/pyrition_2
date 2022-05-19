@@ -21,15 +21,15 @@ function PYRITION:ConsoleExecute(ply, command, arguments)
 	local required = command_arguments.Required or 0
 	
 	if #arguments < required then
-		if required == 1 then PYRITION:LanguageQueue(ply, "command.failed.required_arguments.singular", {command = command_localization(command)})
-		else PYRITION:LanguageQueue(ply, "command.failed.required_arguments", {command = command_localization(command), count = required}) end
+		if required == 1 then PYRITION:LanguageQueue(ply, "pyrition.command.failed.required_arguments.singular", {command = command_localization(command)})
+		else PYRITION:LanguageQueue(ply, "pyrition.command.failed.required_arguments", {command = command_localization(command), count = required}) end
 		
 		return false
 	end
 	
 	local success, message, phrases = PYRITION:ConsoleCommandExecute(ply, command, unpack(arguments))
 		
-	if message then PYRITION:LanguageQueue(ply, message, table.Merge({player = ply:Name()}, phrases or {}))
+	if message then PYRITION:LanguageQueue(success or ply, message, table.Merge({executor = ply:Name()}, phrases or {}))
 	elseif success then
 		if not command.Downloaded then
 			--we don't send a message for downloaded commands

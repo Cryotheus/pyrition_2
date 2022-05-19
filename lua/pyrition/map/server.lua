@@ -33,7 +33,7 @@ function PYRITION:MapChange(map_name)
 	table.Empty(map_votes)
 	table.Empty(player_votes)
 	
-	self:LanguageQueue("pyrition.map.change", {
+	self:LanguageQueue(true, "pyrition.map.change", {
 		map = map_name,
 		time = map_delay
 	})

@@ -42,7 +42,7 @@ function COMMAND_TO:Execute(ply, targetting, entry)
 		
 		if #returners == 0 then return false, "pyrition.commands.return.missed" end
 		
-		return true, "pyrition.commands.return.success", {returners = returners}
+		return true, "pyrition.commands.return.success", {targets = returners}
 	end
 	
 	return false, message

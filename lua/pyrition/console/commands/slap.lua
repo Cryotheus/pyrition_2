@@ -29,7 +29,7 @@ function COMMAND:Execute(ply, targetting, damage)
 		for index, target in ipairs(targets) do
 			--you can slap dead people :)))
 			--correction: that's on the TODO list, you WILL be able to slap people once I make shared player ragdolls
-			if PYRITION:PlayerSlap(ply, true, damage or false, true) then table.insert(slapped, target) end
+			if PYRITION:PlayerSlap(target, true, damage or false, true) then table.insert(slapped, target) end
 		end
 		
 		if #slapped == 0 then return false, "pyrition.commands.slap.missed" end

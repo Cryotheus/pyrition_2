@@ -32,7 +32,7 @@ function COMMAND:Execute(ply, map_name)
 	if maps[map_name] then
 		PYRITION:MapChange(map_name)
 		
-		return true, "pyrition.commands.map.success"
+		return true, "pyrition.commands.map.success", {map = map_name}
 	end
 	
 	return false, "pyrition.commands.map.fail"
@@ -74,7 +74,7 @@ function COMMAND_VOTE_RETRACT:Execute(ply, targetting)
 		
 		for index, target in ipairs(targets) do if PYRITION:MapVoteRetract(target) then table.insert(victims, target) end end
 		
-		return true, "pyrition.commands.map.vote.retract.success", {victims = victims}
+		return true, "pyrition.commands.map.vote.retract.success", {targets = victims}
 	end
 	
 	return false, "pyrition.player.find.invalid"

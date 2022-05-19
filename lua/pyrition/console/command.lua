@@ -55,7 +55,7 @@ local function network_execution(self, ply, ...)
 	do --command arguments
 		local passed = false
 	
-		for index, argument in ipairs({...}) do
+		for index, argument in ipairs{...} do
 			net.WriteBool(true)
 			net.WriteString(argument)
 		end

@@ -2,6 +2,13 @@
 function PYRITION:LanguageQueue(ply, key, phrases, option)
 	assert(not option or self.NetEnumeratedStrings.language_options[option], 'ID10T-4/S:  ')
 	
+	--having ply = true means to broadcast to everyone
+	if ply == true then
+		for index, ply in ipairs(player.GetHumans()) do self:LanguageQueue(ply, key, phrases, option) end
+		
+		return
+	end
+	
 	local model
 	local models = self:NetSyncGetModels(class, ply)
 	

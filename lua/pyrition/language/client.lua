@@ -1,11 +1,17 @@
+local language_options = PYRITION.LanguageOptions or {}
+local language_options_colored = PYRITION.LanguageOptionsColored or {}
+
 --pyrition functions
 function PYRITION:LanguageDisplay(option, key, phrases)
-	local formatted = self:LanguageFormat(key, phrases)
 	local operation = self.LanguageOptions[option]
 	
 	assert(operation, 'ID10T-4/C: Invalid language option "' .. tostring(option) .. '"')
 	
-	return operation(formatted, key, phrases)
+	return operation(
+		self.LanguageOptionsColored[option] and self:LanguageFormatColor(key, phrases) or self:LanguageFormat(key, phrases),
+		key,
+		phrases
+	)
 end
 
 function PYRITION:LanguageList(items)
@@ -15,8 +21,8 @@ function PYRITION:LanguageList(items)
 	
 	if count == 0 then return language.GetPhrase("pyrition.list.nothing")
 	elseif count == 1 then return items[1]
-	elseif count == 2 then return self:LanguageFormat("pyrition.list.duo", {alpha = items[1], bravo = items[2]})
-	elseif count == player.GetCount() then return language.GetPhrase("pyrition.list.everything") end
+	elseif count == player.GetCount() then return language.GetPhrase("pyrition.list.everything")
+	elseif count == 2 then return self:LanguageFormat("pyrition.list.duo", {alpha = items[1], bravo = items[2]}) end
 		
 	return self:LanguageFormat("pyrition.list", {
 		items = table.concat(items, language.GetPhrase("pyrition.list.seperator"), 1, count - 1),
@@ -32,8 +38,8 @@ function PYRITION:LanguageListPlayers(names)
 	
 	if count == 0 then return language.GetPhrase("pyrition.player.list.nobody")
 	elseif count == 1 then return names[1]
-	elseif count == 2 then return self:LanguageFormat("pyrition.player.list.duo", {alpha = names[1], bravo = names[2]})
-	elseif count == player.GetCount() then return language.GetPhrase("pyrition.player.list.everyone") end
+	elseif count == player.GetCount() then return language.GetPhrase("pyrition.player.list.everyone")
+	elseif count == 2 then return self:LanguageFormat("pyrition.player.list.duo", {alpha = names[1], bravo = names[2]}) end
 	
 	return self:LanguageFormat("pyrition.player.list", {
 		last_name = names[count],
