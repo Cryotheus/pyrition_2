@@ -11,7 +11,9 @@ local COMMAND = {
 			Maximum = 448,
 			Class = "String"
 		}
-	}
+	},
+	
+	Console = true
 }
 
 local COMMAND_MULTI = {
@@ -24,7 +26,9 @@ local COMMAND_MULTI = {
 			Maximum = 448,
 			Class = "String"
 		}
-	}
+	},
+	
+	Console = true
 }
 
 --command function
@@ -34,7 +38,7 @@ function COMMAND:Execute(ply, targetting, reason)
 	if target then
 		target:Kick(reason or "")
 		
-		return true, (reason and "pyrition.commands.kick.explicable" or "pyrition.commands.kick.inexplicable"), {target = target:Name(), reason = reason}
+		return true, (reason and "pyrition.commands.kick.explicable" or "pyrition.commands.kick.inexplicable"), {target = target, reason = reason}
 	end
 	
 	return false, message

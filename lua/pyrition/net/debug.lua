@@ -30,3 +30,5 @@ end
 
 resource.AddSingleFile("resource/localization/en/pyrition.properties")
 resource.AddSingleFile("resource/localization/en/pyrition_commands.properties")
+resource.AddSingleFile("resource/localization/ru/pyrition.properties")
+resource.AddSingleFile("resource/localization/ru/pyrition_commands.properties")

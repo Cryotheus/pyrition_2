@@ -1,4 +1,7 @@
-local COMMAND = {}
+local COMMAND = {
+	Arguments = {"Player"},
+	Console = true
+}
 
 --command functions
 function COMMAND:Execute(ply, targetting)

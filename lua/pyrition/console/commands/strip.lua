@@ -1,4 +1,8 @@
-local COMMAND = {Arguments = {{Class = "Player"}}}
+local COMMAND = {
+	Arguments = {"Player"},
+	Console = true
+}
+
 local player_meta = FindMetaTable("Player")
 
 --custom fields

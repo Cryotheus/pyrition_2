@@ -1,4 +1,8 @@
-local COMMAND = {}
+local COMMAND = {
+	Arguments = {"Player"},
+	Console = true
+}
+
 local player_meta = FindMetaTable("Player")
 
 --command function

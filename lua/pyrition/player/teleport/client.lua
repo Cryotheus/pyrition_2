@@ -83,12 +83,13 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 				self:SetHeight(math.max(history_length + 1, 2) * 17)
 				
 				for index, data in ipairs(teleport_history) do
+					local note = data.Note
 					local unix = data.Unix
 					
 					local time_label = self:AddLine(
 						tostring(index),
 						data.Type,
-						data.Note,
+						IsEntity(note) and note:Name() or note,
 						unix
 					).Columns[4]
 					

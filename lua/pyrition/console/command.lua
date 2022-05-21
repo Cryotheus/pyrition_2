@@ -266,7 +266,10 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	
 	local arguments = command.Arguments
 	
-	if arguments then if not arguments.Required then arguments.Required = 0 end
+	if arguments then
+		if not arguments.Required then arguments.Required = 0 end
+		
+		for index, argument_data in ipairs(arguments) do if isstring(argument_data) then arguments[index] = {Class = argument_data} end end
 	else
 		command.Arguments = {Required = 0}
 		

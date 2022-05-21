@@ -9,7 +9,9 @@ local COMMAND = {
 			Minimum = 0,
 			Class = "Integer"
 		}
-	}
+	},
+	
+	Console = true
 }
 
 --command function

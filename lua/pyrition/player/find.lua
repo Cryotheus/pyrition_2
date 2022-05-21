@@ -77,7 +77,12 @@ end
 function PYRITION:PlayerFindWithFallback(needle, supplicant, fallback, single, exclude_supplicant)
 	if needle and needle ~= "" then return self:PlayerFind(needle, supplicant, single, exclude_supplicant) end
 	
-	return single and fallback or {fallback}
+	if fallback == game.GetWorld() then return nil end
+	
+	return single and fallback or {
+		IsPlayerList = true,
+		fallback
+	}
 end
 
 --pyrition hooks

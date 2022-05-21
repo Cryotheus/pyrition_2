@@ -8,7 +8,9 @@ local COMMAND = {
 			Single = true,
 			Class = "Player"
 		}
-	}
+	},
+	
+	Console = true
 }
 
 --local COMMAND_FORCED = {}
@@ -22,9 +24,9 @@ function COMMAND:Execute(ply, traveller_targetting, targetting)
 		local landings, landing_count = PYRITION:PlayerLanding(target, travellers)
 		
 		if landing_count == #travellers then
-			for index, traveller in ipairs(travellers) do PYRITION:PlayerTeleport(traveller, landings[index], "send", target:Name()) end
+			for index, traveller in ipairs(travellers) do PYRITION:PlayerTeleport(traveller, landings[index], "send", target) end
 			
-			return true, "pyrition.commands.send.success", {target = target:Name(), targets = travellers}
+			return true, "pyrition.commands.send.success", {target = target, targets = travellers}
 		else return false, "pyrition.player.landing.insufficient" end
 		
 		return false, "pyrition.player.landing.fail"

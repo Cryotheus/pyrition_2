@@ -1,7 +1,9 @@
 --locals
 local MODEL = {}
+local read_player = PYRITION._ReadPlayer
 local teleport_history = PYRITION.PlayerTeleportHistory
 local teleport_history_length_bits = PYRITION.PlayerTeleportHistoryLengthBits
+local write_player = PYRITION._WritePlayer
 
 --sync model functions
 function MODEL:BuildWrite()
@@ -33,7 +35,7 @@ function MODEL:Read()
 		if index == 1 then table.Empty(teleport_history) end
 		
 		teleport_history[index] = {
-			Note = net.ReadString(),
+			Note = net.ReadBool() and read_player() or net.ReadString(),
 			Position = net.ReadVector(),
 			Type = PYRITION:NetReadEnumeratedString("teleport_type"),
 			Unix = net.ReadUInt(32),
@@ -46,6 +48,8 @@ function MODEL:Write(ply)
 	local data = self.History[index]
 	
 	if data then
+		local note = data.Note
+		
 		if self.First then
 			self.First = false
 			
@@ -54,7 +58,15 @@ function MODEL:Write(ply)
 		
 		net.WriteBool(true)
 		net.WriteUInt(index - 1, teleport_history_length_bits)
-		net.WriteString(data.Note)
+		
+		if IsEntity(note) then
+			net.WriteBool(true)
+			write_player(note)
+		else
+			net.WriteBool(false)
+			net.WriteString(note)
+		end
+		
 		net.WriteVector(data.Position)
 		PYRITION:NetWriteEnumeratedString("teleport_type", data.Type, ply)
 		net.WriteUInt(data.Unix, 32)

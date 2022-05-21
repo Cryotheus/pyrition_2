@@ -7,10 +7,10 @@ local language_kieves = PYRITION.LanguageKieves or {}
 --colors, stolen from ULX >:D
 local color_default = Color(151, 211, 255)
 local color_command = Color(224, 128, 64)
---local color_console = Color(0, 0, 0) --unused
+local color_console = Color(255, 64, 64)
 local color_self = Color(75, 0, 130)
 local color_everyone = Color(0, 128, 128)
-local color_player = Color(255, 255, 0)
+local color_player = Color(255, 224, 0)
 local color_misc = Color(0, 255, 0)
 
 --globals
@@ -39,49 +39,10 @@ local function build_medial_text_colored(accumulator, text, last_finish, current
 	})
 end
 
-local function text_is_ply(text, ply)
-	local ply = ply or LocalPlayer()
-	
-	if text == ply or (not isstring(ply) and text == ply:Name()) then return true end
-end
-
-local function fetch_special_replacement(index, tag, text, key_values, text_data, accumulator)
+local function fetch_special_replacement(index, tag, text, key_values, text_data, accumulator, phrases)
 	local kieve = language_kieves[tag]
 	
-	if kieve then return kieve(index, text, key_values, text_data, accumulator) end
-end
-
-local function find_executor(accumulator)
-	for other_index, other_data in ipairs(accumulator) do
-		local tag = other_data.tag
-		
-		if tag == "executor" then
-			local key_values = other_data.key_values
-			
-			return other_data.original or other_data.text
-		end
-	end
-end
-
-local function kieve_executor(index, text, key_values, text_data, accumulator)
-	local you = key_values.you
-	
-	if text_is_ply(text) then return you, color_self end
-end
-
-local function kieve_targets(index, text, key_values, text_data, accumulator)
-	if text == (SERVER and "everyone" or language.GetPhrase("pyrition.player.list.everyone")) then return nil, color_everyone end
-	
-	key_values.themself = "themself"
-	
-	local executor = find_executor(accumulator) --who ran the command
-	local themself = text_is_ply(text, executor) and key_values.themself --the text to use if target is the executor
-	local value_self = executor and key_values.self --the text to use if we're the target and executor
-	local you = text_is_ply(text) and key_values.you --the text to use if we're the target
-	
-	if value_self and you and text_is_ply(executor) then return value_self, color_self
-	elseif you then return you, color_self
-	elseif themself then return themself, color_player end
+	if kieve then return kieve(index, text, key_values, text_data, accumulator, phrases) end
 end
 
 local function replace_tags(text, phrases, colored)
@@ -94,14 +55,20 @@ local function replace_tags(text, phrases, colored)
 		start, finish, match = string.find(text, "%[%:(.-)%]", finish)
 		
 		if match then
+			local postfix
+			local prefix
 			local boom = string.Split(match, ":")
 			local tag = table.remove(boom, 1)
 			local key_values = {}
 			
 			for index, gib in ipairs(boom) do
-				local key, value = unpack(string.Split(gib, "="))
+				local boom = string.Split(gib, "=")
+				local key = table.remove(boom, 1)
+				local value = table.remove(boom, 1)
 				
-				key_values[key] = value
+				if key == "elpend" then postfix = value
+				elseif key == "elfix" then prefix = value
+				else key_values[key] = next(boom) and boom or value end
 			end
 			
 			build_text(accumulator, text, old_finish, start - 1)
@@ -109,6 +76,8 @@ local function replace_tags(text, phrases, colored)
 			table.insert(accumulator, {
 				color = colored and (language_colors[tag] or color_default),
 				key_values = next(key_values) and key_values or nil,
+				prefix = prefix,
+				postfix = postfix,
 				tag = tag,
 				text = phrases[tag] or "[>" .. tag .. "<]"
 			})
@@ -119,21 +88,53 @@ local function replace_tags(text, phrases, colored)
 		local color = text_data.color
 		local key_values = text_data.key_values
 		local new_text, new_color
+		local perform_concatenation = true
 		local text = text_data.text
 		
+		--in case a kieve function needs the text before it was changed by a previous kieve function
 		text_data.original = text
 		
-		if key_values then new_text, new_color = fetch_special_replacement(index, text_data.tag, text, key_values, text_data, accumulator) end
+		if key_values then
+			new_text, new_color = fetch_special_replacement(index, text_data.tag, text, key_values, text_data, accumulator, phrases)
+			
+			if new_text then perform_concatenation = false end
+		end
+		
+		--for elfix and elpend tag key values
+		if perform_concatenation then
+			local prefix, postfix = text_data.prefix, text_data.postfix
+			
+			if prefix then text = prefix .. text end
+			if postfix then text = text .. postfix end
+		end
+		
 		if color then table.insert(texts, new_color or color) end
 		
-		table.insert(texts, new_text or text)
+		table.insert(texts, new_text or IsEntity(text) and (text == game.GetWorld() and language.GetPhrase("pyrition.console") or text:Name()) or text)
 	end
 	
 	return colored and texts or table.concat(texts, "")
 end
 
---retro tag replacement, was not featureful enough
---local function replace_tags(text, phrases) return (string.gsub(text, "%[%:(.-)%]", phrases)) end
+--kieve functions
+local function kieve_executor(index, text, key_values, text_data, accumulator, phrases)
+	if text == LocalPlayer() then return key_values.you, color_self
+	elseif text == game.GetWorld() then return key_values.console, color_console end
+end
+
+local function kieve_targets(index, text, key_values, text_data, accumulator, phrases)
+	if text == (SERVER and "everyone" or language.GetPhrase("pyrition.player.list.everyone")) then return nil, color_everyone end
+	
+	local executor = phrases.executor --who ran the command
+	local ply = LocalPlayer()
+	local themself = text == executor and key_values.themself --the text to use if target is the executor
+	local value_self = executor and key_values.self --the text to use if we're the target and executor
+	local you = text == ply and key_values.you --the text to use if we're the target
+	
+	if value_self and you and executor == ply then return value_self, color_self
+	elseif you then return you, color_self
+	elseif themself then return themself, color_player end
+end
 
 --pyrition functions
 function PYRITION:LanguageFormat(key, phrases) return phrases and replace_tags(language.GetPhrase(key), phrases) or language.GetPhrase(key) end

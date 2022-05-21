@@ -1,4 +1,7 @@
-local COMMAND = {Arguments = {{Class = "Player"}}}
+local COMMAND = {
+	Arguments = {"Player"},
+	Console = true
+}
 
 --local functions
 local function is_noclipped(ply) return ply:GetMoveType() == MOVETYPE_NOCLIP end

@@ -3,7 +3,9 @@ local COMMAND = {
 		Required = 1,
 		
 		{Class = "Map"}
-	}
+	},
+	
+	Console = true
 }
 
 local COMMAND_VOTE = {
@@ -19,10 +21,15 @@ local COMMAND_VOTE_ANNUL = {
 		Required = 1,
 		
 		{Class = "Map"}
-	}
+	},
+	
+	Console = true
 }
 
-local COMMAND_VOTE_RETRACT = {Arguments = {{Class = "Player"}}}
+local COMMAND_VOTE_RETRACT = {
+	Arguments = {"Player"},
+	Console = true
+}
 
 --locals
 local maps = PYRITION.MapList

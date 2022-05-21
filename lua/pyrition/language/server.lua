@@ -6,6 +6,14 @@ function PYRITION:LanguageQueue(ply, key, phrases, option)
 	if ply == true then
 		for index, ply in ipairs(player.GetHumans()) do self:LanguageQueue(ply, key, phrases, option) end
 		
+		MsgC(color_white, "[Pyrition Broadcast] ", Color(255, 128, 0), key, "\n")
+		
+		return
+	end
+	
+	if ply == game.GetWorld() then
+		MsgC(color_white, "[Pyrition Silent] ", Color(255, 255, 0), key, "\n")
+		
 		return
 	end
 	

@@ -1,6 +1,8 @@
 --TODO: add this script to load order!
 --locals
 local MODEL = {IsLanguageSyncModel = true}
+local read_player = PYRITION._ReadPlayer
+local write_player = PYRITION._WritePlayer
 
 --sync model functions
 function MODEL:AddMessage(key, phrases, option)
@@ -17,29 +19,33 @@ function MODEL:Read()
 		local key = net.ReadBool() and PYRITION:NetReadEnumeratedString("language") or net.ReadString()
 		local phrases
 		
-		if net.ReadBool() then
+		if net.ReadBool() then --we have text to use for substitution
 			phrases = {}
 			
 			repeat
 				local tag = net.ReadString()
 				
-				if net.ReadBool() then --is this a list of strings?
-					local is_player_list = net.ReadBool()
+				if net.ReadBool() then --read lists
 					local items = {}
+					local is_player_list = net.ReadBool()
+					local read_function = is_player_list and read_player or net.ReadString
 					
-					repeat table.insert(items, net.ReadString())
+					repeat table.insert(items, read_function())
 					until not net.ReadBool()
 					
-					if is_player_list then phrases[tag] = PYRITION:LanguageListPlayers(items)
+					if is_player_list then phrases[tag] = #items == 1 and items[1] or PYRITION:LanguageListPlayers(items)
 					else phrases[tag] = PYRITION:LanguageList(items) end
-				else
-					local phrase = net.ReadString()
-					
-					--if prefixed with #, localize the string
-					--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal" weirdo
-					if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)
-					elseif string.StartWith(phrase, "#") then phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
-					else phrases[tag] = phrase end
+				else --read players and strings
+					if net.ReadBool() then phrases[tag] = read_player()
+					else
+						local phrase = net.ReadString()
+						
+						--if prefixed with #, localize the string
+						--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal" weirdo
+						if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)
+						elseif string.StartWith(phrase, "#") then phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
+						else phrases[tag] = phrase end
+					end
 				end
 			until not net.ReadBool()
 		end
@@ -68,27 +74,48 @@ function MODEL:Write(ply)
 			net.WriteBool(true)
 			net.WriteString(tag)
 			
-			if istable(phrase) then --write a list of strings that will replace a single tag
+			if istable(phrase) then --write a list that will replace a single tag
 				local passed = false
 				
 				net.WriteBool(true)
-				net.WriteBool(phrase.IsPlayerList or false)
 				
-				for index, item in ipairs(phrase) do
-					if IsEntity(item) and item:IsPlayer() then item = item:Name() end
+				if phrase.IsPlayerList then
+					net.WriteBool(true)
 					
-					if isstring(item) then
-						if passed then net.WriteBool(true)
-						else passed = true end
-						
-						net.WriteString(item)
-					else ErrorNoHaltWithStack("ID10T-5: Attempt to write a non-string " .. type(item) .. " value.") end
+					for index, ply in ipairs(phrase) do
+						if IsEntity(ply) then
+							if passed then net.WriteBool(true)
+							else passed = true end
+							
+							write_player(ply)
+						else ErrorNoHaltWithStack("ID10T-11: Attempt to write a non-entity " .. type(ply) .. " value. Should be a player or the world entity.") end
+					end
+					
+					if not passed then net.WriteEntity() end
+				else
+					net.WriteBool(false)
+					
+					for index, item in ipairs(phrase) do
+						if isstring(item) then
+							if passed then net.WriteBool(true)
+							else passed = true end
+							
+							net.WriteString(item)
+						else ErrorNoHaltWithStack("ID10T-5: Attempt to write a non-string " .. type(item) .. " value.") end
+					end
 				end
 				
 				net.WriteBool(false)
-			else
+			else --write a player or string
 				net.WriteBool(false)
-				net.WriteString(tostring(phrase))
+				
+				if IsEntity(phrase) then
+					net.WriteBool(true)
+					write_player(phrase)
+				else
+					net.WriteBool(false)
+					net.WriteString(tostring(phrase))
+				end
 			end
 		end
 		

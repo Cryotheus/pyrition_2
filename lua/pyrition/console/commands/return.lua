@@ -1,4 +1,7 @@
-local COMMAND = {Arguments = {{Class = "Player"}}}
+local COMMAND = {
+	Arguments = {"Player"},
+	Console = true
+}
 
 local COMMAND_TO = {
 	Arguments = {
@@ -11,7 +14,9 @@ local COMMAND_TO = {
 			Minimum = 1,
 			Class = "Integer"
 		}
-	}
+	},
+	
+	Console = true
 }
 
 --command function

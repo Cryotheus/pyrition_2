@@ -1,4 +1,22 @@
-local COMMAND = {}
+local COMMAND = {
+	Arguments = {
+		Required = 1,
+		
+		{
+			Class = "Player",
+			Optional = true
+		},
+		
+		{
+			Class = "Integer",
+			Maximum = 2 ^ 31 - 1,
+			Minimum = 1
+		}
+	},
+	
+	Console = true
+}
+
 local entity_meta = FindMetaTable("Entity")
 local player_meta = FindMetaTable("Player")
 
@@ -7,8 +25,6 @@ COMMAND.SetFunction = entity_meta.SetHealth
 
 --command functions
 function COMMAND:Execute(ply, targetting, amount)
-	if not targetting then return false, "pyrition.commands.health.empty" end
-	
 	local message
 	local targets = {ply}
 	

@@ -1,4 +1,4 @@
-local COMMAND = {}
+local COMMAND = {Arguments = {Required = 1, "Player"}}
 
 --command function
 function COMMAND:Execute(ply, targetting)
@@ -8,9 +8,9 @@ function COMMAND:Execute(ply, targetting)
 		local landings, landing_count = PYRITION:PlayerLanding(target, {ply})
 		
 		if landing_count == 1 then
-			PYRITION:PlayerTeleport(ply, landings[1], "goto", target:Name())
+			PYRITION:PlayerTeleport(ply, landings[1], "goto", target)
 			
-			return true, "pyrition.commands.goto.success", {target = target:Name()}
+			return true, "pyrition.commands.goto.success", {target = target}
 		end
 		
 		return false, "pyrition.player.landing.fail"
