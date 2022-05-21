@@ -19,5 +19,5 @@ Some of my projects will be rewritten using Pyrition. Yet another partial list i
 * Void Event
 * War Lab
 
-## For Developers
+## For More Reading
 Check out the [Wiki](https://github.com/Cryotheus/pyrition_2/wiki).
