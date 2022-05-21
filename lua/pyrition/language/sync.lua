@@ -1,6 +1,5 @@
---TODO: add this script to load order!
 --locals
-local MODEL = {IsLanguageSyncModel = true}
+local MODEL = {Priority = 10}
 local read_player = PYRITION._ReadPlayer
 local write_player = PYRITION._WritePlayer
 
@@ -27,14 +26,12 @@ function MODEL:Read()
 				
 				if net.ReadBool() then --read lists
 					local items = {}
-					local is_player_list = net.ReadBool()
-					local read_function = is_player_list and read_player or net.ReadString
+					local read_function = net.ReadBool() and read_player or net.ReadString
 					
 					repeat table.insert(items, read_function())
 					until not net.ReadBool()
 					
-					if is_player_list then phrases[tag] = #items == 1 and items[1] or PYRITION:LanguageListPlayers(items)
-					else phrases[tag] = PYRITION:LanguageList(items) end
+					phrases[tag] = items
 				else --read players and strings
 					if net.ReadBool() then phrases[tag] = read_player()
 					else

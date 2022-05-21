@@ -43,13 +43,9 @@ function PYRITION:PlayerFindBySteamID(needle, supplicant)
 	local all_players = player.GetAll()
 	local players = false
 	
-	if string.StartWith(needle, "STEAM_0:") then --STEAM_0 ID
-		--more?
-		for index, ply in ipairs(all_players) do if ply:SteamID() == needle then return {ply} end end
-	elseif tonumber(needle) then --steam ID 64
-		--more?
-		for index, ply in ipairs(all_players) do if ply:SteamID64() == needle then return {ply} end end
-	else --special IDs
+	if string.StartWith(needle, "STEAM_0:") then for index, ply in ipairs(all_players) do if ply:SteamID() == needle then return {ply} end end --STEAM_0 ID
+	elseif tonumber(needle) then for index, ply in ipairs(all_players) do if ply:SteamID64() == needle then return {ply} end end --steam ID 64
+	else --STEAM_0 ID without STEAM_0:
 		local players = {}
 		
 		for index, ply in ipairs(all_players) do

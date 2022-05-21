@@ -8,7 +8,7 @@ local drint = PYRITION._drint
 local drint_level = 2
 local duplex_insert = PYRITION._DuplexInsert
 local loading_players = {} --dictionary[ply] = ply:TimeConnected false if message emulated
-local load_time = 30
+local load_time = 10
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
 local net_enumeration_players = PYRITION.NetEnumerationPlayers or {} --dictionary[ply] = dictionary[namespace] = report[string]
 local net_enumeration_updates = PYRITION.NetEnumerationUpdates or {}
@@ -120,12 +120,9 @@ end
 
 --pyrition hooks
 function PYRITION:PyritionNetPlayerInitialized(ply, emulated)
-	MsgC(color_significant, "[Pyrition] ", color_white, ply:Name() .. (map_transition and " fully loaded into the server after the map change.\n" or " fully loaded into the server.\n"))
+	PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply})
 	
-	for class, model_table in pairs(self.NetSyncModels) do
-		--more?
-		if model_table.InitialSync and model_table:InitialSync(ply, emulated) then self:NetSyncAdd(class, ply) end
-	end
+	for class, model_table in pairs(self.NetSyncModels) do if model_table.InitialSync and model_table:InitialSync(ply, emulated) then self:NetSyncAdd(class, ply) end end
 end
 
 function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
@@ -180,7 +177,11 @@ hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply) loading_players[ply]
 hook.Add("Think", "PyritionNet", function()
 	for ply, time_spawned in pairs(loading_players) do
 		if time_spawned and ply:TimeConnected() - time_spawned > load_time then
-			MsgC(color_red, "A player (" .. tostring(ply) .. ") has exceeded " .. load_time .. " (took " .. ply:TimeConnected() - time_spawned .. ") seconds of spawn time and has yet to report initialization. Emulating a response.\n")
+			PYRITION:LanguageDisplay("prodigal", "pyrition.net.load.late", {
+				duration = math.Round(ply:TimeConnected() - time_spawned, 2),
+				player = ply,
+				time = load_time,
+			})
 			
 			loading_players[ply] = false
 			
@@ -211,7 +212,6 @@ hook.Add("Think", "PyritionNet", function()
 		table.Empty(net_enumeration_updates)
 	end
 	
-	---[[
 	if next(teaching_queue) then
 		for ply, namespaces in pairs(teaching_queue) do
 			net.Start("pyrition_teach")
@@ -244,16 +244,7 @@ hook.Add("Think", "PyritionNet", function()
 		end
 		
 		table.Empty(teaching_queue)
-	end --]]
-	
-	--else teaching_queue[ply] = {[namespace] = {[enumeration] = true}} end
-	
-	--we should queue this up, yeah?
-	--net.Start("pyrition")
-	--net.WriteString(namespace)
-	--net.WriteUInt(net_enumeration_bits[namespace], 5)
-	--net.WriteBool(false)
-	--net.Send(ply)
+	end
 end)
 
 --net
@@ -261,18 +252,14 @@ net.Receive("pyrition", function(length, ply)
 	if loading_players[ply] == nil and false then --TODO: remove "and false" once done debugging
 		if sv_allowcslua:GetBool() then return end
 		
-		MsgC(color_red, "\n!!!\nA player (", ply, ") tried to send a load net message but has yet to be spawned! It is possible that they are hacking.\n!!!\n\n")
+		PYRITION:LanguageDisplay("hacker", "pyrition.net.load.hacker", {player = ply})
 	else
 		if loading_players[ply] == false then
-			MsgC(
-				color_red, "A player (" .. tostring(ply) .. ") had a belated load net message, an emulated one has been made.\n",
-				color_white, "The above message is not an error, but a sign that clients are taking too long to load into your server.\n"
-			)
-		end
+			PYRITION:LanguageDisplay("prodigal", "pyrition.net.load.delayed", {player = ply})
+			PYRITION:NetPlayerInitialized(ply, true)
+		else PYRITION:NetPlayerInitialized(ply, false) end
 		
 		loading_players[ply] = nil
-		
-		PYRITION:NetPlayerInitialized(ply, false)
 	end
 end)
 

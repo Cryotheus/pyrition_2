@@ -74,7 +74,7 @@ local function error_code()
 end
 
 --module functions
-function Add(place_holder, full_text) LanguagePhrases[phrase] = full_text end
+function Add(place_holder, full_text) LanguagePhrases[place_holder] = full_text end
 function GetPhrase(phrase) return LanguagePhrases[phrase] or phrase end
 
 --convars

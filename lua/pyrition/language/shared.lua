@@ -3,6 +3,7 @@ local language_colors = PYRITION.LanguageColors or {}
 local language_options = PYRITION.LanguageOptions or {}
 local language_options_colored = PYRITION.LanguageOptionsColored or {}
 local language_kieves = PYRITION.LanguageKieves or {}
+local local_player = SERVER and game.GetWorld() or LocalPlayer()
 
 --colors, stolen from ULX >:D
 local color_default = Color(151, 211, 255)
@@ -46,7 +47,7 @@ local function fetch_special_replacement(index, tag, text, key_values, text_data
 	if kieve then return kieve(index, text, key_values, text_data, accumulator, phrases) end
 end
 
-local function replace_tags(text, phrases, colored)
+local function replace_tags(self, text, phrases, colored)
 	local accumulator, finish, old_finish, match, start = {}, 0
 	local build_text = colored and build_medial_text_colored or build_medial_text
 	local texts = {}
@@ -109,6 +110,12 @@ local function replace_tags(text, phrases, colored)
 			if postfix then text = text .. postfix end
 		end
 		
+		--convert tables of singles into their value, or multi-value tables into strings
+		if istable(text) then
+			if #text == 1 then text = text[1]
+			else new_text = IsEntity(text[1]) and self:LanguageListPlayers(text) or self:LanguageList(text) end
+		end
+		
 		--convert world/player to string
 		if IsEntity(text) then
 			if text == game.GetWorld() then
@@ -131,7 +138,7 @@ end
 
 --kieve functions
 local function kieve_executor(index, text, key_values, text_data, accumulator, phrases)
-	if text == LocalPlayer() then return key_values.you, color_self
+	if text == local_player then return key_values.you, color_self
 	elseif text == game.GetWorld() then return key_values.console, color_console end
 end
 
@@ -139,7 +146,7 @@ local function kieve_targets(index, text, key_values, text_data, accumulator, ph
 	if text == language.GetPhrase("pyrition.player.list.everyone") then return nil, color_everyone end
 	
 	local executor = phrases.executor --who ran the command
-	local ply = LocalPlayer()
+	local ply = local_player
 	local themself = text == executor and key_values.themself --the text to use if target is the executor
 	local value_self = executor and key_values.self --the text to use if we're the target and executor
 	local you = text == ply and key_values.you --the text to use if we're the target
@@ -150,10 +157,10 @@ local function kieve_targets(index, text, key_values, text_data, accumulator, ph
 end
 
 --pyrition functions
-function PYRITION:LanguageFormat(key, phrases) return phrases and replace_tags(language.GetPhrase(key), phrases) or language.GetPhrase(key) end
-function PYRITION:LanguageFormatColor(key, phrases) return phrases and replace_tags(language.GetPhrase(key), phrases, true) or {color_default, language.GetPhrase(key)} end
-function PYRITION:LanguageFormatColorTranslated(text, phrases) return phrases and replace_tags(text, phrases, true) or {color_default, text} end
-function PYRITION:LanguageFormatTranslated(text, phrases) return phrases and replace_tags(text, phrases) or text end
+function PYRITION:LanguageFormat(key, phrases) return phrases and replace_tags(self, language.GetPhrase(key), phrases) or language.GetPhrase(key) end
+function PYRITION:LanguageFormatColor(key, phrases) return phrases and replace_tags(self, language.GetPhrase(key), phrases, true) or {color_default, language.GetPhrase(key)} end
+function PYRITION:LanguageFormatColorTranslated(text, phrases) return phrases and replace_tags(self, text, phrases, true) or {color_default, text} end
+function PYRITION:LanguageFormatTranslated(text, phrases) return phrases and replace_tags(self, text, phrases) or text end
 
 function PYRITION:LanguageList(items)
 	if items.IsPlayerList then return self:LanguageListPlayers(items) end
@@ -201,18 +208,21 @@ end
 
 function PYRITION:PyritionLanguageRegisterKieve(kieve_function, ...) for index, tag in ipairs{...} do language_kieves[tag] = kieve_function end end
 
+--hooks
+hook.Add("InitPostEntity", "PyritionLanguage", function() local_player = SERVER and game.GetWorld() or LocalPlayer() end)
+
 --post
 PYRITION:GlobalHookCreate("LanguageRegisterColor")
 PYRITION:GlobalHookCreate("LanguageRegisterOption")
 PYRITION:GlobalHookCreate("LanguageRegisterKieve")
 
 PYRITION:LanguageRegisterColor(color_command, "command")
-PYRITION:LanguageRegisterColor(color_misc, "map", "reason", "time")
-PYRITION:LanguageRegisterColor(color_player, "executor", "target", "targets")
+PYRITION:LanguageRegisterColor(color_misc, "duration", "map", "reason", "time")
+PYRITION:LanguageRegisterColor(color_player, "executor", "player", "target", "targets")
 
 PYRITION:LanguageRegisterKieve(kieve_executor, "executor")
 PYRITION:LanguageRegisterKieve(kieve_targets, "target", "targets")
 
-PYRITION:LanguageRegisterOption("center", function(formatted, key, phrases) LocalPlayer():PrintMessage(HUD_PRINTCENTER, formatted) end)
+PYRITION:LanguageRegisterOption("center", function(formatted, key, phrases) local_player:PrintMessage(HUD_PRINTCENTER, formatted) end)
 PYRITION:LanguageRegisterOption("chat", function(formatted_table, key, phrases) chat.AddText(unpack(formatted_table)) end, true)
 PYRITION:LanguageRegisterOption("console", function(formatted, key, phrases) MsgC(color_white, formatted, "\n") end)

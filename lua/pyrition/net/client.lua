@@ -83,7 +83,7 @@ concommand.Add("pd", function(ply, command, arguments, arguments_string)
 end, nil, "Pyrition's debug command. If you are reading this and you're not on a test server, please report it.")
 
 --hooks
-hook.Add("InitPostEntity", "PyritionNet", function() PYRITION:NetClientInitialized(LocalPlayer()) end)
+--hook.Add("InitPostEntity", "PyritionNet", function() PYRITION:NetClientInitialized(LocalPlayer()) end)
 
 hook.Add("PopulateToolMenu", "PyritionNet", function()
 	spawnmenu.AddToolMenuOption("Utilities", "PyritionDevelopers", "NetEnumerations", "#pyrition.spawnmenu.categories.developer.net_enumerations", "", "", function(form)

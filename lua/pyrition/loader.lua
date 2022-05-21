@@ -4,8 +4,6 @@
 --status: active
 --motivation: whats that
 
-include("includes/modules/language.lua")
-
 local config = {
 	hooks = 127,	--1111 111
 	duplex = 23,	--0010 111
@@ -46,7 +44,7 @@ local config = {
 	
 	language = {
 		client = 45,	--101 101
-		debug = 45,		--101 101
+		debug = 47,		--101 111
 		library = 18,	--010 010
 		shared = 47,	--101 111
 		server = 42,	--101 010
