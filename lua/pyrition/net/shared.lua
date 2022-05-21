@@ -14,7 +14,7 @@ local function maybe_write(net_function, value, ...)
 end
 
 local function read_player() return Entity(net.ReadUInt(max_players_bits)) end
-local function write_player(ply) net.WriteUInt(ply:EntIndex(), max_players_bits) end
+local function write_player(ply) print("writing", ply) net.WriteUInt(ply:EntIndex(), max_players_bits) end
 
 --globals
 max_players_bits = bits(max_players_bits)

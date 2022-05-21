@@ -73,6 +73,7 @@ local config = {
 	
 	player = {
 		find = 31,		--011 111
+		kick = 26,		--011 010
 		landing = 26,	--011 010
 		slap = 26,		--011 010
 		

@@ -11,6 +11,7 @@ local color_console = Color(255, 64, 64)
 local color_self = Color(75, 0, 130)
 local color_everyone = Color(0, 128, 128)
 local color_player = Color(255, 224, 0)
+local color_unknown = Color(192, 0, 0)
 local color_misc = Color(0, 255, 0)
 
 --globals
@@ -108,9 +109,21 @@ local function replace_tags(text, phrases, colored)
 			if postfix then text = text .. postfix end
 		end
 		
+		--convert world/player to string
+		if IsEntity(text) then
+			if text == game.GetWorld() then
+				new_color = color_console
+				new_text = language.GetPhrase("pyrition.console")
+			elseif text:IsValid() then new_text = text:Name()
+			else
+				new_text = language.GetPhrase("pyrition.player.unknown")
+				new_color = color_unknown
+			end
+		end
+		
 		if color then table.insert(texts, new_color or color) end
 		
-		table.insert(texts, new_text or IsEntity(text) and (text == game.GetWorld() and language.GetPhrase("pyrition.console") or text:Name()) or text)
+		table.insert(texts, new_text or text)
 	end
 	
 	return colored and texts or table.concat(texts, "")

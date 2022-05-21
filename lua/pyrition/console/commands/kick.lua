@@ -48,11 +48,9 @@ function COMMAND_MULTI:Execute(ply, targetting, reason)
 	local targets, message = PYRITION:PlayerFind(targetting, supplicant)
 	
 	if targets then
-		local safe_reason = reason or ""
+		for index, target in ipairs(targets) do PYRITION:PlayerKick(target, reason) end
 		
-		for index, target in ipairs(targets) do target:Kick(safe_reason) end
-		
-		return true, (reason and "pyrition.commands.kick.multiple.explicable" or "pyrition.commands.kick.multiple.inexplicable"), {targets = targets, reason = reason}
+		return true, reason and "pyrition.commands.kick.multiple.explicable" or "pyrition.commands.kick.multiple.inexplicable", {targets = targets, reason = reason}
 	end
 	
 	return false, message

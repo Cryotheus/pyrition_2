@@ -30,11 +30,11 @@ function PYRITION:LanguageList(items)
 	})
 end
 
-function PYRITION:LanguageListPlayers(names)
-	local count = #names
+function PYRITION:LanguageListPlayers(players)
+	local count = #players
+	local names = {}
 	
-	--convert any players to names
-	for index, item in ipairs(names) do if IsEntity(item) and item:IsPlayer() then names[index] = item:Name() end end
+	for index, item in ipairs(players) do names[index] = item:IsValid() and item:Name() or language.GetPhrase("pyrition.player.unknown") end
 	
 	if count == 0 then return language.GetPhrase("pyrition.player.list.nobody")
 	elseif count == 1 then return names[1]
