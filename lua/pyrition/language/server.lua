@@ -27,7 +27,6 @@ function PYRITION:LanguageQueue(ply, key, phrases, option)
 end
 
 function PYRITION:LanguageRegister(key) self:NetAddEnumeratedString("language", key) end
-function PYRITION:LanguageTranslate(key, fallback, phrases) return self:LanguageFormatTranslated(fallback, phrases) end
 
 --post
 PYRITION:NetAddEnumeratedString("language")

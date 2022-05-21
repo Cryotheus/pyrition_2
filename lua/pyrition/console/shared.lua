@@ -71,13 +71,15 @@ function PYRITION:ConsoleParseArguments(arguments_string)
 end
 
 --console commands
-if game.SinglePlayer() then
-	if SERVER then concommand.Add("sv_pyrition", command_callback, function() return {"The server cannot use autocompletion."} end, "Master command for Pyrition (server sided for single-player, not available in a networked game)")
-	else concommand.Add("pyrition", command_callback, function(command, arguments_string) return PYRITION:ConsoleComplete(command, arguments_string) end, PYRITION:LanguageTranslate("pyrition.command.help", "Master command for Pyrition (fall back)")) end
-else
-	concommand.Add("pyrition", command_callback, function(command, arguments_string)
-		if SERVER then return end
-		
+concommand.Add(
+	SERVER and game.SinglePlayer() and sv_pyrition or "pyrition",
+	command_callback,
+	
+	function(command, arguments_string)
+		--yeah that's right, autocomplete on console ⌐■_■
+		--only useful for singleplayer or custom srcds consoles
 		return PYRITION:ConsoleComplete(command, arguments_string)
-	end, PYRITION:LanguageTranslate("pyrition.command.help", "Master command for Pyrition (fall back)"))
-end
+	end,
+	
+	language.GetPhrase("pyrition.command.help")
+)

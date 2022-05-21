@@ -218,12 +218,13 @@ function PYRITION:PyritionConsoleCommandExecute(ply, command, ...)
 		end
 	end
 	
+	--[[
 	if CLIENT and phrases then
 		local mods = {}
 		
 		--convert tables into strings
 		for tag, phrase in pairs(phrases) do if istable(phrase) then phrases[tag] = self:LanguageList(phrase) end end
-	end
+	end --]]
 	
 	return success, message, phrases
 end

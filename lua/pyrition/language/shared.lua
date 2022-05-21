@@ -136,7 +136,7 @@ local function kieve_executor(index, text, key_values, text_data, accumulator, p
 end
 
 local function kieve_targets(index, text, key_values, text_data, accumulator, phrases)
-	if text == (SERVER and "everyone" or language.GetPhrase("pyrition.player.list.everyone")) then return nil, color_everyone end
+	if text == language.GetPhrase("pyrition.player.list.everyone") then return nil, color_everyone end
 	
 	local executor = phrases.executor --who ran the command
 	local ply = LocalPlayer()
@@ -154,6 +154,39 @@ function PYRITION:LanguageFormat(key, phrases) return phrases and replace_tags(l
 function PYRITION:LanguageFormatColor(key, phrases) return phrases and replace_tags(language.GetPhrase(key), phrases, true) or {color_default, language.GetPhrase(key)} end
 function PYRITION:LanguageFormatColorTranslated(text, phrases) return phrases and replace_tags(text, phrases, true) or {color_default, text} end
 function PYRITION:LanguageFormatTranslated(text, phrases) return phrases and replace_tags(text, phrases) or text end
+
+function PYRITION:LanguageList(items)
+	if items.IsPlayerList then return self:LanguageListPlayers(items) end
+	
+	local count = #items
+	
+	if count == 0 then return language.GetPhrase("pyrition.list.nothing")
+	elseif count == 1 then return items[1]
+	elseif count == player.GetCount() then return language.GetPhrase("pyrition.list.everything")
+	elseif count == 2 then return self:LanguageFormat("pyrition.list.duo", {alpha = items[1], bravo = items[2]}) end
+		
+	return self:LanguageFormat("pyrition.list", {
+		items = table.concat(items, language.GetPhrase("pyrition.list.seperator"), 1, count - 1),
+		last_item = items[count]
+	})
+end
+
+function PYRITION:LanguageListPlayers(players)
+	local count = #players
+	local names = {}
+	
+	for index, item in ipairs(players) do names[index] = item:IsValid() and item:Name() or language.GetPhrase("pyrition.player.unknown") end
+	
+	if count == 0 then return language.GetPhrase("pyrition.player.list.nobody")
+	elseif count == 1 then return names[1]
+	elseif count == player.GetCount() then return language.GetPhrase("pyrition.player.list.everyone")
+	elseif count == 2 then return self:LanguageFormat("pyrition.player.list.duo", {alpha = names[1], bravo = names[2]}) end
+	
+	return self:LanguageFormat("pyrition.player.list", {
+		last_name = names[count],
+		names = table.concat(names, language.GetPhrase("pyrition.player.list.seperator"), 1, count - 1)
+	})
+end
 
 function PYRITION:PyritionLanguageRegisterColor(color, ...) for index, tag in ipairs{...} do language_colors[tag] = color end end
 
