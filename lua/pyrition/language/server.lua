@@ -19,7 +19,7 @@ function PYRITION:LanguageDisplay(log, key, phrases, broadcast)
 		end
 	end
 	
-	if log then ServerLog("[Pyrition] " .. self:LanguageFormat(key, phrases))
+	if log then ServerLog("[Pyrition] " .. self:LanguageFormat(key, phrases) .. "\n")
 	else
 		if broadcast then MsgC(color_broadcast, "[Pyrition Broadcast] ")
 		else MsgC(color_silent, "[Pyrition Silent] ") end
