@@ -2,24 +2,12 @@
 local color_cursor = Color(217, 217, 217)
 local color_hightlight = Color(255, 156, 2)
 local color_text = color_white
+local on_player_chat = PYRITION._OnPlayerChat or GAMEMODE.OnPlayerChat
 
 local command_prefixes = {
 	["/"] = true,
 	["!"] = false
 }
-
---[[
-	"chat_filterbutton"	"Filters"
-	"filter_joinleave"	"Joins/Leaves"
-	"filter_namechange"	"Name Changes"
-	"filter_publicchat"	"Public Chat"
-	"filter_servermsg"	"Server Messages"
-	"filter_teamchange"	"Team Changes"
-	"filter_achievement" "Achievement Announce"
-	"chat_say"				"Say :"
-	"chat_say_team"			"Say (TEAM) :"
-	"chat_say_party"		"Say (PARTY) :"
-]]
 
 --local functions
 local function build_panel_roster(parent)
@@ -110,9 +98,6 @@ local function find_chat()
 				end
 				
 				if IsValid(chat_input) and IsValid(chat_input_line) and IsValid(frame) then
-					language.Add("pyrition.chat.run", "Run :")
-					language.Add("pyrition.chat.run.silent", "Run (SILENT):")
-					
 					local chat_input_prompt = self.ChatInputPrompt
 					local chat_input_prompt_text = language.GetPhrase(silent_command and "pyrition.chat.run.silent" or "pyrition.chat.run")
 					local chat_input_replacement = vgui.Create("EditablePanel", chat_input_line)
@@ -421,6 +406,21 @@ local function find_chat()
 	
 	return false
 end
+
+--globals
+PYRITION._OnPlayerChat = on_player_chat
+
+--global functions
+function GAMEMODE:OnPlayerChat(ply, message, team_chat, ply_dead, ...)
+	local supressed = on_player_chat(self, ply, message, team_chat, ply_dead, ...)
+	
+	PYRITION:ConsoleChatPosted(ply, message, team_chat, ply_dead, supressed, ...)
+	
+	return supressed
+end
+
+--pyrition hooks
+function PYRITION:PyritionConsoleChatPosted(ply, message, team_chat, ply_dead, supressed) end
 
 --hooks
 hook.Add("FinishChat", "PyritionConsoleChat", function()

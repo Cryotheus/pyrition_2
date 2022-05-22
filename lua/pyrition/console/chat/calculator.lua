@@ -1,5 +1,5 @@
---nothing now--pseudo
 --local variables
+local color = Color(176, 176, 176)
 local max_depth = 10
 
 local operations_layers = {
@@ -9,7 +9,7 @@ local operations_layers = {
 	
 	{
 		["%*"] = function(left, right) return left * right end,
-		["%/"] = function(left, right) return left / right end,
+		["/"] = function(left, right) return left / right end,
 		["%%"] = function(left, right) return left % right end
 	},
 	
@@ -41,12 +41,13 @@ local function calculate(expression, depth)
 	
 	for layer, operations in ipairs(operations_layers) do
 		for operator_match, operation in pairs(operations) do
-			local matcher = "%d+[%s" .. operator_match .. "]+%d+"
+			local matcher = "[%d%.]+[%s" .. operator_match .. "]+[%d%.]+"
 			
 			while string.find(expression, matcher) do
-				expression = string.gsub(expression, matcher, function(text)
-					--matches here
-					return tostring(operation(tonumber(string.match(text, "^%d+")), tonumber(string.match(text, "%d+$"))))
+				expression = string.gsub(expression, matcher, function(text)=
+					local alpha, bravo = string.match(text, "^[%d%.]+"), string.match(text, "[%d%.]+$")
+					
+					return tostring(operation(tonumber(alpha), tonumber(bravo)))
 				end)
 			end
 		end
@@ -58,29 +59,27 @@ local function calculate(expression, depth)
 end
 
 local function parse(text)
-	--remove duplicate spaces
+	--remove duplicate spaces and trims
+	--because string.Trim wasn't trimming leading spaces
 	text = string.gsub(text, "%s+", " ")
+	local start = string.match(text, "^%s*()")
 	
-	--trim the spaces at start and end
-	--should be replaced with the built in trim c functions in glua
-	local text_from = string.match(text, "^%s*()")
-	
-	return text_from > #text and "" or string.match(text, ".*%S", text_from)
-end
-
---gamemode functions
-local function chat(ply, message)
-	if string.sub(message, 1, 1) == "=" then
-		local calculation = calculate(parse(string.sub(message, 2)), 0)
-		
-		if calculation then print("= " .. calculation)
-		elseif calculation == false then print("= max parenthesis depth reached") end
-	end
+	return start <= #text and string.match(text, ".*%S", start) or false
 end
 
 --hooks
---[[
-hook.Add("ChatText", "PyritionConsoleChatCalculator", function (index, name, text, type)
-	print("player index", index)
-	
-end) ]]
+hook.Add("PyritionConsoleChatPosted", "PyritionConsoleChatCalculator", function(ply, message, team_chat, ply_dead, supressed)
+	if string.StartWith(message, "=") then
+		local parsed = parse(string.sub(message, 2))
+		
+		if not parsed then return end
+		
+		local calculation = calculate(parsed, 0)
+		local text
+		
+		if calculation then text = "= " .. calculation
+		elseif calculation == false then text = "= " .. language.GetPhrase("pyrition.chat.calculator.failed") end
+		
+		chat.AddText(color, text)
+	end
+end)
