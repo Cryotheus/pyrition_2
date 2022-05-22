@@ -1,9 +1,6 @@
 --locals
 local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses or {}
-local is_pyrition_command = PYRITION._IsPyritionCommand
-
---globals
-PYRITION.ConsoleCommandArgumentClasses = command_argument_classes
+local is_pyrition_command
 
 --local functions
 local function command_callback(ply, command, arguments)
@@ -29,6 +26,12 @@ local function insert_prefixed_commands(completions, tree, validation_prefix, co
 		end
 	end
 end
+
+function is_pyrition_command(object) return istable(object) and object.IsPyritionCommand or false end
+
+--globals
+PYRITION.ConsoleCommandArgumentClasses = command_argument_classes
+PYRITION._IsPyritionCommand = is_pyrition_command
 
 --pyrition functions
 function PYRITION:ConsoleExecute(ply, command, arguments)
@@ -99,7 +102,7 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 	
 	if is_pyrition_command(tree) then
 		local complete_function = tree.Complete
-		local complete_prefix = prefix .. " " .. prefix_arguments_string
+		local complete_prefix = prefix .. prefix_arguments_string
 		
 		if complete_function then complete_function(completions, complete_prefix, next_argument) end
 		
@@ -114,7 +117,7 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 			table.remove(arguments)
 			
 			insert_prefixed_commands(completions, tree, next_argument, complete_prefix .. " ")
-			insert_prefixed_commands(completions, self:ConsoleCommandGet(arguments), depth_argument, prefix .. " ")
+			insert_prefixed_commands(completions, self:ConsoleCommandGet(arguments), depth_argument, prefix)
 			
 			table.remove(completions)
 			table.sort(completions)
@@ -143,7 +146,7 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 						end
 						
 						--add our new insertions
-						complete_prefix = prefix .. " " .. table.concat(arguments, " ", 1, depth + command_argument_index - 1)
+						complete_prefix = prefix .. table.concat(arguments, " ", 1, depth + command_argument_index - 1)
 						
 						for index, insertion in ipairs(insertions) do table.insert(completions, complete_prefix .. " " .. insertion) end
 					end
@@ -151,7 +154,7 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 			end
 		end
 	else
-		insert_prefixed_commands(completions, tree, depth_argument, prefix .. " " .. prefix_arguments_string)
+		insert_prefixed_commands(completions, tree, depth_argument, prefix .. prefix_arguments_string)
 		table.sort(completions)
 	end
 	
@@ -166,7 +169,7 @@ concommand.Add(
 	function(command, arguments_string)
 		--yeah that's right, autocomplete on console ⌐■_■
 		--only useful for singleplayer or custom srcds consoles
-		return PYRITION:ConsoleComplete(command, arguments_string)
+		return PYRITION:ConsoleComplete(command .. " ", arguments_string)
 	end,
 	
 	language.GetPhrase("pyrition.command.help")

@@ -7,7 +7,7 @@ PYRITION.LanguageLogFilter = log_filter
 
 --pyrition functions
 function PYRITION:LanguageDisplay(log, key, phrases, broadcast)
-	if isstring(log) and log_filter[log] then log = true end
+	if isstring(log) then log = log_filter[log] and true or false end
 	
 	--if prefixed with #, localize the string
 	--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal" weirdo
@@ -19,10 +19,10 @@ function PYRITION:LanguageDisplay(log, key, phrases, broadcast)
 		end
 	end
 	
-	if log then ServerLog("[Pyrition] " .. self:LanguageFormat(key, phrases) .. "\n")
+	if log then ServerLog(language.GetPhrase("pyrition.language.log") .. self:LanguageFormat(key, phrases) .. "\n")
 	else
-		if broadcast then MsgC(color_broadcast, "[Pyrition Broadcast] ")
-		else MsgC(color_silent, "[Pyrition Silent] ") end
+		if broadcast then MsgC(color_broadcast, language.GetPhrase("pyrition.language.broadcast"))
+		else MsgC(color_silent, language.GetPhrase("pyrition.language")) end
 		
 		MsgC(unpack(self:LanguageFormatColor(key, phrases)))
 		MsgC("\n")

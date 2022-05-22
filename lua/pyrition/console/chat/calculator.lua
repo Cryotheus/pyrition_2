@@ -70,8 +70,6 @@ end
 
 --gamemode functions
 local function chat(ply, message)
-	print(ply:Nick() .. ": " .. message)
-	
 	if string.sub(message, 1, 1) == "=" then
 		local calculation = calculate(parse(string.sub(message, 2)), 0)
 		
@@ -79,3 +77,10 @@ local function chat(ply, message)
 		elseif calculation == false then print("= max parenthesis depth reached") end
 	end
 end
+
+--hooks
+--[[
+hook.Add("ChatText", "PyritionConsoleChatCalculator", function (index, name, text, type)
+	print("player index", index)
+	
+end) ]]

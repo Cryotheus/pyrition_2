@@ -8,7 +8,7 @@ local drint = PYRITION._drint
 local drint_level = 2
 local duplex_insert = PYRITION._DuplexInsert
 local loading_players = {} --dictionary[ply] = ply:TimeConnected false if message emulated
-local load_time = 10
+local load_time = 30
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
 local net_enumeration_players = PYRITION.NetEnumerationPlayers or {} --dictionary[ply] = dictionary[namespace] = report[string]
 local net_enumeration_updates = PYRITION.NetEnumerationUpdates or {}

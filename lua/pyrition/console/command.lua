@@ -3,7 +3,7 @@ local build_command_list
 local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses
 local commands = PYRITION.ConsoleCommands or {}
 local grow_command_tree
-local is_pyrition_command
+local is_pyrition_command = PYRITION._IsPyritionCommand
 local _R = debug.getregistry()
 
 --local tables
@@ -81,12 +81,9 @@ function grow_command_tree(commands, maximum_depth, depth)
 	return tree
 end
 
-function is_pyrition_command(object) return istable(object) and object.IsPyritionCommand or false end
-
 --globals
 _R.PyritionCommand = command_meta
 PYRITION.ConsoleCommands = commands
-PYRITION._IsPyritionCommand = is_pyrition_command
 
 --command meta functions
 function command_meta:__call(...) return self:Execute(...) end --ply, full_command, arguments...

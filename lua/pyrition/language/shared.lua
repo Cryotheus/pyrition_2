@@ -96,10 +96,19 @@ local function replace_tags(self, text, phrases, colored)
 		--in case a kieve function needs the text before it was changed by a previous kieve function
 		text_data.original = text
 		
+		--convert tables of singles into their value, or multi-value tables into strings
+		if istable(text) then
+			if #text == 1 then text = text[1]
+			else text = IsEntity(text[1]) and self:LanguageListPlayers(text) or self:LanguageList(text) end
+		end
+		
 		if key_values then
 			new_text, new_color = fetch_special_replacement(index, text_data.tag, text, key_values, text_data, accumulator, phrases)
 			
-			if new_text then perform_concatenation = false end
+			if new_text then
+				perform_concatenation = false
+				text = new_text
+			end
 		end
 		
 		--for elfix and elpend tag key values
@@ -110,27 +119,21 @@ local function replace_tags(self, text, phrases, colored)
 			if postfix then text = text .. postfix end
 		end
 		
-		--convert tables of singles into their value, or multi-value tables into strings
-		if istable(text) then
-			if #text == 1 then text = text[1]
-			else new_text = IsEntity(text[1]) and self:LanguageListPlayers(text) or self:LanguageList(text) end
-		end
-		
 		--convert world/player to string
 		if IsEntity(text) then
 			if text == game.GetWorld() then
-				new_color = color_console
-				new_text = language.GetPhrase("pyrition.console")
-			elseif text:IsValid() then new_text = text:Name()
+				color = colored and color_console
+				text = language.GetPhrase("pyrition.console")
+			elseif text:IsValid() then text = text:Name()
 			else
-				new_text = language.GetPhrase("pyrition.player.unknown")
-				new_color = color_unknown
+				color = colored and color_unknown
+				text = language.GetPhrase("pyrition.player.unknown")
 			end
 		end
 		
 		if color then table.insert(texts, new_color or color) end
 		
-		table.insert(texts, new_text or text)
+		table.insert(texts, text)
 	end
 	
 	return colored and texts or table.concat(texts, "")
