@@ -31,8 +31,8 @@ local config = {
 		command = 55,	--110 111
 		arguments = 63,	--110 111
 		server = 58,	--111 010
-		shared = 55,	--110 111
-		sync = 55,		--110 111
+		shared = 47,	--101 111
+		sync = 63,		--111 111
 	},
 	
 	global = {

@@ -10,9 +10,9 @@ local COMMAND_TO = {
 		{Class = "Player"},
 		
 		{
+			Class = "Integer",
 			Maximum = PYRITION.PlayerTeleportHistoryLength,
-			Minimum = 1,
-			Class = "Integer"
+			Minimum = 1
 		}
 	},
 	

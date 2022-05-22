@@ -1,1 +1,2 @@
---nothing now
+--globals
+LocalPlayer = LocalPlayer or game.GetWorld

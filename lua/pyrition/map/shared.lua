@@ -33,11 +33,15 @@ PYRITION:ConsoleCommandRegisterArgument("Map", function(settings, ply, argument)
 	end
 	
 	return true, found
-end, function(settings, argument)
+end, function(settings, executor, argument)
 	local completions = {}
 	
 	--add all maps prefixed with the text
-	for index, map in ipairs(maps) do if string.StartWith(map, argument) then table.insert(completions) end end
+	for index, map in ipairs(maps) do
+		if string.StartWith(map, argument) then
+			table.insert(completions, map)
+		end
+	end
 	
 	--add all maps prefixed with the text ignoring prefixes
 	for index, map in ipairs(maps) do

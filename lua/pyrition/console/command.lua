@@ -1,6 +1,6 @@
 --locals
 local build_command_list
-local command_arguments = PYRITION.ConsoleCommandArguments or {}
+local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses
 local commands = PYRITION.ConsoleCommands or {}
 local grow_command_tree
 local is_pyrition_command
@@ -85,7 +85,6 @@ function is_pyrition_command(object) return istable(object) and object.IsPyritio
 
 --globals
 _R.PyritionCommand = command_meta
-PYRITION.ConsoleCommandArguments = command_arguments
 PYRITION.ConsoleCommands = commands
 PYRITION._IsPyritionCommand = is_pyrition_command
 
@@ -121,7 +120,7 @@ function command_meta:__tostring() return "PyritionCommand [" .. table.concat(se
 --pyrition functions
 function PYRITION:ConsoleCommandFilterArgument(settings, ply, argument)
 	local class = settings.Class
-	local command_argument_data = command_arguments[class]
+	local command_argument_data = command_argument_classes[class]
 	
 	assert(command_argument_data, "ID10T-11: Attempt to filter command argument with non-existent command argument class " .. tostring(class) .. ".")
 	
@@ -180,13 +179,9 @@ function PYRITION:ConsoleCommandGetList(subject) return build_command_list(subje
 function PYRITION:ConsoleCommandGetTree(maximum_depth) return grow_command_tree(commands, maximum_depth or 4, 0) end
 
 --pyrition hooks
-function PYRITION:PyritionConsoleCommandDownload(parents)
-	local existing = self:ConsoleCommandGetExisting(parents)
-	
-	if existing then return existing end
-	
+function PYRITION:PyritionConsoleCommandDownload(parents, arguments)
 	local command = {
-		Arguments = {Required = 0},
+		Arguments = arguments or {Required = 0},
 		Downloaded = true,
 		Execute = network_execution,
 		Name = parents[#parents],
@@ -196,9 +191,9 @@ function PYRITION:PyritionConsoleCommandDownload(parents)
 	command = table.Merge(table.Copy(command_indexing), command)
 	
 	setmetatable(command, command_meta)
-	MsgC(color_white, "Downloaded command mirror " .. command, "\n")
-	
 	self:ConsoleCommandSet(parents, command)
+	
+	--MsgC(color_white, "Downloaded command mirror " .. command, "\n")
 	
 	return command
 end
@@ -290,17 +285,26 @@ end
 
 function PYRITION:PyritionConsoleCommandRegisterArgument(class, filter_function, auto_complete, write_function, read_function)
 	assert(isstring(class) and isfunction(filter_function) and isfunction(auto_complete), "ID10T-10: Argument mismatch in registering command arguments.")
+	assert(read_function and write_function or not (read_function or write_function), "ID10T-13: Either both network functions or no network functions are required.")
 	
 	if SERVER then self:NetAddEnumeratedString("command_argument", class) end
 	
-	command_arguments[class] = {
+	command_argument_classes[class] = {
 		--first return should be a bool for validity of argument
 		--second return should be the value itself, and is ignored if invalid
 		--third return is a message
 		filter_function,
 		
 		--return should be a list of strings for the command's completion
-		auto_complete
+		auto_complete,
+		
+		--first argument is the settings of the argument
+		--optional, used to network the argument's data
+		write_function,
+		
+		--first argument is the settings of the argument
+		--optional, used to network the argument's data
+		read_function
 	}
 end
 

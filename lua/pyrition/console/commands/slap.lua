@@ -5,9 +5,9 @@ local COMMAND = {
 		{Class = "Player"},
 		
 		{
+			Class = "Integer",
 			Default = 0,
-			Minimum = 0,
-			Class = "Integer"
+			Minimum = 0
 		}
 	},
 	

@@ -1,5 +1,15 @@
+--locals
 local maybe_read = PYRITION._MaybeRead
 local maybe_write = PYRITION._MaybeWrite
+local prefix_functions = PYRITION.PlayerFindPrefixes
+
+--local functions
+local function escape_targetting(target)
+	local name = target:Name()
+			
+	if prefix_functions[string.Left(name, 1)] then return "$" .. string.sub(name:SteamID(), 9)
+	else return string.find(name, "%s") and '"' .. name .. '"' or name end
+end
 
 --post
 PYRITION:ConsoleCommandRegisterArgument("Integer", function(settings, ply, argument)
@@ -14,7 +24,7 @@ PYRITION:ConsoleCommandRegisterArgument("Integer", function(settings, ply, argum
 	if minimum then integer = math.max(integer, minimum) end
 	
 	return integer and true or false, integer
-end, function(settings, ply, argument)
+end, function(settings, executor, argument)
 	local completions = {}
 	local default = settings.Default
 	local maximum = settings.Maximum
@@ -26,13 +36,21 @@ end, function(settings, ply, argument)
 	
 	return completions
 end, function(settings)
-	maybe_write(net.WriteUInt, settings.Default, 32)
-	maybe_write(net.WriteUInt, settings.Maximum, 32)
-	maybe_write(net.WriteUInt, settings.Minimum, 32)
+	local signed = settings.Signed
+	local integer_function = signed and net.WriteInt or net.WriteUInt
+	
+	net.WriteBool(signed)
+	maybe_write(integer_function, settings.Default, 32)
+	maybe_write(integer_function, settings.Maximum, 32)
+	maybe_write(integer_function, settings.Minimum, 32)
 end, function(settings)
-	settings.Default = maybe_read(net.ReadUInt, 32)
-	settings.Maximum = maybe_read(net.ReadUInt, 32)
-	settings.Minimum = maybe_read(net.ReadUInt, 32)
+	local signed = net.ReadBool()
+	local integer_function = signed and net.ReadInt or net.ReadUInt
+	
+	settings.Signed = signed
+	settings.Default = maybe_read(integer_function, 32)
+	settings.Maximum = maybe_read(integer_function, 32)
+	settings.Minimum = maybe_read(integer_function, 32)
 end)
 
 PYRITION:ConsoleCommandRegisterArgument("Number", function(settings, ply, argument)
@@ -46,7 +64,7 @@ PYRITION:ConsoleCommandRegisterArgument("Number", function(settings, ply, argume
 	if minimum then number = math.max(number, minimum) end
 	
 	return number and true or false, number
-end, function(settings, ply, argument)
+end, function(settings, executor, argument)
 	local completions = {}
 	local default = settings.Default
 	local maximum = settings.Maximum
@@ -58,14 +76,14 @@ end, function(settings, ply, argument)
 	
 	return completions
 end, function(settings)
-	maybe_write(net.WriteUInt, settings.Default, 32)
-	maybe_write(net.WriteUInt, settings.Maximum, 32)
-	maybe_write(net.WriteUInt, settings.Minimum, 32)
+	maybe_write(net.WriteDouble, settings.Default)
+	maybe_write(net.WriteDouble, settings.Maximum)
+	maybe_write(net.WriteDouble, settings.Minimum)
 	maybe_write(net.WriteBool, settings.Rounding)
 end, function(settings)
-	settings.Default = maybe_read(net.ReadUInt, 32)
-	settings.Maximum = maybe_read(net.ReadUInt, 32)
-	settings.Minimum = maybe_read(net.ReadUInt, 32)
+	settings.Default = maybe_read(net.ReadDouble)
+	settings.Maximum = maybe_read(net.ReadDouble)
+	settings.Minimum = maybe_read(net.ReadDouble)
 	settings.Rounding = maybe_read(net.ReadBool)
 end)
 
@@ -80,30 +98,32 @@ PYRITION:ConsoleCommandRegisterArgument("Player", function(settings, ply, target
 	return find and true or false, find, message
 end, function(settings, executor, argument)
 	local completions = {}
+	local targets = PYRITION:PlayerFind(argument, executor, false, settings.Selfless, true)
 	
-	for index, ply in ipairs(player.GetAll()) do
-		if ply ~= executor then
-			local name = ply:Name()
+	if targets then
+		if IsEntity(targets) then table.insert(completions, tostring(targets))
+		else
+			for index, target in ipairs(targets) do table.insert(completions, escape_targetting(target)) end
 			
-			if string.StartWith(name, argument) then table.insert(completions, name) end
+			table.sort(completions)
 		end
 	end
 	
-	table.sort(completions)
-	
-	if not settings.Selfless then table.insert(completions, 1, "^") end
-	
-	if not settings.Single then
-		table.insert(completions, "*")
-		table.insert(completions, "^^")
-		table.insert(completions, "%")
+	if argument == "" or not targets then
+		if not settings.Selfless then table.insert(completions, 1, "^") end
+		
+		if not settings.Single then
+			table.insert(completions, "*")
+			table.insert(completions, "^^")
+			table.insert(completions, "%")
+		end
+		
+		local steam_id = executor:SteamID()
+		
+		table.insert(completions, "#" .. executor:UserID())
+		table.insert(completions, "$" .. steam_id)
+		table.insert(completions, "$" .. string.sub(steam_id, 9))
 	end
-	
-	local steam_id = executor:SteamID()
-	
-	table.insert(completions, "#" .. executor:UserID())
-	table.insert(completions, "$" .. steam_id)
-	table.insert(completions, "$" .. string.sub(steam_id, 9))
 	
 	return completions
 end, function(settings)
@@ -138,7 +158,7 @@ PYRITION:ConsoleCommandRegisterArgument("String", function(settings, ply, argume
 	elseif minimum and length < minimum or argument == "" then argument = default end
 	
 	return argument and true or false, argument
-end, function(settings, ply, argument)
+end, function(settings, executor, argument)
 	local default = settings.Default
 	
 	if default then return {default} end

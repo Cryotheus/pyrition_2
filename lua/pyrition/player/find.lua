@@ -82,8 +82,9 @@ function PYRITION:PlayerFindWithFallback(needle, supplicant, fallback, single, e
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerFind(needle, supplicant, single, exclude_supplicant)
-	if not needle or needle == "" then return false, "pyrition.player.find.targetless" end
+function PYRITION:PyritionPlayerFind(needle, supplicant, single, exclude_supplicant, allow_empty)
+	if allow_empty then needle = needle or ""
+	elseif not needle or needle == "" then return false, "pyrition.player.find.targetless" end
 	
 	local first_character = string.Left(needle, 1)
 	local invert = false

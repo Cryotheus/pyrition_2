@@ -1,4 +1,5 @@
 --locals
+local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses
 local MODEL = {}
 
 --sync model functions
@@ -21,11 +22,35 @@ function MODEL:Read()
 	local parents = self.CommandParents
 	
 	if net.ReadBool() then --we are reading a command
+		local index = 0
 		local name = PYRITION:NetReadEnumeratedString("command")
+		local required = net.ReadUInt(8)
+		
+		local arguments = {Required = required}
+		
+		while net.ReadBool() do
+			index = index + 1
+			local settings = {}
+			
+			if index <= required then settings.Optional = net.ReadBool() end
+			
+			local class = PYRITION:NetReadEnumeratedString("command_argument")
+			local functions = command_argument_classes[class]
+			
+			settings.Class = class
+			
+			if functions then
+				local read_function = functions[4]
+				
+				if read_function then read_function(settings) end
+			else error('ID10T-12/C: Invalid command argument class ' .. tostring(class) .. ' for sync.') end
+			
+			arguments[index] = settings
+		end
 		
 		table.insert(parents, name)
 		
-		PYRITION:ConsoleCommandDownload(parents)
+		PYRITION:ConsoleCommandDownload(parents, arguments)
 		
 		--bool = child commands follow
 		if not net.ReadBool() then table.remove(parents) end
@@ -57,7 +82,35 @@ function MODEL:Write(ply)
 		net.WriteBool(true)
 		
 		--writes a string with compression
+		local command = PYRITION:ConsoleCommandGetExisting(parents)[next_key]
+		local command_arguments = command.Arguments
+		local required = command_arguments.Required
+		
 		PYRITION:NetWriteEnumeratedString("command", next_key, ply)
+		net.WriteUInt(required, 8)
+		
+		for index, argument_data in ipairs(command_arguments) do
+			net.WriteBool(true)
+			
+			if index <= required then net.WriteBool(argument_data.Optional or false) end
+			
+			local class = argument_data.Class
+			local functions = command_argument_classes[class]
+			
+			if functions then
+				local write_function = functions[3]
+				
+				PYRITION:NetWriteEnumeratedString("command_argument", class, ply)
+				
+				if write_function then write_function(argument_data) end
+			else
+				ErrorNoHalt('ID10T-12/S: Invalid command argument class ' .. tostring(class) .. ' for sync.')
+				
+				break
+			end
+		end
+		
+		net.WriteBool(false)
 		
 		--next_value contains the children commands' names of next_key
 		if table.IsEmpty(next_value) then net.WriteBool(false)

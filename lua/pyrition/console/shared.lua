@@ -1,3 +1,10 @@
+--locals
+local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses or {}
+local is_pyrition_command = PYRITION._IsPyritionCommand
+
+--globals
+PYRITION.ConsoleCommandArgumentClasses = command_argument_classes
+
 --local functions
 local function command_callback(ply, command, arguments)
 	local arguments_count = #arguments
@@ -14,6 +21,14 @@ local function command_callback(ply, command, arguments)
 end
 
 local function command_localization(command) return "#pyrition.commands." .. table.concat(command.Parents, ".") end
+
+local function insert_prefixed_commands(completions, tree, validation_prefix, command_prefix)
+	for name, command in pairs(tree) do
+		if string.StartWith(name, validation_prefix) and is_pyrition_command(command) then
+			table.insert(completions, command_prefix .. name)
+		end
+	end
+end
 
 --pyrition functions
 function PYRITION:ConsoleExecute(ply, command, arguments)
@@ -68,6 +83,79 @@ function PYRITION:ConsoleParseArguments(arguments_string)
 	end
 	
 	return arguments
+end
+
+--pyrition hooks
+function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
+	local arguments = self:ConsoleParseArguments(arguments_string)
+	local argument_count = #arguments
+	local completions = {}
+	local tree, depth = self:ConsoleCommandGet(arguments)
+	
+	local command_arguments = tree.Arguments
+	local prefix_arguments_string = table.concat(arguments, " ", 1, depth)
+	local depth_argument = arguments[math.max(depth, 1)] or ""
+	local next_argument = arguments[depth + 1] or ""
+	
+	if is_pyrition_command(tree) then
+		local complete_function = tree.Complete
+		local complete_prefix = prefix .. " " .. prefix_arguments_string
+		
+		if complete_function then complete_function(completions, complete_prefix, next_argument) end
+		
+		--ourself, may get removed depending on command argument class completions
+		table.insert(completions, complete_prefix)
+		
+		do --other commands
+			local arguments = table.Copy(arguments)
+			
+			if argument_count ~= depth then table.remove(arguments) end
+			
+			table.remove(arguments)
+			
+			insert_prefixed_commands(completions, tree, next_argument, complete_prefix .. " ")
+			insert_prefixed_commands(completions, self:ConsoleCommandGet(arguments), depth_argument, prefix .. " ")
+			
+			table.remove(completions)
+			table.sort(completions)
+		end
+		
+		do --command argument class completion function
+			local argument_count_excited = string.Right(arguments_string, 1) == " " and argument_count + 1 or argument_count
+			local command_argument_index = math.max(argument_count_excited - depth, 1)
+			local settings = command_arguments[command_argument_index]
+			
+			if settings then
+				local class = settings.Class
+				local completion_function = command_argument_classes[class][2]
+				
+				if completion_function then
+					local insertions = completion_function(settings, LocalPlayer(), arguments[depth + command_argument_index] or "")
+					
+					if insertions and next(insertions) then
+						--remove the blank command completion
+						for index, completion in ipairs(completions) do
+							if completion == complete_prefix then
+								table.remove(completions, index)
+								
+								break
+							end
+						end
+						
+						--add our new insertions
+						complete_prefix = prefix .. " " .. table.concat(arguments, " ", 1, depth + command_argument_index - 1)
+						
+						for index, insertion in ipairs(insertions) do table.insert(completions, complete_prefix .. " " .. insertion) end
+					end
+				else table.insert(class) end
+			end
+		end
+	else
+		insert_prefixed_commands(completions, tree, depth_argument, prefix .. " " .. prefix_arguments_string)
+		table.sort(completions)
+	end
+	
+	return completions
 end
 
 --console commands
