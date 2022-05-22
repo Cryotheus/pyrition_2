@@ -84,20 +84,22 @@ net.Receive("pyrition_sync", function()
 		if net.ReadBool() then class = PYRITION:NetReadEnumeratedString("sync_model")
 		else class = net.ReadString() end
 		
-		local debugging = DEBUG_PYRITION_NET
 		local identifier = net.ReadUInt(32)
-		
-		DEBUG_PYRITION_NET = class == debug_class
-		
 		local model = PYRITION:NetSyncGetModel(class, identifier)
 		
-		model()
+		do
+			::retry::
+			
+			model()
+			
+			if model.Retry then
+				model.Retry = false
+				
+				goto retry
+			end
+		end
 		
-		DEBUG_PYRITION_NET = debugging
-		
-		local complete = net.ReadBool()
-		
-		if complete then
+		if net.ReadBool() then
 			model:FinishRead()
 			
 			active_models[class][identifier] = nil

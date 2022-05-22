@@ -83,8 +83,6 @@ hook.Add("Think", "PyritionNetSync", function()
 		
 		net.Start("pyrition_sync")
 		
-		--DEBUG_PYRITION_NET = true
-		
 		for index, model in ipairs(pyrition:NetSyncBuildOrder(models)) do
 			local class = model.Class
 			local success, message
@@ -134,8 +132,6 @@ hook.Add("Think", "PyritionNetSync", function()
 		local stop_bits = math.ceil(bits_written / 8) * 8 - bits_written
 		
 		drint(drint_level, "sending " .. bits_written .. " bits to " .. tostring(ply) .. " (" .. stop_bits .. " stop bit modulo)")
-		
-		--DEBUG_PYRITION_NET = false
 		
 		net.WriteUInt(0, stop_bits == 0 and 8 or stop_bits)
 		net.Send(ply)

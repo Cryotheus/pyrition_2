@@ -35,8 +35,8 @@ function MODEL:Read()
 		else return true end
 	end
 	
-	--don't worry about a stack overflow, we can't send more than 64KB in one message anyways
-	self:Read()
+	--this tells the client to re-run the Read method
+	self.Retry = true
 end
 
 function MODEL:Write(ply)

@@ -13,14 +13,6 @@ function PYRITION:NetReadEnumeratedString(namespace)
 	
 	assert(enumerations, 'ID10T-2/C: Attempt to read enumerated string using non-existent namespace "' .. tostring(namespace) .. '"')
 	
-	local debug_net = DEBUG_PYRITION_NET
-	
-	if debug_net then
-		DEBUG_PYRITION_NET = false
-		
-		drint(drint_level, "reading estring " .. namespace)
-	end
-	
 	if net.ReadBool() then text = net.ReadString(text) end
 	
 	local enumeration = net.ReadUInt(net_enumeration_bits[namespace]) + 1
@@ -29,22 +21,7 @@ function PYRITION:NetReadEnumeratedString(namespace)
 		enumerations[enumeration] = text
 		enumerations[text] = enumeration
 		
-		if debug_net then
-			DEBUG_PYRITION_NET = true
-			
-			drint(drint_level, "read " .. enumeration .. ":" .. text .. "\n")
-		end
-		
 		return text
-	end
-	
-	if debug_net then
-		DEBUG_PYRITION_NET = true
-		
-		local enumeration = enumeration or -1
-		local text = enumerations[enumeration] or "<invalid>"
-		
-		drint(drint_level, "read " .. enumeration .. ":" .. text .. "\n")
 	end
 	
 	return enumerations[enumeration]
@@ -83,7 +60,7 @@ concommand.Add("pd", function(ply, command, arguments, arguments_string)
 end, nil, "Pyrition's debug command. If you are reading this and you're not on a test server, please report it.")
 
 --hooks
---hook.Add("InitPostEntity", "PyritionNet", function() PYRITION:NetClientInitialized(LocalPlayer()) end)
+hook.Add("InitPostEntity", "PyritionNet", function() PYRITION:NetClientInitialized(LocalPlayer()) end)
 
 hook.Add("PopulateToolMenu", "PyritionNet", function()
 	spawnmenu.AddToolMenuOption("Utilities", "PyritionDevelopers", "NetEnumerations", "#pyrition.spawnmenu.categories.developer.net_enumerations", "", "", function(form)

@@ -100,22 +100,13 @@ function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
 	
 	assert(enumeration, 'ID10T-3.1: Attempt to write enumerated string using non-existent enumeration "' .. text .. '"')
 	
-	local debug_net = DEBUG_PYRITION_NET
 	local send_raw = track_enumerations(namespace, enumeration, recipients)
-	
-	if debug_net then
-		DEBUG_PYRITION_NET = false
-		
-		drint(drint_level, "WriteEnum	" .. namespace .. "	" .. enumeration .. ":" .. text .. " (" .. net_enumeration_bits[namespace] .. ")\n")
-	end
 	
 	net.WriteBool(send_raw)
 	
 	if send_raw then net.WriteString(text) end
 	
 	net.WriteUInt(enumeration - 1, net_enumeration_bits[namespace])
-	
-	if debug_net then DEBUG_PYRITION_NET = true end
 end
 
 --pyrition hooks
