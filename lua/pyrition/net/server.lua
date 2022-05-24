@@ -3,9 +3,6 @@ util.AddNetworkString("pyrition_teach")
 
 --locals
 local bits = PYRITION._Bits
-local color_significant = Color(255, 128, 64)
-local drint = PYRITION._drint
-local drint_level = 2
 local duplex_insert = PYRITION._DuplexInsert
 local loading_players = {} --dictionary[ply] = ply:TimeConnected false if message emulated
 local load_time = 30
@@ -17,7 +14,8 @@ local teaching_queue = {}
 
 --local functions
 local function recipient_pairs(recipients)
-	if IsEntity(recipients) then recipients = {recipients}
+	if recipients == true then recipients = player.GetAll()
+	elseif IsEntity(recipients) then recipients = {recipients}
 	elseif type(recipients) == "CRecipientFilter" then recipients = recipients:GetPlayers() end
 	
 	assert(istable(recipients), "bad argument #1 to 'recipient_pairs' (table, Player, or CRecipientFilter expected, got " .. type(recipients) .. ")")
@@ -61,7 +59,7 @@ end
 function PYRITION:NetReadEnumeratedString(namespace, ply)
 	local enumerations = net_enumerations[namespace]
 	
-	assert(enumerations, 'ID10T-2/S: Attempt to read enumerated string using non-existent namespace "' .. namespace .. '"')
+	assert(enumerations, "ID10T-2/S: Attempt to read enumerated string using non-existent namespace '" .. namespace .. "'")
 	
 	if net.ReadBool() then
 		local text = net.ReadString()
@@ -94,11 +92,11 @@ end
 function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
 	local enumerations = net_enumerations[namespace]
 	
-	assert(enumerations, 'ID10T-3/S: Attempt to write enumerated string using non-existent namespace "' .. namespace .. '"')
+	assert(enumerations, "ID10T-3/S: Attempt to write enumerated string using non-existent namespace '" .. namespace .. "'")
 	
 	local enumeration = enumerations[text]
 	
-	assert(enumeration, 'ID10T-3.1: Attempt to write enumerated string using non-existent enumeration "' .. text .. '"')
+	assert(enumeration, "ID10T-3.1: Attempt to write enumerated string using non-existent enumeration '" .. text .. "'")
 	
 	local send_raw = track_enumerations(namespace, enumeration, recipients)
 	

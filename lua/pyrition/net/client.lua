@@ -1,7 +1,4 @@
 --locals
-local bits = PYRITION._Bits
-local drint = PYRITION._drint
-local drint_level = 3
 local jerry = 0.24027821356 --this is jerry, a very special number. do not worry about its origin, just keep moving.
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
 local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] = fooplex[string]
@@ -144,12 +141,12 @@ net.Receive("pyrition", function(length, ply)
 end)
 
 net.Receive("pyrition_teach", function()
-	--this is received when the server is teaching us enumerations that we didnt use
+	--this is received when the server is teaching us enumerations that we didn't use
 	repeat
 		local namespace = net.ReadString()
 		local namespace_bits = net_enumeration_bits[namespace]
 		
-		assert(namespace_bits, 'Panic! Missing bit count for enumeration namespace "' .. namespace .. '"')
+		assert(namespace_bits, "Panic! Missing bit count for net enumeration namespace '" .. namespace .. "'")
 		
 		local enumerations = net_enumerations[namespace]
 		

@@ -44,7 +44,7 @@ local function calculate(expression, depth)
 			local matcher = "[%d%.]+[%s" .. operator_match .. "]+[%d%.]+"
 			
 			while string.find(expression, matcher) do
-				expression = string.gsub(expression, matcher, function(text)=
+				expression = string.gsub(expression, matcher, function(text)
 					local alpha, bravo = string.match(text, "^[%d%.]+"), string.match(text, "[%d%.]+$")
 					
 					return tostring(operation(tonumber(alpha), tonumber(bravo)))

@@ -43,7 +43,7 @@ function MODEL:Read()
 				local read_function = functions[4]
 				
 				if read_function then read_function(settings) end
-			else error('ID10T-12/C: Invalid command argument class ' .. tostring(class) .. ' for sync.') end
+			else error("ID10T-12/C: Invalid command argument class " .. tostring(class) .. " for sync.") end
 			
 			arguments[index] = settings
 		end
@@ -61,7 +61,7 @@ function MODEL:Read()
 	end
 	
 	--this tells the client to re-run the Read method
-	self.Retry = true
+	return true
 end
 
 function MODEL:Write(ply)
@@ -104,7 +104,7 @@ function MODEL:Write(ply)
 				
 				if write_function then write_function(argument_data) end
 			else
-				ErrorNoHalt('ID10T-12/S: Invalid command argument class ' .. tostring(class) .. ' for sync.')
+				ErrorNoHalt("ID10T-12/S: Invalid command argument class " .. tostring(class) .. " for sync.")
 				
 				break
 			end

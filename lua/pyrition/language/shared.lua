@@ -220,7 +220,7 @@ PYRITION:GlobalHookCreate("LanguageRegisterOption")
 PYRITION:GlobalHookCreate("LanguageRegisterKieve")
 
 PYRITION:LanguageRegisterColor(color_command, "command")
-PYRITION:LanguageRegisterColor(color_misc, "duration", "map", "reason", "time")
+PYRITION:LanguageRegisterColor(color_misc, "attempts", "duration", "map", "message", "reason", "time")
 PYRITION:LanguageRegisterColor(color_player, "executor", "player", "target", "targets")
 
 PYRITION:LanguageRegisterKieve(kieve_executor, "executor")

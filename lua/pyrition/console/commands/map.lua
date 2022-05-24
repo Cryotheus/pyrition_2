@@ -2,11 +2,20 @@ local COMMAND = {
 	Arguments = {
 		Required = 1,
 		
-		{Class = "Map"}
+		"Map",
+		
+		{
+			Class = "Integer",
+			Default = 60,
+			Maximum = 0,
+			Minimum = 18000
+		}
 	},
 	
 	Console = true
 }
+
+local COMMAND_CANCEL = {Arguments = false, Console = true}
 
 local COMMAND_VOTE = {
 	Arguments = {
@@ -35,14 +44,24 @@ local COMMAND_VOTE_RETRACT = {
 local maps = PYRITION.MapList
 
 --command functions
-function COMMAND:Execute(ply, map_name)
+function COMMAND:Execute(ply, map_name, delay)
 	if maps[map_name] then
-		PYRITION:MapChange(map_name)
+		PYRITION:MapChange(map_name, delay)
 		
 		return true, "pyrition.commands.map.success", {map = map_name}
 	end
 	
 	return false, "pyrition.commands.map.fail"
+end
+
+function COMMAND_CANCEL:Execute(ply)
+	if PYRITION.MapChanging then
+		PYRITION:MapCancel()
+		
+		return true, "pyrition.commands.map.cancel.success"
+	end
+	
+	return false, "pyrition.commands.map.cancel.fail"
 end
 
 function COMMAND_VOTE:Execute(ply, map_name)
@@ -89,6 +108,7 @@ end
 
 --post
 PYRITION:ConsoleCommandRegister("map", COMMAND)
+PYRITION:ConsoleCommandRegister("map cancel", COMMAND_CANCEL)
 PYRITION:ConsoleCommandRegister("map vote", COMMAND_VOTE)
 PYRITION:ConsoleCommandRegister("map vote annul", COMMAND_VOTE_ANNUL)
 PYRITION:ConsoleCommandRegister("map vote retract", COMMAND_VOTE_RETRACT)

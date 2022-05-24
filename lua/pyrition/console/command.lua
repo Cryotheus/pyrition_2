@@ -1,8 +1,10 @@
 --locals
+local assert = assert
 local build_command_list
 local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses
 local commands = PYRITION.ConsoleCommands or {}
 local grow_command_tree
+local isstring = isstring
 local is_pyrition_command = PYRITION._IsPyritionCommand
 local _R = debug.getregistry()
 
@@ -53,8 +55,6 @@ local function network_execution(self, ply, ...)
 	end
 	
 	do --command arguments
-		local passed = false
-	
 		for index, argument in ipairs{...} do
 			net.WriteBool(true)
 			net.WriteString(argument)
@@ -125,16 +125,34 @@ function PYRITION:ConsoleCommandFilterArgument(settings, ply, argument)
 end
 
 function PYRITION:ConsoleCommandFilterArguments(command, ply, arguments)
+	--basically, fail the execution if a required argument is invalid
+	--and ignore optional arguments that are invalid
+	--if we have an argument marked with Optional and it is invalid, pop it
+	local argument_count = #arguments
 	local command_arguments = command.Arguments
+	local index = 1
 	local required = command.Required
 	
-	for index, argument in ipairs(arguments) do
+	--I can't adjust the index ipairs is on...
+	while index < argument_count do
 		local command_argument = command_arguments[index]
 		local valid, value, message = self:ConsoleCommandFilterArgument(command_argument, ply, argument)
 		
-		if index <= required then
-			
-		elseif not valid then return false, message end
+		if valid then
+			arguments[index] = value
+			index = index + 1
+		else
+			if command_argument.Optional then
+				argument_count = argument_count - 1
+				
+				table.remove(command_arguments, index)
+			else
+				if index <= required then return false, message
+				else arguments[index] = nil end
+				
+				index = index + 1
+			end
+		end
 	end
 end
 
@@ -259,7 +277,7 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 		command.Arguments = {Required = 0}
 		
 		--scream at the developer
-		ErrorNoHalt('ID10T-7: Registered a command "' .. table.concat(parents, ".") .. '" without an Arguments table. Auto-completion will not be generated. To silence this error, provide an empty Arguments table in your COMMAND table.\n')
+		if arguments == nil then ErrorNoHalt("ID10T-7: Registered a command '" .. table.concat(parents, ".") .. "' without an Arguments table. Auto-completion will not be generated. To silence this error, set Arguments to false in your COMMAND table.\n") end
 	end
 	
 	--finally set meta
@@ -305,7 +323,7 @@ function PYRITION:PyritionConsoleCommandRegisterArgument(class, filter_function,
 	}
 end
 
-function PYRITION:PyritionConsoleCommandReloaded(old_command, new_command) MsgC(Color(255, 192, 46), '[Pyrition] Reloaded "' .. old_command .. '"\n') end
+function PYRITION:PyritionConsoleCommandReloaded(old_command, new_command) MsgC(Color(255, 192, 46), "[Pyrition] Reloaded '" .. old_command .. "'\n") end
 
 function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 	local branch = commands

@@ -19,7 +19,7 @@ local config = {
 		
 		commands = {
 			bring = 74,			--1001 010
-			goto = 74,			--1001 010
+			["goto"] = 74,		--1001 010
 			heal = 74,			--1001 010
 			health = 74,		--1001 010
 			kick = 74,			--1001 010
@@ -33,7 +33,6 @@ local config = {
 			strip = 74,			--1001 010
 		},
 		
-		--client = 61,	--111 101
 		command = 55,	--110 111
 		arguments = 63,	--110 111
 		server = 58,	--111 010
@@ -90,6 +89,12 @@ local config = {
 			shared = 55,	--110 111
 			sync = 63,		--111 111
 		}
+	},
+	
+	sql = {
+		client = 53,	--110 101
+		mysqlite = 50,	--110 010
+		server = 58,	--110 010
 	}
 }
 

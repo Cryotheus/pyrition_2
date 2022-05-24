@@ -1,4 +1,3 @@
-local sync_models = PYRITION.NetSyncModels or {}
 local active_models = PYRITION.NetSyncActiveModels or {}
 
 --globals
@@ -21,6 +20,7 @@ function PYRITION:NetSyncGetModel(class, identifier)
 	
 	model.Created = CurTime()
 	model.Identifier = identifier
+	model.PerfIteration = 1
 	models[identifier] = model
 	
 	return model
@@ -87,17 +87,7 @@ net.Receive("pyrition_sync", function()
 		local identifier = net.ReadUInt(32)
 		local model = PYRITION:NetSyncGetModel(class, identifier)
 		
-		do
-			::retry::
-			
-			model()
-			
-			if model.Retry then
-				model.Retry = false
-				
-				goto retry
-			end
-		end
+		while model() do model.PerfIteration = model.PerfIteration + 1 end
 		
 		if net.ReadBool() then
 			model:FinishRead()

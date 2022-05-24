@@ -68,7 +68,6 @@ end
 --pyrition hooks
 function PYRITION:PyritionNetSyncModelRegister(class, model, base_class)
 	local base = base_class and sync_models[base_class]
-	local existing_model = sync_models[class]
 	
 	model.Class = class
 	model.Parents = parents

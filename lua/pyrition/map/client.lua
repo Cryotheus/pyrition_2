@@ -152,3 +152,23 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 		end
 	end)
 end)
+
+--net
+net.Receive("pyrition_map", function()
+	if net.ReadBool() then
+		local change_time = net.ReadFloat()
+		local map_name = PYRITION:NetReadEnumeratedString("map")
+		
+		PYRITION.MapChanging = true
+		PYRITION.MapChanges = change_time
+		PYRITION.MapChangesTo = map_name
+		
+		PYRITION:LanguageDisplay("chat", pyrition.map.change, {map = map_name, time = delay})
+		
+		return
+	end
+	
+	PYRITION.MapChanging = false
+	PYRITION.MapChanges = nil
+	PYRITION.MapChangesTo = nil
+end)

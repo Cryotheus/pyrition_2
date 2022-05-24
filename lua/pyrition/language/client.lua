@@ -3,12 +3,12 @@ local language_options_colored = PYRITION.LanguageOptionsColored or {}
 
 --pyrition functions
 function PYRITION:LanguageDisplay(option, key, phrases)
-	local operation = self.LanguageOptions[option]
+	local operation = language_options[option]
 	
 	assert(operation, 'ID10T-4/C: Invalid language option "' .. tostring(option) .. '"')
 	
 	return operation(
-		self.LanguageOptionsColored[option] and self:LanguageFormatColor(key, phrases) or self:LanguageFormat(key, phrases),
+		language_options_colored[option] and self:LanguageFormatColor(key, phrases) or self:LanguageFormat(key, phrases),
 		key,
 		phrases
 	)

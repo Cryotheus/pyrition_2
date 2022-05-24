@@ -225,8 +225,6 @@ local function find_chat()
 			end
 			
 			function hacking_panel:RestoreChat(team_chat)
-				local chat_input = hacking_panel.ChatInput
-				
 				hud_chat:SetParent(view_port)
 				hud_chat:SetPos(22, 618)
 				hud_chat:SetSize(720, 270)
@@ -236,7 +234,6 @@ local function find_chat()
 			
 			function hacking_panel:RestoreChatInput(team_chat, focus)
 				local chat_input = self.ChatInput
-				local chat_input_line = self.ChatInputLine
 				local chat_input_prompt = self.ChatInputPrompt
 				local chat_input_replacement = self.ChatInputReplacement
 				
@@ -261,19 +258,14 @@ local function find_chat()
 				local frame = self.Frame
 				self.TeamChatting = team_chat
 				
+				if IsValid(frame) then frame:Remove() end
+				
 				self:SetVisible(true)
 				self:MakePopup()
-				
-				do --chat input prompt
-					local chat_input_prompt = self.ChatInputPrompt
-					
-					--chat_input_prompt:SetText(team_chat and "#chat_say_team" or "#chat_say")
-				end
 				
 				do --frame
 					local header_color = Color(141, 141, 141, 128)
 					local frame = vgui.Create("DFrame", self)
-					local frame_paint = frame.Paint
 					local frame_think = frame.Think
 					frame.ChatHackDragging = false
 					self.Frame = frame
@@ -377,9 +369,6 @@ local function find_chat()
 			
 			do --hud chat
 				local hud_chat_roster = build_panel_roster(hud_chat)
-				
-				local command_key = KEY_BAN
-				local silent_command_key = KEY_SLASH
 				
 				do --chat input line
 					local chat_input_line = hud_chat_roster.ChatInputLine

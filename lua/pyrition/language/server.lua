@@ -11,11 +11,13 @@ function PYRITION:LanguageDisplay(log, key, phrases, broadcast)
 	
 	--if prefixed with #, localize the string
 	--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal" weirdo
-	for tag, phrase in pairs(phrases) do
-		if isstring(phrase) then
-			if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)
-			elseif string.StartWith(phrase, "#") then phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
-			else phrases[tag] = phrase end
+	if phrases then
+		for tag, phrase in pairs(phrases) do
+			if isstring(phrase) then
+				if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)
+				elseif string.StartWith(phrase, "#") then phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
+				else phrases[tag] = phrase end
+			end
 		end
 	end
 	
@@ -30,7 +32,7 @@ function PYRITION:LanguageDisplay(log, key, phrases, broadcast)
 end
 
 function PYRITION:LanguageQueue(ply, key, phrases, option)
-	assert(not option or self.NetEnumeratedStrings.language_options[option], 'ID10T-4/S:  ')
+	assert(not option or self.NetEnumeratedStrings.language_options[option], "ID10T-4/S: Cannot queue language module message for non-existent option '" .. tostring(option) .. "'")
 	
 	--having ply = true means to broadcast to everyone
 	if ply == true then

@@ -1,11 +1,3 @@
---locals
-local color_blue = Color(0, 0, 255)
-local color_cyan = Color(0, 255, 255)
-local color_green = Color(0, 255, 0)
-local color_magenta = Color(255, 0, 255)
-local color_red = Color(255, 0, 0)
-local color_yellow = Color(255, 255, 0)
-
 --local functions, these are stolen from my Expression 2 scripts lol
 local function power_lerp(fraction, power, alpha, bravo) return Lerp(fraction, alpha ^ power, bravo ^ power) ^ (1 / power) end
 local function quadratic_lerp(fraction, alpha, bravo) return Lerp(fraction, alpha ^ 2, bravo ^ 2) ^ 0.5 end
@@ -80,4 +72,7 @@ local function somatic_gradient_map(fraction, map, formulae)
 end
 
 --globals
+PYRITION._ColorMix = quadratic_mix
+PYRITION._ColorMixLinear = mix
+PYRITION._ColorMixPower = power_mix
 PYRITION._GradientMap = somatic_gradient_map

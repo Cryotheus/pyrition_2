@@ -40,9 +40,9 @@ function PYRITION:ConsoleExecute(ply, command, arguments)
 	
 	if not IsValid(ply) then ply = game.GetWorld() end
 	
-	if ply == game.GetWorld() then
+	if ply == game.GetWorld() and not command.Console then
 		--we shouldn't let the console run commands that are not marked as console safe
-		if not command.Console then return PYRITION:LanguageQueue(ply, "pyrition.command.failed.console", {command = command_localization(command)}) end
+		return PYRITION:LanguageQueue(ply, "pyrition.command.failed.console", {command = command_localization(command)})
 	end
 	
 	if #arguments < required then

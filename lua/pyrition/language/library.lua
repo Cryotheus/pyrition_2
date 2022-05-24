@@ -62,7 +62,7 @@ local function error_code()
 	local count = 0
 	local total = table.Count(LanguageCodes)
 	
-	MsgC(color, 'No language specified for the server. Defaulting sv_gmod_language to "' .. code .. '"\n', color_white, "See available language codes below:\n")
+	MsgC(color, "No language specified for the server. Defaulting sv_gmod_language to '" .. code .. "'\n", color_white, "See available language codes below:\n")
 	
 	for code in pairs(LanguageCodes) do
 		count = count + 1
@@ -79,8 +79,8 @@ function GetPhrase(phrase) return LanguagePhrases[phrase] or phrase end
 
 --convars
 cvars.AddChangeCallback("sv_gmod_language", function(name, old, new)
-	if load_localizations(new) then
-	else error_code() end
+	--if they never set up their server's language we want to scream at them so they become wiser
+	if not load_localizations(new) then error_code() end
 end, "PyritionLanguageLibrary")
 
 --post

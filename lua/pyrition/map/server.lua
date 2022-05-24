@@ -1,6 +1,7 @@
+util.AddNetworkString("pyrition_map")
+
 --locals
 local duplex_insert = PYRITION._DuplexInsert
-local map_delay = 60 --TODO: ConVar this!
 local map_vote_percentage = 0.5 --TODO: ConVar this!
 local map_vote_threshold = 3 --TODO: ConVar this!
 local map_votes = PYRITION.MapVotes or {}
@@ -25,18 +26,43 @@ function PYRITION:MapBuildList()
 	return maps
 end
 
-function PYRITION:MapChange(map_name)
-	self.MapChanges = RealTime() + map_delay
+function PYRITION:MapCancel()
+	self.MapChanges = nil
+	self.MapChanging = false
+	self.MapChangesTo = nil
+	
+	hook.Remove("Think", "PyritionMap")
+	net.Start("pyrition_map")
+	net.WriteBool(false)
+	net.Broadcast()
+end
+
+function PYRITION:MapChange(map_name, delay)
+	local delay = delay or 60
+	local time = CurTime() + delay
+	
+	self.MapChanges = time
 	self.MapChanging = true
 	self.MapChangesTo = map_name
 	
+	hook.Add("Think", "PyritionMap", function() PYRITION:MapThink() end)
 	table.Empty(map_votes)
 	table.Empty(player_votes)
 	
-	self:LanguageQueue(true, "pyrition.map.change", {
-		map = map_name,
-		time = map_delay
-	})
+	if delay > 0 then
+		net.Start("pyrition_map")
+		net.WriteBool(true)
+		net.WriteFloat(time)
+		self:NetWriteEnumeratedString("map", map_name, true)
+		net.Broadcast()
+	end
+end
+
+function PYRITION:MapThink()
+	if CurTime() < self.MapChanges then return end
+	
+	hook.Remove("Think", "PyritionMap")
+	RunConsoleCommand("changelevel", self.MapChangesTo)
 end
 
 function PYRITION:MapVote(ply, map_name)
@@ -90,6 +116,7 @@ function PYRITION:MapVoteRetract(ply)
 	
 	return false
 end
+
 --post
 PYRITION:MapBuildList()
 PYRITION:NetAddEnumeratedString("map")

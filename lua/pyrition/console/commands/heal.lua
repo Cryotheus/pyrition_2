@@ -3,8 +3,6 @@ local COMMAND = {
 	Console = true
 }
 
-local player_meta = FindMetaTable("Player")
-
 --command function
 function COMMAND:Execute(ply, targetting)
 	local targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply)

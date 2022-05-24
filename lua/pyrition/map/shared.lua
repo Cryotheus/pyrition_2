@@ -5,7 +5,7 @@ PYRITION.MapList = maps
 
 --local functions
 local function defix(map)
-	local start, finish = string.find(map, "_", 1, true)
+	local _, finish = string.find(map, "_", 1, true)
 	
 	if not finish or finish > 6 then return false end
 	

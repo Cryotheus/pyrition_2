@@ -7,7 +7,6 @@ local maximum_sync_bits = 500000 --65533 bytes, minus the header bytes
 local model_indices = PYRITION.NetSyncModelIndices or {}
 local player_rebuilds = {}
 local player_syncs = {}
-local sync_models = PYRITION.NetSyncModels
 
 --globals
 PYRITION.NetSyncModelIndices = model_indices
