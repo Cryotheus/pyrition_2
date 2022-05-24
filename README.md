@@ -20,4 +20,7 @@ Some of my projects will be rewritten using Pyrition. Yet another partial list i
 * War Lab
 
 ## For More Reading
-Check out the [Wiki](https://github.com/Cryotheus/pyrition_2/wiki).
+Check out the
+* [Discord](https://discord.com/invite/WMeCsQhakH) to get updates on what's being done, and chat about it
+* [Trello](https://trello.com/b/AkkexwmQ/pyrition) to see what's planned
+* [Wiki](https://github.com/Cryotheus/pyrition_2/wiki) to cry over how bad I am with Wiki management
