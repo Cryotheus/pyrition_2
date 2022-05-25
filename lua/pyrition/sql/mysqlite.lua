@@ -6,6 +6,7 @@
 
 --pre
 if file.Exists("bin/gmsv_mysqloo_*.dll", "LUA") then require("mysqloo")
+elseif file.Exists("bin/gmsv_tmysql4_*.dll", "LUA") then require("tmysql4")
 else PYRITION:LanguageDisplay("mysql_fail", "pyrition.mysql.fail") end
 
 --locals
@@ -27,6 +28,7 @@ local cvars = cvars
 local debug = debug
 local escape_function
 local error = error
+local hibernate
 local language = language
 local mysql_escape
 local mysqloo = mysqloo
@@ -36,9 +38,11 @@ local PYRITION = PYRITION
 local query_function
 local RunConsoleCommand = RunConsoleCommand
 local sql = sql
-local string = string
 local table = table
 local timer = timer
+local tmysql = tmysql
+local tmysql_escape
+local tmysql_query
 local tostring = tostring
 
 --module!
@@ -46,7 +50,6 @@ module("pyrmysql")
 
 --module fields
 DatabaseObject = nil
-MySQLDatabaseName = "pyrition"
 
 --local functions
 local function associate_convar(name, key, default, flags, type_key, callback)
@@ -71,15 +74,30 @@ local function associate_convar(name, key, default, flags, type_key, callback)
 	cvars.AddChangeCallback(name, function(convar_name, ...) return callback(convar, ...) end, "pyrmysql")
 end
 
-local function change_hibernate(value) RunConsoleCommand("sv_hibernate_think", value and "1" or "0") end
+local function change_hibernate(value)
+	changing_hibernate = true
+	
+	RunConsoleCommand("sv_hibernate_think", value and "1" or "0")
+end
+
+local function finish_connection()
+	connected_to_mysql = true
+	need_thinking = false
+	
+	for key, value in pairs(cached_queries) do
+		if value[3] then queryValue(value[1], value[2])
+		else query(value[1], value[2]) end
+	end
+	
+	hibernate()
+	table.Empty(cached_queries)
+	PYRITION:SQLInitialized()
+end
 
 local function get_any_member(tbl) return select(2, next(tbl)) end
 
-local function hibernate()
-	if controlling_hibernate then
-		changing_hibernate = true
-		
-		change_hibernate(false)
+function hibernate()
+	if controlling_hibernate then change_hibernate(false)
 	else change_hibernate(restore_hibernate) end
 end
 
@@ -89,30 +107,20 @@ local function mysql_connect(retry)
 	local retry = retry or 0
 	
 	function DatabaseObject:onConnected()
+		if not MySQLEnabled then return end
 		if retry > 1 then PYRITION:LanguageDisplay("mysql_connect", "pyrition.mysql.connect", {attempts = retry}) end
 		
-		connected_to_mysql = true
 		escape_function = mysql_escape
-		need_thinking = false
 		query_function = mysql_query
 		
-		for key, value in pairs(cached_queries) do
-			if value[3] then queryValue(value[1], value[2])
-			else query(value[1], value[2]) end
-		end
-		
-		hibernate()
-		table.Empty(cached_queries)
-		PYRITION:SQLInitialized()
+		finish_connection()
 	end
 	
 	function DatabaseObject:onConnectionFailed(error_message)
 		if retry == 0 then PYRITION:LanguageDisplay("mysql_error", "pyrition.mysql.connect.fail", {message = tostring(error_message)}) end
 		
-		timer.Simple(5, function() mysql_connect(retry + 1) end)
+		timer.Create("pyrmysql_connect", 5, 1, function() mysql_connect(retry + 1) end)
 	end
-	
-	changing_hibernate = true
 	
 	change_hibernate(true)
 	DatabaseObject:connect()
@@ -174,7 +182,58 @@ local function sql_query(instruction, callback, error_callback, query_value)
 	return result
 end
 
+local function tmysql_connect(retry)
+	local database, error_message = tmysql.Connect(MySQLHost, MySQLUsername, MySQLPassword, MySQLDatabaseName, MySQLPort)
+	local retry = retry or 0
+	
+	if error_message then
+		if retry == 0 then PYRITION:LanguageDisplay("mysql_error", "pyrition.mysql.connect.fail", {message = tostring(error_message)}) end
+		
+		need_thinking = true
+		
+		change_hibernate(true)
+		timer.Create("pyrmysql_connect", 5, 1, function() tmysql_connect(retry + 1) end)
+		
+		return
+	end
+	
+	if not MySQLEnabled then return end
+	if retry > 1 then PYRITION:LanguageDisplay("mysql_connect", "pyrition.mysql.connect", {attempts = retry}) end
+	
+	DatabaseObject = database
+	escape_function = tmysql_escape
+	query_function = tmysql_query
+	
+	finish_connection()
+end
+
+function tmysql_escape(unsafe) return "\"" .. DatabaseObject:Escape(tostring(unsafe)) .. "\"" end
+
+function tmysql_query(instruction, callback, error_callback, query_value)
+	local call = function(results)
+		local result = results[1]
+		
+		if not result.startus then
+			local error_code = result.error
+			local suppress = error_callback and error_callback(error_code, instruction)
+			
+			if suppress == false then error(error_code .. " (" .. instruction .. ")") end
+			
+			return
+		end
+		
+		local data = result.data
+		
+		if not data or #result == 0 then data = nil end
+		if query_value and callback then return callback(data and data[1] and get_any_member(data[1]) or nil) end
+		if callback then callback(data, result.lastid) end
+	end
+	
+	DatabaseObject:Query(instruction, call)
+end
+
 --post function setup
+associate_convar("pyrition_mysql_database", "MySQLDatabaseName", "pyrition", safety_flags)
 associate_convar("pyrition_mysql_host", "MySQLHost", "localhost", safety_flags)
 associate_convar("pyrition_mysql_password", "MySQLPassword", "password", safety_flags)
 associate_convar("pyrition_mysql_port", "MySQLPort", "3306", safety_flags, "Int")
@@ -267,20 +326,26 @@ function commit(on_finished)
 end
 
 function initialize()
-	if mysqloo and MySQLEnabled then mysql_connect()
-	else
-		if connected_to_mysql then
-			DatabaseObject:disconnect()
-			
-			DatabaseObject = nil
-			connected_to_mysql = false
-		end
-		
-		escape_function = sql.SQLStr
-		query_function = sql_query
-		
-		PYRITION:SQLInitialized()
+	if MySQLEnabled then
+		if mysqloo then return mysql_connect()
+		elseif tmysql then return tmysql_connect() end
 	end
+	
+	if connected_to_mysql then
+		if mysqloo then DatabaseObject:disconnect()
+		else DatabaseObject:Disconnect() end
+		
+		DatabaseObject = nil
+		connected_to_mysql = false
+	end
+	
+	escape_function = sql.SQLStr
+	need_thinking = false
+	query_function = sql_query
+	
+	change_hibernate(false)
+	PYRITION:SQLInitialized()
+	timer.Remove("pyrmysql_connect")
 end
 
 function isMySQL() return connected_to_mysql end
@@ -314,5 +379,5 @@ function tableExists(dable, callback, error_callback)
 		return exists
 	end
 	
-	queryValue(string.format("SHOW TABLES LIKE %s", SQLStr(dable)), function(value) callback(value ~= nil) end, error_callback)
+	queryValue("SHOW TABLES LIKE " .. SQLStr(dable), function(value) callback(value ~= nil) end, error_callback)
 end
