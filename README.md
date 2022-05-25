@@ -1,4 +1,6 @@
 # Pyrition
+![](https://img.shields.io/codacy/grade/ac3be98e8eeb49a7b8052dbe8eeb1062)  
+
 **NOT YET READY FOR RELEASE**  
 Administration mod for Garry's Mod.  
 Third rewrite **D:**
