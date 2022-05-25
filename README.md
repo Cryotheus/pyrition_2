@@ -1,8 +1,12 @@
-# Pyrition
-![](https://img.shields.io/codacy/grade/ac3be98e8eeb49a7b8052dbe8eeb1062)  
+<div id="header" align="center">
+	<h1>Pyrition</h1>
+	<a href="https://discord.gg/WMeCsQhakH"><img src="https://img.shields.io/static/v1?logo=discord&label=&message=Discord&color=36393f" alt="Discord"></a>
+	<a href="https://github.com/Cryotheus/pyrition_2/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Cryotheus/pyrition_2"></a>
+	<a href="https://app.codacy.com/gh/Cryotheus/pyrition_2"><img src="https://img.shields.io/codacy/grade/ac3be98e8eeb49a7b8052dbe8eeb1062"></a>
+	<p>Administration mod for Garry's Mod.</p>
+</div>
 
 **NOT YET READY FOR RELEASE**  
-Administration mod for Garry's Mod.  
 Third rewrite **D:**
 
 Pyrition is a consolidation of everything I want when making all my other addons. A partial list of what it currently is, (or will be) is as follows:
