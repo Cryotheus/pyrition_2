@@ -6,7 +6,7 @@
 	<p>Administration mod for Garry's Mod.</p>
 </div>
 
-**NOT YET READY FOR RELEASE**  
+**NOT YET READY FOR USAGE**  
 Third rewrite **D:**
 
 Pyrition is a consolidation of everything I want when making all my other addons. A partial list of what it currently is, (or will be) is as follows:
