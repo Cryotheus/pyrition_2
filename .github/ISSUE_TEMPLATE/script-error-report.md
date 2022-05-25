@@ -10,7 +10,7 @@ assignees: ''
 Optionally write some info here.
 
 **Script Error**
-```
+```fix
 Paste the error here, or a pastebin link to it. Please make sure you don't paste multiple copies of the same error
 ```
 
