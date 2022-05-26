@@ -1,10 +1,8 @@
-<div id="header" align="center">
-	<h1>Pyrition</h1>
-	<a href="https://discord.gg/WMeCsQhakH"><img src="https://img.shields.io/static/v1?logo=discord&label=&message=Discord&color=555555&style=flat" alt="discord"></a>
-	<a href="https://github.com/Cryotheus/pyrition_2/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Cryotheus/pyrition_2"></a>
-	<a href="https://www.codacy.com/gh/Cryotheus/pyrition_2/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Cryotheus/pyrition_2&amp;utm_campaign=Badge_Grade"><img src="https://img.shields.io/codacy/grade/ac3be98e8eeb49a7b8052dbe8eeb1062"></a>
-	<p>Administration mod for Garry's Mod.</p>
-</div>
+# Pyrition
+[![Discord](https://img.shields.io/discord/785233414374686720?label=Discord&logo=discord)](https://discord.gg/WMeCsQhakH)
+[![Codacy](https://img.shields.io/codacy/grade/ac3be98e8eeb49a7b8052dbe8eeb1062)](https://www.codacy.com/gh/Cryotheus/pyrition_2/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Cryotheus/pyrition_2&amp;utm_campaign=Badge_Grade)
+[![License](https://img.shields.io/github/license/Cryotheus/pyrition_2)](https://github.com/Cryotheus/pyrition_2/blob/main/LICENSE)  
+Administration mod for Garry's Mod  
 
 **NOT YET READY FOR USAGE**  
 Third rewrite **D:**
