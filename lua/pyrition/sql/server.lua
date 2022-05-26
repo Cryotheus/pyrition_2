@@ -1,8 +1,18 @@
 --locals
---"localhost", "developer", "developer", database_name, 3306
+
+--localized functions
+local pyrmysql = pyrmysql
+
 --pyrition hooks
+function PYRITION:PyritionSQLCreateTables() pyrmysql.commit() end
+
 function PYRITION:PyritionSQLInitialized()
-	self:LanguageDisplay("sql_init", pyrmysql.isMySQL() and "pyrition.mysql.initialized" or "pyrition.sql.initialized")
+	local is_mysql = pyrmysql.isMySQL()
+	
+	self:LanguageDisplay("sql_init", is_mysql and "pyrition.mysql.initialized" or "pyrition.sql.initialized")
+	
+	pyrmysql.begin()
+	self:SQLCreateTables(is_mysql, pyrmysql.MySQLDatabaseName)
 end
 
 --hooks

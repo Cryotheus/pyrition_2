@@ -79,9 +79,15 @@ local config = {
 	
 	player = {
 		find = 31,		--011 111
+		identity = 58,	--111 010
 		kick = 26,		--011 010
 		landing = 26,	--011 010
 		slap = 26,		--011 010
+		
+		storage = {
+			--client
+			server = 50,	--110 010
+		},
 		
 		teleport = {
 			client = 61,	--111 101
@@ -94,7 +100,7 @@ local config = {
 	sql = {
 		client = 53,	--110 101
 		mysqlite = 50,	--110 010
-		server = 58,	--110 010
+		server = 58,	--111 010
 	}
 }
 

@@ -2,7 +2,7 @@
 local color_cursor = Color(217, 217, 217)
 local color_hightlight = Color(255, 156, 2)
 local color_text = color_white
-local on_player_chat = PYRITION._OnPlayerChat or GAMEMODE.OnPlayerChat
+local on_player_chat = PYRITION._OnPlayerChat
 
 local command_prefixes = {
 	["/"] = true,
@@ -396,11 +396,7 @@ local function find_chat()
 	return false
 end
 
---globals
-PYRITION._OnPlayerChat = on_player_chat
-
---global functions
-function GAMEMODE:OnPlayerChat(ply, message, team_chat, ply_dead, ...)
+local function on_player_chat_detour(self, ply, message, team_chat, ply_dead, ...)
 	local supressed = on_player_chat(self, ply, message, team_chat, ply_dead, ...)
 	
 	PYRITION:ConsoleChatPosted(ply, message, team_chat, ply_dead, supressed, ...)
@@ -418,7 +414,12 @@ hook.Add("FinishChat", "PyritionConsoleChat", function()
 	if IsValid(hacking_panel) then hacking_panel:FinishChat() end
 end)
 
---hook.GetTable().ShutDown.PyritionConsoleChat()
+hook.Add("Initialize", "PyritionConsoleChat", function()
+	on_player_chat = PYRITION._OnPlayerChat or GAMEMODE.OnPlayerChat
+	GAMEMODE.OnPlayerChat = on_player_chat_detour
+	PYRITION._OnPlayerChat = on_player_chat
+end)
+
 hook.Add("ShutDown", "PyritionConsoleChat", function()
 	--the chat panel will be left behind in weird spots or unclickable if we don't do this
 	local hacking_panel = PYRITION.ConsoleCommandChatHackingPanel

@@ -21,6 +21,31 @@ end
 function MODEL:Read()
 	local parents = self.CommandParents
 	
+	--[[
+		for index, argument_data in ipairs(command_arguments) do
+			net.WriteBool(true)
+			
+			if index <= required then net.WriteBool(argument_data.Optional or false) end
+			
+			local class = argument_data.Class
+			local functions = command_argument_classes[class]
+			
+			if functions then
+				local write_function = functions[3]
+				
+				PYRITION:NetWriteEnumeratedString("command_argument", class, ply)
+				
+				if write_function then write_function(argument_data) end
+			else
+				ErrorNoHalt("ID10T-12/S: Invalid command argument class " .. tostring(class) .. " for sync.")
+				
+				break
+			end
+		end
+		
+		net.WriteBool(false)
+	]]
+	
 	if net.ReadBool() then --we are reading a command
 		local index = 0
 		local name = PYRITION:NetReadEnumeratedString("command")
@@ -32,7 +57,7 @@ function MODEL:Read()
 			index = index + 1
 			local settings = {}
 			
-			if index <= required then settings.Optional = net.ReadBool() end
+			settings.Optional = net.ReadBool()
 			
 			local class = PYRITION:NetReadEnumeratedString("command_argument")
 			local functions = command_argument_classes[class]
@@ -57,7 +82,7 @@ function MODEL:Read()
 	else --we are reading popping instructions
 		--bool = do we have more to read?
 		if net.ReadBool() then table.remove(parents)
-		else return true end
+		else return end
 	end
 	
 	--this tells the client to re-run the Read method
@@ -91,8 +116,7 @@ function MODEL:Write(ply)
 		
 		for index, argument_data in ipairs(command_arguments) do
 			net.WriteBool(true)
-			
-			if index <= required then net.WriteBool(argument_data.Optional or false) end
+			net.WriteBool(argument_data.Optional or false)
 			
 			local class = argument_data.Class
 			local functions = command_argument_classes[class]
