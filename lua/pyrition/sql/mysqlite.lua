@@ -4,10 +4,13 @@
 --TL;DR
 --mysqlite but only mysqloo support >:D
 
---pre
+--no autoreload allowed!
+if pyrmysql then return end
+
+--module is required
 if file.Exists("bin/gmsv_mysqloo_*.dll", "LUA") then require("mysqloo")
 elseif file.Exists("bin/gmsv_tmysql4_*.dll", "LUA") then require("tmysql4")
-else PYRITION:LanguageDisplay("mysql_fail", "pyrition.mysql.fail") end
+else hook.Add("InitPostEntity", function() PYRITION:LanguageDisplay("mysql_fail", "pyrition.mysql.fail") end) end
 
 --locals
 local cached_queries = {}
@@ -326,17 +329,17 @@ function commit(on_finished)
 end
 
 function initialize()
-	if MySQLEnabled then
-		if mysqloo then return mysql_connect()
-		elseif tmysql then return tmysql_connect() end
-	end
-	
 	if connected_to_mysql then
 		if mysqloo then DatabaseObject:disconnect()
 		else DatabaseObject:Disconnect() end
 		
 		DatabaseObject = nil
 		connected_to_mysql = false
+	end
+	
+	if MySQLEnabled then
+		if mysqloo then return mysql_connect()
+		elseif tmysql then return tmysql_connect() end
 	end
 	
 	escape_function = sql.SQLStr

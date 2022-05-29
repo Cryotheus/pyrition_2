@@ -9,6 +9,7 @@ local COMMAND = {
 		
 		{
 			Class = "Integer",
+			Default = 100,
 			Maximum = 2 ^ 31 - 1,
 			Minimum = 1
 		}

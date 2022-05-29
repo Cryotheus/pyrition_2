@@ -5,10 +5,10 @@ local COMMAND = {
 		"Map",
 		
 		{
-			Class = "Integer",
+			Class = "Time",
 			Default = 60,
-			Maximum = 0,
-			Minimum = 18000
+			Maximum = 18000,
+			Minimum = 0
 		}
 	},
 	

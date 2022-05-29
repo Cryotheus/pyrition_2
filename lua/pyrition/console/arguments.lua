@@ -1,7 +1,10 @@
 --locals
 local maybe_read = PYRITION._MaybeRead
 local maybe_write = PYRITION._MaybeWrite
+local nice_time = PYRITION._TimeNicefy
+local parse_time = PYRITION._TimeParse
 local prefix_functions = PYRITION.PlayerFindPrefixes
+local time_unit_shorthand = PYRITION.TimeUnitShorthand
 
 --local functions
 local function escape_targetting(target)
@@ -18,6 +21,8 @@ local function insert_if_matching(completions, argument, insertion, position)
 		return table.insert(completions, insertion)
 	end
 end
+
+local function shorthand_time(seconds) return nice_time(seconds, 9, false, nil, time_unit_shorthand, "", "") end
 
 --post
 PYRITION:ConsoleCommandRegisterArgument("Integer", function(settings, ply, argument)
@@ -38,9 +43,28 @@ end, function(settings, executor, argument)
 	local maximum = settings.Maximum
 	local minimum = settings.Minimum
 	
-	if default then table.insert(completions, tostring(default)) end
-	if minimum then table.insert(completions, tostring(minimum)) end
-	if maximum then table.insert(completions, tostring(maximum)) end
+	if default then insert_if_matching(completions, argument, tostring(default)) end
+	
+	if minimum and maximum then
+		local maximum, minimum = tostring(maximum), tostring(minimum)
+		
+		insert_if_matching(completions, argument, minimum)
+		insert_if_matching(completions, argument, maximum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.integer.range", {maximum = maximum, minimum = minimum})
+	elseif maximum then
+		local maximum = tostring(maximum)
+		
+		insert_if_matching(completions, argument, maximum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.integer.maximum", {maximum = maximum})
+	elseif minimum then
+		local minimum = tostring(minimum)
+		
+		insert_if_matching(completions, argument, minimum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.integer.minimum", {minimum = minimum})
+	end
 	
 	return completions
 end, function(settings)
@@ -67,7 +91,7 @@ PYRITION:ConsoleCommandRegisterArgument("Number", function(settings, ply, argume
 	local minimum = settings.Minimum
 	local rounding = settings.Rounding
 	
-	if rounding then math.Round(number, isnumber(rounding) or 0) end
+	if rounding then math.Round(number) end
 	if maximum then number = math.min(number, maximum) end
 	if minimum then number = math.max(number, minimum) end
 	
@@ -78,9 +102,29 @@ end, function(settings, executor, argument)
 	local maximum = settings.Maximum
 	local minimum = settings.Minimum
 	
-	if default then table.insert(completions, tostring(default)) end
-	if minimum then table.insert(completions, tostring(minimum)) end
-	if maximum then table.insert(completions, tostring(maximum)) end
+	if default then insert_if_matching(completions, argument, tostring(default)) end
+	
+	if minimum and maximum then
+		local maximum, minimum = tostring(maximum), tostring(minimum)
+		
+		insert_if_matching(completions, argument, minimum)
+		insert_if_matching(completions, argument, maximum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.number.range", {maximum = maximum, minimum = minimum})
+	elseif maximum then
+		local maximum = tostring(maximum)
+		
+		insert_if_matching(completions, argument, maximum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.number.maximum", {maximum = maximum})
+	elseif minimum then
+		local minimum = tostring(minimum)
+		
+		insert_if_matching(completions, argument, minimum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.number.minimum", {minimum = minimum})
+	end
+	
 	
 	return completions
 end, function(settings)
@@ -134,7 +178,7 @@ end, function(settings, executor, argument)
 		insert_if_matching(completions, argument, "$" .. string.sub(steam_id, 9))
 	end
 	
-	return completions, settings.Single and "player" or "players"
+	return completions, language.GetPhrase(settings.Single and "pyrition.command.argument.player" or "pyrition.command.argument.players")
 end, function(settings)
 	if settings.Manual then return net.WriteBool(true) end
 	
@@ -169,8 +213,24 @@ PYRITION:ConsoleCommandRegisterArgument("String", function(settings, ply, argume
 	return argument and true or false, argument
 end, function(settings, executor, argument)
 	local default = settings.Default
+	local maximum = settings.Maximum
+	local minimum = settings.Minimum
 	
 	if default then return {default} end
+	
+	if minimum and maximum then
+		local maximum, minimum = tostring(maximum), tostring(minimum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.string.range", {maximum = maximum, minimum = minimum})
+	elseif maximum then
+		local maximum = tostring(maximum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.string.maximum", {maximum = maximum})
+	elseif minimum then
+		local minimum = tostring(minimum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.string.minimum", {minimum = minimum})
+	end
 	
 	return {}
 end, function(settings)
@@ -179,6 +239,58 @@ end, function(settings)
 	maybe_write(net.WriteUInt, settings.Minimum, 32)
 end, function(settings)
 	settings.Default = maybe_read(net.ReadString)
+	settings.Maximum = maybe_read(net.ReadUInt, 32)
+	settings.Minimum = maybe_read(net.ReadUInt, 32)
+end)
+
+PYRITION:ConsoleCommandRegisterArgument("Time", function(settings, ply, argument)
+	local default = settings.Default
+	local time = parse_time(argument) or default
+	local maximum = settings.Maximum
+	local minimum = settings.Minimum
+	
+	--no inf with time, ok?
+	if math.abs(time) == math.huge then time = default end
+	if maximum then time = math.min(time, maximum) end
+	if minimum then time = math.max(time, minimum) end
+	
+	return time and true or false, time
+end, function(settings, executor, argument)
+	local completions = {}
+	local default = settings.Default
+	local maximum = settings.Maximum
+	local minimum = settings.Minimum
+	
+	if default then insert_if_matching(completions, argument, shorthand_time(default)) end
+	
+	if minimum and maximum then
+		local maximum, minimum = shorthand_time(maximum), shorthand_time(minimum)
+		
+		insert_if_matching(completions, argument, minimum)
+		insert_if_matching(completions, argument, maximum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.time.range", {maximum = maximum, minimum = minimum})
+	elseif maximum then
+		local maximum = shorthand_time(maximum)
+		
+		insert_if_matching(completions, argument, maximum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.time.maximum", {maximum = maximum})
+	elseif minimum then
+		local minimum = shorthand_time(minimum)
+		
+		insert_if_matching(completions, argument, minimum)
+		
+		return completions, PYRITION:LanguageFormat("pyrition.command.argument.time.minimum", {minimum = minimum})
+	end
+	
+	return completions
+end, function(settings)
+	maybe_write(net.WriteUInt, settings.Default, 32)
+	maybe_write(net.WriteUInt, settings.Maximum, 32)
+	maybe_write(net.WriteUInt, settings.Minimum, 32)
+end, function(settings)
+	settings.Default = maybe_read(net.ReadUInt, 32)
 	settings.Maximum = maybe_read(net.ReadUInt, 32)
 	settings.Minimum = maybe_read(net.ReadUInt, 32)
 end)

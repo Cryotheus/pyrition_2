@@ -5,6 +5,7 @@ local language_options_colored = PYRITION.LanguageOptionsColored or {}
 local language_kieves = PYRITION.LanguageKieves or {}
 local language_tieves = PYRITION.LanguageTieves or {}
 local local_player = SERVER and game.GetWorld() or LocalPlayer()
+local nice_time = PYRITION._TimeNicefy
 
 --colors, stolen from ULX >:D
 local color_command = Color(224, 128, 64)
@@ -34,18 +35,6 @@ local global_kieves = {
 	elpend = true,
 	prefix = true
 }
-
-local time_units = {
-	[1] = "second",
-	[60] = "minute",
-	[3600] = "hour",
-	[86400] = "day",
-	[604800] = "week",
-	[2592000] = "month", --30 days
-	[31556926] = "year" --365.2422 days rounded up
-}
-
-local time_thresholds = {}
 
 --local functions
 local function build_medial_text(accumulator, text, last_finish, current_start)
@@ -99,39 +88,10 @@ local function global_kieve_prefix(text, texts, prefix, prefix_color)
 	else return prefix .. text end
 end
 
-local function grammar(quantity, unit)
-	if quantity == 1 then return unit end
+local function phrase_exists(key)
+	local phrase = language.GetPhrase(key)
 	
-	return unit .. "s"
-end
-
-local function nice_time(seconds, recursions)
-	--the built in nice time sucks
-	local count = seconds
-	local flooring = seconds
-	local recursions = recursions or 0
-	local unit = "second"
-	
-	for index, threshold in ipairs(time_thresholds) do
-		if seconds >= threshold then
-			count = math.floor(seconds / threshold)
-			flooring = count * threshold
-			unit = time_units[threshold]
-			unit = grammar(count, unit)
-			
-			break
-		end
-	end
-	
-	local text = count .. " " .. unit
-	
-	if recursions > 0 then
-		local difference = seconds - flooring
-		
-		if difference > 0 then text = text .. " " .. nice_time(difference, recursions - 1) end
-	end
-	
-	return text
+	return phrase ~= key and phrase
 end
 
 local function replace_tags(self, text, phrases, colored)
@@ -277,14 +237,7 @@ PYRITION.LanguageOptions = language_options
 PYRITION.LanguageOptionsColored = language_options_colored
 PYRITION.LanguageKieves = language_kieves
 PYRITION.LanguageTieves = language_tieves
-PYRITION._NiceTime = nice_time
-
---post function set up
-for threshold, unit in pairs(time_units) do table.insert(time_thresholds, threshold) end
-
-table.sort(time_thresholds)
-
-time_thresholds = table.Reverse(time_thresholds)
+PYRITION._LanguagePhraseExists = phrase_exists
 
 --pyrition functions
 function PYRITION:LanguageFormat(key, phrases) return phrases and replace_tags(self, language.GetPhrase(key), phrases) or language.GetPhrase(key) end

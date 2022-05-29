@@ -7,7 +7,9 @@
 local config = {
 	duplex = 23,	--0010 111
 	gradient = 23,	--0010 111
+	ip = 18,		--0010 010
 	loader = 4,		--0000 100
+	time = 23,		--0010 111
 	
 	console = {
 		chat = {

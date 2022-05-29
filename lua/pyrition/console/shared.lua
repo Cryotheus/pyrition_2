@@ -155,7 +155,8 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 					end
 				else table.insert(class) end
 				
-				if string.TrimLeft(class_argument) == "" then hint = string.lower(hint or class)
+				--the hint in the chat box of what should be there
+				if string.TrimLeft(class_argument) == "" then hint = hint or language.GetPhrase("pyrition.command.argument." .. string.lower(class))
 				else hint = nil end
 			end
 		end

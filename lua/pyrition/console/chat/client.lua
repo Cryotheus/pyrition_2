@@ -484,8 +484,6 @@ hook.Add("StartChat", "PyritionConsoleChat", function(team_chat)
 	end
 end)
 
-hook.Remove("Think", "PyritionConsoleChat")
-
 --autoreload
 if IsValid(PYRITION.ConsoleCommandChatHackingPanel) then
 	PYRITION.ConsoleCommandChatHackingPanel:Remove()
