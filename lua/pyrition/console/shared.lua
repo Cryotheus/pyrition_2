@@ -151,7 +151,7 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 						--add our new insertions
 						complete_prefix = prefix .. table.concat(arguments, " ", 1, depth + command_argument_index - 1)
 						
-						for index, insertion in ipairs(insertions) do table.insert(completions, complete_prefix .. " " .. insertion) end
+						for index, insertion in ipairs(insertions) do table.insert(completions, complete_prefix .. (tree[insertion] and " ?" or " ") .. insertion) end
 					end
 				else table.insert(class) end
 				

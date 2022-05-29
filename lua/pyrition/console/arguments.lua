@@ -289,7 +289,21 @@ end, function(settings)
 	maybe_write(net.WriteUInt, settings.Default, 32)
 	maybe_write(net.WriteUInt, settings.Maximum, 32)
 	maybe_write(net.WriteUInt, settings.Minimum, 32)
-	maybe_write(net.WriteUInt, settings.Unit, 3)
+	
+	local unit = settings.Unit
+	local stop_bit = true
+	
+	for index, threshold in ipairs(time_thresholds) do
+		if unit == threshold then
+			stop_bit = false
+			
+			maybe_write(net.WriteUInt, index, 3)
+			
+			break
+		end
+	end
+	
+	if stop_bit then net.WriteBool(false) end
 end, function(settings)
 	settings.Default = maybe_read(net.ReadUInt, 32)
 	settings.Maximum = maybe_read(net.ReadUInt, 32)

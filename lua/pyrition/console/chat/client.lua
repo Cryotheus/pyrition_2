@@ -127,6 +127,7 @@ local function find_chat()
 						text_entry:SetPaintBackground(false)
 						text_entry:SetCursorColor(color_cursor)
 						text_entry:SetHighlightColor(color_hightlight)
+						text_entry:SetTabbingDisabled(true)
 						text_entry:SetText(starting_text)
 						text_entry:SetTextColor(color_white)
 						

@@ -44,9 +44,10 @@ local function nice_time(seconds, recursions, use_grammar, thresholds, units, un
 	local flooring = seconds
 	local recursions = recursions or 0
 	local thresholds = thresholds or time_thresholds
-	local unit = "second"
 	local unit_seperator = unit_seperator or " "
 	local units = units or time_units
+	
+	local unit = units[1]
 	
 	for index, threshold in ipairs(thresholds) do
 		if seconds >= threshold then

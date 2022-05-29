@@ -7,7 +7,7 @@ local COMMAND = {
 		{
 			Class = "Time",
 			Default = 60,
-			Maximum = 18000,
+			Maximum = 18000, --five hours, the suggested maximum duration to stay on a map
 			Minimum = 0,
 			Unit = PYRITION.TimeMinute
 		}
