@@ -1,6 +1,7 @@
 --locals
 local color_cursor = Color(217, 217, 217)
 local color_hightlight = Color(255, 156, 2)
+local color_hint = Color(112, 112, 112)
 local color_text = color_white
 local on_player_chat = PYRITION._OnPlayerChat
 
@@ -119,7 +120,7 @@ local function find_chat()
 					
 					do --text entry
 						local text_entry = vgui.Create("DTextEntry", chat_input_replacement)
-						text_entry.FirstAutoCompletionTime = RealTime() + math.min(RealFrameTime() * 2, 0.1)
+						local text_entry_history_update = text_entry.UpdateFromHistory
 						
 						text_entry:Dock(FILL)
 						text_entry:SetFont("ChatFont")
@@ -132,7 +133,21 @@ local function find_chat()
 						--always want to be at the end when pasting
 						text_entry:SetCaretPos(#text_entry:GetText())
 						
-						function text_entry:GetAutoComplete(text) return PYRITION:ConsoleComplete("", self:GetText() or text) end
+						function text_entry:GetAutoComplete(text)
+							local auto_compeleted = self.AutoCompleted
+							
+							if auto_compeleted then
+								self.Hint = nil
+								
+								return PYRITION:ConsoleComplete("", text or self.AutoCompleted or self:GetText())
+							end
+							
+							local completions, hint = PYRITION:ConsoleComplete("", text or self.AutoCompleted or self:GetText())
+							
+							self.Hint = hint
+							
+							return completions
+						end
 						
 						function text_entry:OnEnter(text)
 							if text == "" then return chat.Close() end
@@ -159,10 +174,9 @@ local function find_chat()
 						
 						function text_entry:OnKeyCode(code)
 							if code == KEY_ESCAPE then chat.Close()
-							elseif code == KEY_BACKSPACE and self:GetText() == "" then
-								--more?
-								hacking_panel:RestoreChatInput(team_chat, true)
-							end
+							elseif code == KEY_BACKSPACE and self:GetText() == "" then hacking_panel:RestoreChatInput(team_chat, true) end
+							
+							self.AutoCompleted, self.AutoCompletedPrevious = nil, self.AutoCompleted
 						end
 						
 						function text_entry:OpenAutoComplete(completions)
@@ -177,9 +191,14 @@ local function find_chat()
 							
 							for index, completion in ipairs(completions) do
 								local option = completion_menu:AddOption(completion, function()
+									self.AutoCompleted = self.AutoCompleted or self:GetText()
+									self.CodeTyped = false
+									self.Hint = nil
+									
 									self:SetText(completion)
 									self:SetCaretPos(completion:len())
 									self:RequestFocus()
+									self:StartThinking(0)
 								end)
 								
 								option:SetTextColor(color_cursor)
@@ -203,23 +222,49 @@ local function find_chat()
 						end
 						
 						function text_entry:Paint(width, height)
+							local hint = self.Hint
+							
 							surface.SetDrawColor(32, 32, 32)
 							surface.DrawRect(0, 0, width, height)
+							
+							if hint and hint ~= "" then
+								local text = self:GetText()
+								
+								surface.SetTextColor(color_hint)
+								surface.SetFont(self:GetFont())
+								surface.SetTextPos(3, 0)
+								surface.DrawText(string.EndsWith(text, " ") and text .. hint or text .. " " .. hint)
+							end
 							
 							self:DrawTextEntryText(color_text, color_hightlight, color_cursor)
 						end
 						
-						function text_entry:Think()
-							if RealTime() > self.FirstAutoCompletionTime then
-								self:InvalidateLayout(true)
-								self:OpenAutoComplete(self:GetAutoComplete())
-								
-								self.Think = nil
+						function text_entry:StartThinking(delay)
+							local delay = delay or math.min(RealFrameTime() * 2, 0.1)
+							self.FirstAutoCompletionTime = RealTime() + delay
+							
+							function self:Think()
+								if RealTime() > self.FirstAutoCompletionTime then
+									self:InvalidateLayout(true)
+									self:OpenAutoComplete(self:GetAutoComplete())
+									
+									self.Think = nil
+								end
 							end
+						end
+						
+						function text_entry:UpdateFromHistory()
+							--attempt to recover persistence
+							self.AutoCompleted = self.AutoCompleted or self.AutoCompletedPrevious or self:GetText()
+							
+							--do the internal bull crap then re-open the menu
+							text_entry_history_update(self)
+							self:OpenAutoComplete(self:GetAutoComplete())
 						end
 						
 						TextEntryLoseFocus()
 						text_entry:RequestFocus()
+						text_entry:StartThinking()
 					end
 				end
 			end

@@ -11,6 +11,14 @@ local function escape_targetting(target)
 	else return string.find(name, "%s") and '"' .. name .. '"' or name end
 end
 
+local function insert_if_matching(completions, argument, insertion, position)
+	if string.StartWith(insertion, argument) then
+		if position then return table.insert(completions, position, insertion) end
+			
+		return table.insert(completions, insertion)
+	end
+end
+
 --post
 PYRITION:ConsoleCommandRegisterArgument("Integer", function(settings, ply, argument)
 	local default = settings.Default
@@ -97,6 +105,7 @@ PYRITION:ConsoleCommandRegisterArgument("Player", function(settings, ply, target
 	
 	return find and true or false, find, message
 end, function(settings, executor, argument)
+	local argument = string.lower(argument)
 	local completions = {}
 	local targets = PYRITION:PlayerFind(argument, executor, false, settings.Selfless, true)
 	
@@ -110,22 +119,22 @@ end, function(settings, executor, argument)
 	end
 	
 	if argument == "" or not targets then
-		if not settings.Selfless then table.insert(completions, 1, "^") end
+		if not settings.Selfless then insert_if_matching(completions, argument, "^", 1) end
 		
 		if not settings.Single then
-			table.insert(completions, "*")
-			table.insert(completions, "^^")
-			table.insert(completions, "%")
+			insert_if_matching(completions, argument, "*")
+			insert_if_matching(completions, argument, "^^")
+			insert_if_matching(completions, argument, "%")
 		end
 		
 		local steam_id = executor:SteamID()
 		
-		table.insert(completions, "#" .. executor:UserID())
-		table.insert(completions, "$" .. steam_id)
-		table.insert(completions, "$" .. string.sub(steam_id, 9))
+		insert_if_matching(completions, argument, "#" .. executor:UserID())
+		insert_if_matching(completions, argument, "$" .. steam_id)
+		insert_if_matching(completions, argument, "$" .. string.sub(steam_id, 9))
 	end
 	
-	return completions
+	return completions, settings.Single and "player" or "players"
 end, function(settings)
 	if settings.Manual then return net.WriteBool(true) end
 	

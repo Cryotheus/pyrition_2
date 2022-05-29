@@ -93,6 +93,7 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 	local arguments = self:ConsoleParseArguments(arguments_string)
 	local argument_count = #arguments
 	local completions = {}
+	local hint
 	local tree, depth = self:ConsoleCommandGet(arguments)
 	
 	local command_arguments = tree.Arguments
@@ -130,10 +131,12 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 			
 			if settings then
 				local class = settings.Class
+				local class_argument = arguments[depth + command_argument_index] or ""
 				local completion_function = command_argument_classes[class][2]
 				
 				if completion_function then
-					local insertions = completion_function(settings, LocalPlayer(), arguments[depth + command_argument_index] or "")
+					local insertions
+					insertions, hint = completion_function(settings, LocalPlayer(), class_argument)
 					
 					if insertions and next(insertions) then
 						--remove the blank command completion
@@ -151,6 +154,9 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 						for index, insertion in ipairs(insertions) do table.insert(completions, complete_prefix .. " " .. insertion) end
 					end
 				else table.insert(class) end
+				
+				if string.TrimLeft(class_argument) == "" then hint = string.lower(hint or class)
+				else hint = nil end
 			end
 		end
 	else
@@ -158,7 +164,7 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 		table.sort(completions)
 	end
 	
-	return completions
+	return completions, hint
 end
 
 --console commands
