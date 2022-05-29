@@ -1,5 +1,3 @@
-include("pyrition/loader.lua")
-
 --commands
 concommand.Add(SERVER and "sv_pyrition_restart" or "cl_pyrition_restart", function(ply, command, arguments, arguments_string) include("pyrition/loader.lua") end, nil, "Reload Pyrition with auto-reload enabled.")
 
@@ -12,3 +10,6 @@ if SERVER then
 		for index, ply in ipairs(player.GetAll()) do ply:ConCommand("cl_pyrition_restart") end
 	end, nil, "Reload Pyrition with auto-reload enabled.")
 end
+
+--post
+include("pyrition/loader.lua")

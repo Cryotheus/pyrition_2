@@ -3,23 +3,49 @@ local language_colors = PYRITION.LanguageColors or {}
 local language_options = PYRITION.LanguageOptions or {}
 local language_options_colored = PYRITION.LanguageOptionsColored or {}
 local language_kieves = PYRITION.LanguageKieves or {}
+local language_tieves = PYRITION.LanguageTieves or {}
 local local_player = SERVER and game.GetWorld() or LocalPlayer()
 
 --colors, stolen from ULX >:D
-local color_default = Color(151, 211, 255)
 local color_command = Color(224, 128, 64)
 local color_console = Color(255, 64, 64)
-local color_self = Color(75, 0, 130)
+local color_default = Color(151, 211, 255)
 local color_everyone = Color(0, 128, 128)
-local color_player = Color(255, 224, 0)
-local color_unknown = Color(192, 0, 0)
 local color_misc = Color(0, 255, 0)
+local color_player = Color(255, 224, 0)
+local color_self = SERVER and color_console or Color(75, 0, 130)
+local color_unknown = Color(192, 0, 0)
 
---globals
-PYRITION.LanguageColors = language_colors
-PYRITION.LanguageOptions = language_options
-PYRITION.LanguageOptionsColored = language_options_colored
-PYRITION.LanguageKieves = language_kieves
+--local tables
+local colors = {
+	command = color_command,
+	console = color_console,
+	default = color_default,
+	everyone = color_everyone,
+	misc = color_misc,
+	player = color_player,
+	self = color_self,
+	unknown = color_unknown
+}
+
+local global_kieves = {
+	append = true,
+	elfix = true,
+	elpend = true,
+	prefix = true
+}
+
+local time_units = {
+	[1] = "second",
+	[60] = "minute",
+	[3600] = "hour",
+	[86400] = "day",
+	[604800] = "week",
+	[2592000] = "month", --30 days
+	[31556926] = "year" --365.2422 days rounded up
+}
+
+local time_thresholds = {}
 
 --local functions
 local function build_medial_text(accumulator, text, last_finish, current_start)
@@ -41,10 +67,71 @@ local function build_medial_text_colored(accumulator, text, last_finish, current
 	})
 end
 
-local function fetch_special_replacement(index, tag, text, key_values, text_data, accumulator, phrases)
+local function fetch_special_replacement(tag, ...)
 	local kieve = language_kieves[tag]
 	
-	if kieve then return kieve(index, text, key_values, text_data, accumulator, phrases) end
+	if kieve then return kieve(...) end
+end
+
+local function get_color(id)
+	local id_color = colors[id] or language_colors[id]
+	
+	if id_color then return id_color end
+	
+	id = string.gsub(id, "%s", "")
+	local rgb = string.Split(id, ",")
+	
+	if #rgb == 3 then return Color(tonumber(rgb[1]), tonumber(rgb[2]), tonumber(rgb[3])) end
+	--maybe I should also allow hex?
+end
+
+local function global_kieve_append(text, texts, postfix, postfix_color)
+	if postfix_color then
+		table.insert(texts, get_color(postfix_color))
+		table.insert(texts, postfix)
+	else texts[#texts] = text .. postfix end
+end
+
+local function global_kieve_prefix(text, texts, prefix, prefix_color)
+	if prefix_color then
+		table.insert(texts, get_color(prefix_color))
+		table.insert(texts, prefix)
+	else return prefix .. text end
+end
+
+local function grammar(quantity, unit)
+	if quantity == 1 then return unit end
+	
+	return unit .. "s"
+end
+
+local function nice_time(seconds, recursions)
+	--the built in nice time sucks
+	local count = seconds
+	local flooring = seconds
+	local recursions = recursions or 0
+	local unit = "second"
+	
+	for index, threshold in ipairs(time_thresholds) do
+		if seconds >= threshold then
+			count = math.floor(seconds / threshold)
+			flooring = count * threshold
+			unit = time_units[threshold]
+			unit = grammar(count, unit)
+			
+			break
+		end
+	end
+	
+	local text = count .. " " .. unit
+	
+	if recursions > 0 then
+		local difference = seconds - flooring
+		
+		if difference > 0 then text = text .. " " .. nice_time(difference, recursions - 1) end
+	end
+	
+	return text
 end
 
 local function replace_tags(self, text, phrases, colored)
@@ -57,8 +144,11 @@ local function replace_tags(self, text, phrases, colored)
 		start, finish, match = string.find(text, "%[%:(.-)%]", finish)
 		
 		if match then
+			local global_key_values = {}
 			local postfix
+			local postfix_color
 			local prefix
+			local prefix_color
 			local boom = string.Split(match, ":")
 			local tag = table.remove(boom, 1)
 			local key_values = {}
@@ -66,20 +156,22 @@ local function replace_tags(self, text, phrases, colored)
 			for index, gib in ipairs(boom) do
 				local boom = string.Split(gib, "=")
 				local key = table.remove(boom, 1)
-				local value = table.remove(boom, 1)
+				local value = boom[1]
 				
-				if key == "elpend" then postfix = value
-				elseif key == "elfix" then prefix = value
-				else key_values[key] = next(boom) and boom or value end
+				if global_kieves[key] then global_key_values[key] = boom
+				else key_values[key] = #boom > 1 and boom or value end
 			end
 			
 			build_text(accumulator, text, old_finish, start - 1)
 			
 			table.insert(accumulator, {
 				color = colored and (language_colors[tag] or color_default),
+				global_key_values = next(global_key_values) and global_key_values or nil,
 				key_values = next(key_values) and key_values or nil,
-				prefix = prefix,
 				postfix = postfix,
+				postfix_color = postfix_color and get_color(postfix_color),
+				prefix = prefix,
+				prefix_color = prefix_color and get_color(prefix_color),
 				tag = tag,
 				text = phrases[tag] or "[>" .. tag .. "<]"
 			})
@@ -88,35 +180,34 @@ local function replace_tags(self, text, phrases, colored)
 	
 	for index, text_data in ipairs(accumulator) do
 		local color = text_data.color
+		local global_key_values = text_data.global_key_values
 		local key_values = text_data.key_values
 		local new_text, new_color
-		local perform_concatenation = true
+		local replacements_made = false
+		local tag = text_data.tag
 		local text = text_data.text
+		local tieve_function = language_tieves[tag]
 		
 		--in case a kieve function needs the text before it was changed by a previous kieve function
 		text_data.original = text
 		
 		--convert tables of singles into their value, or multi-value tables into strings
+		if tieve_function then text = tieve_function(index, text, text_data, texts, key_values, phrases) or text end
+		
 		if istable(text) then
 			if #text == 1 then text = text[1]
 			else text = IsEntity(text[1]) and self:LanguageListPlayers(text) or self:LanguageList(text) end
 		end
 		
 		if key_values then
-			new_text, new_color = fetch_special_replacement(index, text_data.tag, text, key_values, text_data, accumulator, phrases)
+			--index, text, texts, key_values, text_data, phrases
+			--index, text, texts, key_values, text_data, phrases
+			new_text, new_color = fetch_special_replacement(tag, index, text, text_data, texts, key_values, phrases)
 			
 			if new_text then
-				perform_concatenation = false
+				replacements_made = true
 				text = new_text
 			end
-		end
-		
-		--for elfix and elpend tag key values
-		if perform_concatenation then
-			local prefix, postfix = text_data.prefix, text_data.postfix
-			
-			if prefix then text = prefix .. text end
-			if postfix then text = text .. postfix end
 		end
 		
 		--convert world/player to string
@@ -131,21 +222,36 @@ local function replace_tags(self, text, phrases, colored)
 			end
 		end
 		
-		if color then table.insert(texts, new_color or color) end
-		
-		table.insert(texts, text)
+		--for elfix and elpend tag key values
+		if global_key_values then
+			local postfix_index = replacements_made and "append" or "elpend"
+			local postfix_values = global_key_values[postfix_index]
+			local prefix_index = replacements_made and "prefix" or "elfix"
+			local prefix_values = global_key_values[prefix_index]
+			
+			if prefix_values then text = global_kieve_prefix(text, texts, unpack(prefix_values)) or text end
+			if color then table.insert(texts, new_color or color) end
+			
+			table.insert(texts, text)
+			
+			if postfix_values then global_kieve_append(text, texts, unpack(postfix_values)) end
+		else
+			if color then table.insert(texts, new_color or color) end
+			
+			table.insert(texts, text)
+		end
 	end
 	
 	return colored and texts or table.concat(texts, "")
 end
 
 --kieve functions
-local function kieve_executor(index, text, key_values, text_data, accumulator, phrases)
+local function kieve_executor(index, text, text_data, texts, key_values, phrases)
 	if text == local_player then return key_values.you, color_self
 	elseif text == game.GetWorld() then return key_values.console, color_console end
 end
 
-local function kieve_targets(index, text, key_values, text_data, accumulator, phrases)
+local function kieve_targets(index, text, text_data, texts, key_values, phrases)
 	if text == language.GetPhrase("pyrition.player.list.everyone") then return nil, color_everyone end
 	
 	local executor = phrases.executor --who ran the command
@@ -158,6 +264,27 @@ local function kieve_targets(index, text, key_values, text_data, accumulator, ph
 	elseif you then return you, color_self
 	elseif themself then return themself, color_player end
 end
+
+local function tieve_time(index, text, text_data, texts, key_values, phrases)
+	local time = tonumber(text)
+	
+	if time then return nice_time(time, 1) end
+end
+
+--globals
+PYRITION.LanguageColors = language_colors
+PYRITION.LanguageOptions = language_options
+PYRITION.LanguageOptionsColored = language_options_colored
+PYRITION.LanguageKieves = language_kieves
+PYRITION.LanguageTieves = language_tieves
+PYRITION._NiceTime = nice_time
+
+--post function set up
+for threshold, unit in pairs(time_units) do table.insert(time_thresholds, threshold) end
+
+table.sort(time_thresholds)
+
+time_thresholds = table.Reverse(time_thresholds)
 
 --pyrition functions
 function PYRITION:LanguageFormat(key, phrases) return phrases and replace_tags(self, language.GetPhrase(key), phrases) or language.GetPhrase(key) end
@@ -210,6 +337,7 @@ function PYRITION:PyritionLanguageRegisterOption(option, operation, colored) --o
 end
 
 function PYRITION:PyritionLanguageRegisterKieve(kieve_function, ...) for index, tag in ipairs{...} do language_kieves[tag] = kieve_function end end
+function PYRITION:PyritionLanguageRegisterTieve(tieve_function, ...) for index, tag in ipairs{...} do language_tieves[tag] = tieve_function end end
 
 --hooks
 hook.Add("InitPostEntity", "PyritionLanguage", function() local_player = SERVER and game.GetWorld() or LocalPlayer() end)
@@ -218,10 +346,11 @@ hook.Add("InitPostEntity", "PyritionLanguage", function() local_player = SERVER 
 PYRITION:GlobalHookCreate("LanguageRegisterColor")
 PYRITION:GlobalHookCreate("LanguageRegisterOption")
 PYRITION:GlobalHookCreate("LanguageRegisterKieve")
+PYRITION:GlobalHookCreate("LanguageRegisterTieve")
 
 PYRITION:LanguageRegisterColor(color_command, "command")
-PYRITION:LanguageRegisterColor(color_misc, "attempts", "duration", "map", "message", "reason", "time")
-PYRITION:LanguageRegisterColor(color_player, "executor", "player", "target", "targets")
+PYRITION:LanguageRegisterColor(color_misc, "attempts", "duration", "map", "message", "reason", "time", "visit")
+PYRITION:LanguageRegisterColor(color_player, "executor", "name", "player", "target", "targets")
 
 PYRITION:LanguageRegisterKieve(kieve_executor, "executor")
 PYRITION:LanguageRegisterKieve(kieve_targets, "target", "targets")
@@ -229,3 +358,5 @@ PYRITION:LanguageRegisterKieve(kieve_targets, "target", "targets")
 PYRITION:LanguageRegisterOption("center", function(formatted, key, phrases) local_player:PrintMessage(HUD_PRINTCENTER, formatted) end)
 PYRITION:LanguageRegisterOption("chat", function(formatted_table, key, phrases) chat.AddText(unpack(formatted_table)) end, true)
 PYRITION:LanguageRegisterOption("console", function(formatted, key, phrases) MsgC(color_white, formatted, "\n") end)
+
+PYRITION:LanguageRegisterTieve(tieve_time, "time", "visit")

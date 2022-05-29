@@ -41,14 +41,7 @@ function PYRITION:NetWriteEnumeratedString(namespace, text)
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetClientInitialized(ply)
-	--we use a timer because everyone else in the entire world also sends net messages here
-	--this is jerry's sole purpose
-	timer.Simple(jerry, function()
-		net.Start("pyrition")
-		net.SendToServer()
-	end)
-end
+function PYRITION:PyritionNetClientInitialized(ply) end
 
 --console commands
 concommand.Add("pd", function(ply, command, arguments, arguments_string)
@@ -57,7 +50,15 @@ concommand.Add("pd", function(ply, command, arguments, arguments_string)
 end, nil, "Pyrition's debug command. If you are reading this and you're not on a test server, please report it.")
 
 --hooks
-hook.Add("InitPostEntity", "PyritionNet", function() PYRITION:NetClientInitialized(LocalPlayer()) end)
+hook.Add("InitPostEntity", "PyritionNet", function()
+	--we use a timer because everyone else in the entire world also sends net messages here
+	--this is jerry's sole purpose
+	timer.Simple(jerry, function()
+		net.Start("pyrition")
+		net.SendToServer()
+		PYRITION:NetClientInitialized(LocalPlayer())
+	end)
+end)
 
 hook.Add("PopulateToolMenu", "PyritionNet", function()
 	spawnmenu.AddToolMenuOption("Utilities", "PyritionDevelopers", "NetEnumerations", "#pyrition.spawnmenu.categories.developer.net_enumerations", "", "", function(form)

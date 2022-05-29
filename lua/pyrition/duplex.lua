@@ -44,8 +44,12 @@ local function duplex_is_fooplex(duplex)
 end
 
 local function duplex_remove(duplex, index)
-	index = index or #duplex
-	local value = duplex[index]
+	local value
+	
+	if index then
+		if isnumber(index) then value = duplex[index]
+		else value, index = index, duplex[index] end
+	else index = #duplex end
 	
 	if value then
 		table.remove(duplex, index)
@@ -62,7 +66,7 @@ local function duplex_remove(duplex, index)
 		return value
 	end
 	
-	return false
+	return nil
 end
 
 function duplex_set(duplex, position, value)
@@ -97,25 +101,13 @@ local function duplex_sort(duplex, sorter)
 	return duplex, list
 end
 
-local function duplex_unset(duplex, value)
-	local index = duplex[value]
+local function duplex_unset(duplex, index)
+	local value = duplex[index]
+	duplex[index] = nil
 	
-	if isnumber(index) then
-		table.remove(duplex, index)
-		
-		duplex[value] = nil
-		
-		--update the following values
-		for march = index, #duplex do
-			local indexed_value = duplex[march]
-			
-			duplex[indexed_value] = march
-		end
-		
-		return index
-	end
+	if value then duplex[value] = nil end
 	
-	return false
+	return isnumber(index) and index or value 
 end
 
 --globals

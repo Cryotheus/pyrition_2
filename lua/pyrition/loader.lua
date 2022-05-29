@@ -5,7 +5,6 @@
 --motivation: whats that
 
 local config = {
-	hooks = 127,	--1111 111
 	duplex = 23,	--0010 111
 	gradient = 23,	--0010 111
 	loader = 4,		--0000 100
@@ -78,15 +77,16 @@ local config = {
 	},
 	
 	player = {
-		find = 31,		--011 111
-		identity = 58,	--111 010
-		kick = 26,		--011 010
-		landing = 26,	--011 010
-		slap = 26,		--011 010
+		find = 31,		--0011 111
+		kick = 26,		--0011 010
+		landing = 26,	--0011 010
+		slap = 26,		--0011 010
+		storage = 58,	--0111 010
+		time = 66,		--1000 010
 		
-		storage = {
-			--client
-			server = 50,	--110 010
+		identity = {
+			client = 21,	--0010 101
+			server = 66		--1000 010
 		},
 		
 		teleport = {
@@ -155,16 +155,16 @@ local color_significant = Color(255, 128, 64)
 
 --local functions
 local function construct_order(config_table, depth, path)
-	local tabs = " ]" .. string.rep("    ", depth)
+	--local tabs = " ]" .. string.rep("    ", depth)
 	
 	for key, value in pairs(config_table) do
 		if istable(value) then
-			MsgC(color_generic, tabs .. key .. ":\n")
+			--MsgC(color_generic, tabs .. key .. ":\n")
 			
 			if depth < max_depth then construct_order(value, depth + 1, path .. key .. "/")
-			else MsgC(color_significant, tabs .. "    !!! MAX DEPTH !!!\n") end
+			else MsgC(color_significant, " ]" .. string.rep("    ", depth) .. "    !!! MAX DEPTH !!!\n") end
 		else
-			MsgC(color_generic, tabs .. key .. " = 0d" .. value .. "\n")
+			--MsgC(color_generic, tabs .. key .. " = 0d" .. value .. "\n")
 			
 			local priority = fl_bit_rshift(value, load_function_shift)
 			local script_path = path .. key
@@ -254,6 +254,10 @@ local function load_scripts(command_reload)
 		MsgC(color_generic, "\n!!! ", color_significant, "PRECONFIGURED LOADER NOTE", color_generic, " !!!\nAs the load was requested using command, the source file for the loader be used as a prefix for the following includes. You may experience issues with scripts loaded using this command that do not persist when the file is loaded by an include. If that happens, try making the file include itself instead of executing the load_scripts function in the reload command. You can do this by setting self_include_reload to true (attempts to automatically grab the file's path) or the full path of the loader.\n||| ", color_significant, "PRECONFIGURED LOADER NOTE", color_generic, " |||\n\n")
 		load_by_order(loader_directory)
 	else load_by_order("") end
+	
+	--we do this manually here so I don't keep adjusting its load order
+	AddCSLuaFile("hooks.lua")
+	include("hooks.lua")
 	
 	MsgC(color_significant, "\nLoaded scripts.\n\n", color_generic, "/// ", color_significant, "All scripts loaded.", color_generic, " \\\\\\\n\n")
 end
