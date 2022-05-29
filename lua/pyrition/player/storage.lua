@@ -110,7 +110,7 @@ function PYRITION:PlayerStorageLoad(ply, key, queue, tracker, emulated)
 	local storage_data = player_storages[key]
 	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or storage_data.TableName
 	
-	query(database_name and "select * from `" .. table_name .. "` where steam_id = '" .. player_data._ShortSteamID .. "';", function(result)
+	query("select * from `" .. table_name .. "` where steam_id = '" .. player_data._ShortSteamID .. "';", function(result)
 		if not IsValid(ply) then return end
 		
 		if not player_datum then
