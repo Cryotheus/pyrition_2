@@ -1,10 +1,9 @@
 --locals
 local maybe_read = PYRITION._MaybeRead
 local maybe_write = PYRITION._MaybeWrite
-local nice_time = PYRITION._TimeNicefy
 local parse_time = PYRITION._TimeParse
 local prefix_functions = PYRITION.PlayerFindPrefixes
-local time_unit_shorthand = PYRITION.TimeUnitShorthand
+local shorthand_time = PYRITION._TimeShorthand
 
 --local functions
 local function escape_targetting(target)
@@ -21,8 +20,6 @@ local function insert_if_matching(completions, argument, insertion, position)
 		return table.insert(completions, insertion)
 	end
 end
-
-local function shorthand_time(seconds) return nice_time(seconds, 9, false, nil, time_unit_shorthand, "", "") end
 
 --post
 PYRITION:ConsoleCommandRegisterArgument("Integer", function(settings, ply, argument)

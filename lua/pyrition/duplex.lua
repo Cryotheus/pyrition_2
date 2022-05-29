@@ -2,15 +2,13 @@
 local duplex_set
 
 --local functions
-local function duplex_destroy(duplex)
-	--turn a duplex into a list
+local function duplex_destroy(duplex) --turn a duplex into a list
 	for index, value in ipairs(duplex) do duplex[value] = nil end
 	
 	return duplex
 end
 
-local function duplex_extract(duplex)
-	--get a list from a duplex
+local function duplex_extract(duplex) --get a list from a duplex
 	local copy = {}
 	
 	for index, value in ipairs(duplex) do copy[index] = value end
@@ -31,7 +29,7 @@ local function duplex_insert(duplex, value, set_value)
 	return false
 end
 
-local function duplex_is_fooplex(duplex)
+local function duplex_is_fooplex(duplex) --check duplex for "holes"
 	local count = table.Count(duplex)
 	
 	--quick check by comparing counts
@@ -41,6 +39,22 @@ local function duplex_is_fooplex(duplex)
 	for index = 1, count * 0.5 do if duplex[index] == nil then return true end end
 	
 	return false
+end
+
+local function duplex_make(duplex, modify)
+	local duplex = modify and duplex or table.Copy(duplex)
+	
+	for index, value in ipairs(duplex) do duplex[value] = index end
+	
+	return duplex
+end
+
+local function duplex_make_fooplex(duplex, modify)
+	local duplex = modify and duplex or table.Copy(duplex)
+	
+	for index, value in pairs(duplex) do if isnumber(index) then duplex[value] = index end end
+	
+	return duplex
 end
 
 local function duplex_remove(duplex, index)
@@ -115,6 +129,8 @@ PYRITION._DuplexDestroy = duplex_destroy
 PYRITION._DuplexExtract = duplex_extract
 PYRITION._DuplexInsert = duplex_insert
 PYRITION._DuplexIsFooplex = duplex_is_fooplex
+PYRITION._DuplexMake = duplex_make
+PYRITION._DuplexMakeFooplex = duplex_make_fooplex
 PYRITION._DuplexRemove = duplex_remove
 PYRITION._DuplexSet = duplex_set
 PYRITION._DuplexSort = duplex_sort
@@ -126,6 +142,8 @@ local duplex_destroy = PYRITION._DuplexDestroy
 local duplex_extract = PYRITION._DuplexExtract
 local duplex_insert = PYRITION._DuplexInsert
 local duplex_is_fooplex = PYRITION._DuplexIsFooplex
+local duplex_make = PYRITION._DuplexMake
+local duplex_make_fooplex = PYRITION._DuplexMakeFooplex
 local duplex_remove = PYRITION._DuplexRemove
 local duplex_set = PYRITION._DuplexSet
 local duplex_sort = PYRITION._DuplexSort

@@ -8,4 +8,4 @@ local chat_filter = {
 }
 
 --hooks
-hook.Remove("ChatText", "PyritionPlayerIdentity", function(index, name, text, id) if chat_filter[id] then return true end print(text, id) end)
+hook.Add("ChatText", "PyritionPlayerIdentity", function(index, name, text, id) if chat_filter[id] then return true end end)
