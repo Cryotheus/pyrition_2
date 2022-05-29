@@ -49,7 +49,7 @@ local config = {
 	},
 	
 	language = {
-		client = 45,	--101 101
+		client = 53,	--101 101
 		debug = 47,		--101 111
 		library = 18,	--010 010
 		shared = 47,	--101 111

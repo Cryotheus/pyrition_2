@@ -11,7 +11,7 @@ local TIME_YEAR = 31556926 --365.2422 days rounded up
 local duplex_make_fooplex = PYRITION._DuplexMakeFooplex
 local time_thresholds = PYRITION.TimeThresholds or {}
 
-local time_unit_shorthand = PYRITION.TimeUnitShorthand and table.Empty(PYRITION.TimeUnitShorthand) or {
+local time_unit_shorthand = PYRITION.TimeUnitShorthand or {
 	[TIME_SECOND] = "s",
 	[TIME_MINUTE] = "m",
 	[TIME_HOUR] = "h",
@@ -21,7 +21,7 @@ local time_unit_shorthand = PYRITION.TimeUnitShorthand and table.Empty(PYRITION.
 	[TIME_YEAR] = "y"
 }
 
-local time_units = PYRITION.TimeUnits and table.Empty(PYRITION.TimeUnits) or {
+local time_units = PYRITION.TimeUnits or {
 	[TIME_SECOND] = "second",
 	[TIME_MINUTE] = "minute",
 	[TIME_HOUR] = "hour",
@@ -123,7 +123,7 @@ PYRITION._TimeParse = parse_time
 --post function set up
 table.Empty(time_thresholds)
 
-for threshold, unit in pairs(time_units) do table.insert(time_thresholds, threshold) end
+for threshold, unit in pairs(time_units) do if isnumber(threshold) then table.insert(time_thresholds, threshold) end end
 
 time_thresholds = table.Reverse(table.sort(time_thresholds) or time_thresholds)
 

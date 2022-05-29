@@ -8,7 +8,8 @@ local COMMAND = {
 			Class = "Time",
 			Default = 60,
 			Maximum = 18000,
-			Minimum = 0
+			Minimum = 0,
+			Unit = PYRITION.TimeMinute
 		}
 	},
 	

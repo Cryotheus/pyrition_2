@@ -4,6 +4,8 @@ local maybe_write = PYRITION._MaybeWrite
 local parse_time = PYRITION._TimeParse
 local prefix_functions = PYRITION.PlayerFindPrefixes
 local shorthand_time = PYRITION._TimeShorthand
+local time_thresholds = PYRITION.TimeThresholds
+local time_units = PYRITION.TimeUnits
 
 --local functions
 local function escape_targetting(target)
@@ -257,6 +259,7 @@ end, function(settings, executor, argument)
 	local default = settings.Default
 	local maximum = settings.Maximum
 	local minimum = settings.Minimum
+	local unit = time_units[time_thresholds[settings.Unit] or 1]
 	
 	if default then insert_if_matching(completions, argument, shorthand_time(default)) end
 	
@@ -266,19 +269,19 @@ end, function(settings, executor, argument)
 		insert_if_matching(completions, argument, minimum)
 		insert_if_matching(completions, argument, maximum)
 		
-		return completions, PYRITION:LanguageFormat("pyrition.command.argument.time.range", {maximum = maximum, minimum = minimum})
+		return completions, unit .. "   " .. PYRITION:LanguageFormat("pyrition.command.argument.time.range", {maximum = maximum, minimum = minimum})
 	elseif maximum then
 		local maximum = shorthand_time(maximum)
 		
 		insert_if_matching(completions, argument, maximum)
 		
-		return completions, PYRITION:LanguageFormat("pyrition.command.argument.time.maximum", {maximum = maximum})
+		return completions, unit .. "   " .. PYRITION:LanguageFormat("pyrition.command.argument.time.maximum", {maximum = maximum})
 	elseif minimum then
 		local minimum = shorthand_time(minimum)
 		
 		insert_if_matching(completions, argument, minimum)
 		
-		return completions, PYRITION:LanguageFormat("pyrition.command.argument.time.minimum", {minimum = minimum})
+		return completions, unit .. "   " .. PYRITION:LanguageFormat("pyrition.command.argument.time.minimum", {minimum = minimum})
 	end
 	
 	return completions
@@ -286,8 +289,10 @@ end, function(settings)
 	maybe_write(net.WriteUInt, settings.Default, 32)
 	maybe_write(net.WriteUInt, settings.Maximum, 32)
 	maybe_write(net.WriteUInt, settings.Minimum, 32)
+	maybe_write(net.WriteUInt, settings.Unit, 3)
 end, function(settings)
 	settings.Default = maybe_read(net.ReadUInt, 32)
 	settings.Maximum = maybe_read(net.ReadUInt, 32)
 	settings.Minimum = maybe_read(net.ReadUInt, 32)
+	settings.Unit = maybe_read(net.ReadUInt, 3)
 end)
