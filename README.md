@@ -1,7 +1,8 @@
 # Pyrition
 [![Discord](https://img.shields.io/discord/785233414374686720?label=Discord&logo=discord)](https://discord.gg/WMeCsQhakH)
 [![Codacy](https://img.shields.io/codacy/grade/ac3be98e8eeb49a7b8052dbe8eeb1062)](https://www.codacy.com/gh/Cryotheus/pyrition_2/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Cryotheus/pyrition_2&amp;utm_campaign=Badge_Grade)
-[![License](https://img.shields.io/github/license/Cryotheus/pyrition_2)](https://github.com/Cryotheus/pyrition_2/blob/main/LICENSE)  
+[![License](https://img.shields.io/github/license/Cryotheus/pyrition_2)](https://github.com/Cryotheus/pyrition_2/blob/main/LICENSE)
+[![Localizely](https://img.shields.io/localizely/progress/f115d755-6280-44b5-b69f-5167a175540f?token=6822fa5e61064e03ab3ed326ced0f532355949d0e7a04f9387f3b75e5534fbe3)](https://app.localizely.com/projects/f115d755-6280-44b5-b69f-5167a175540f/main/dashboard)  
 Administration mod for Garry's Mod  
 
 **NOT YET READY FOR USAGE**  
