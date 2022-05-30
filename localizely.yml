@@ -17,3 +17,6 @@ download:
       locale_code: ru
     - file: resource/localization/ru/pyrition.properties
       locale_code: ru
+  params:
+    export_empty_as: skip
+    java_properties_encoding: utf_8
