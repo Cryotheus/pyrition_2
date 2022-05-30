@@ -99,6 +99,16 @@ local function replace_tags(self, text, phrases, colored)
 	local build_text = colored and build_medial_text_colored or build_medial_text
 	local texts = {}
 	
+	--if prefixed with #, localize the string
+	--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal"
+	for tag, phrase in pairs(phrases) do
+		if isstring(phrase) then
+			if string.StartWith(phrase, "\\#") then print("escaped", phrase) phrases[tag] = string.sub(phrase, 2)
+			elseif string.StartWith(phrase, "#") then print("localized", phrase) phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
+			else print("standad", phrase) phrases[tag] = phrase end
+		end
+	end
+	
 	repeat
 		old_finish = finish
 		start, finish, match = string.find(text, "%[%:(.-)%]", finish)

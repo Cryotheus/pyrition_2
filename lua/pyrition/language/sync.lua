@@ -34,15 +34,7 @@ function MODEL:Read()
 					phrases[tag] = items
 				else --read players and strings
 					if net.ReadBool() then phrases[tag] = read_player()
-					else
-						local phrase = net.ReadString()
-						
-						--if prefixed with #, localize the string
-						--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal" weirdo
-						if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)
-						elseif string.StartWith(phrase, "#") then phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
-						else phrases[tag] = phrase end
-					end
+					else phrases[tag] = net.ReadString() end
 				end
 			until not net.ReadBool()
 		end

@@ -46,6 +46,7 @@ local function nice_time(seconds, recursions, use_grammar, thresholds, units, un
 	local thresholds = thresholds or time_thresholds
 	local unit_seperator = unit_seperator or " "
 	local units = units or time_units
+	local use_grammar = use_grammar or use_grammar == nil
 	
 	local unit = units[1]
 	

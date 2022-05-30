@@ -115,7 +115,7 @@ end
 function command_meta:__tostring() return "PyritionCommand [" .. table.concat(self.Parents, ".") .. "]" end
 
 --pyrition functions
-function PYRITION:ConsoleCommandFilterArgument(settings, ply, argument)
+function PYRITION:ConsoleCommandFilterArgument(ply, settings, argument)
 	local class = settings.Class
 	local command_argument_data = command_argument_classes[class]
 	
@@ -124,10 +124,11 @@ function PYRITION:ConsoleCommandFilterArgument(settings, ply, argument)
 	--TODO: WIP!!!
 end
 
-function PYRITION:ConsoleCommandFilterArguments(command, ply, arguments)
+function PYRITION:ConsoleCommandFilterArguments(ply, command, ...)
 	--basically, fail the execution if a required argument is invalid
 	--and ignore optional arguments that are invalid
 	--if we have an argument marked with Optional and it is invalid, pop it
+	local arguments = {...}
 	local argument_count = #arguments
 	local command_arguments = command.Arguments
 	local index = 1
@@ -136,7 +137,7 @@ function PYRITION:ConsoleCommandFilterArguments(command, ply, arguments)
 	--I can't adjust the index ipairs is on...
 	while index < argument_count do
 		local command_argument = command_arguments[index]
-		local valid, value, message = self:ConsoleCommandFilterArgument(command_argument, ply, argument)
+		local valid, value, message = self:ConsoleCommandFilterArgument(ply, command_argument, argument)
 		
 		if valid then
 			arguments[index] = value
@@ -154,6 +155,8 @@ function PYRITION:ConsoleCommandFilterArguments(command, ply, arguments)
 			end
 		end
 	end
+	
+	return arguments
 end
 
 function PYRITION:ConsoleCommandGet(parents, modify, max_depth)
@@ -213,8 +216,8 @@ function PYRITION:PyritionConsoleCommandDownload(parents, arguments)
 	return command
 end
 
-function PYRITION:PyritionConsoleCommandExecute(ply, command, ...)
-	local success, message, phrases = command(ply, ...)
+function PYRITION:PyritionConsoleCommandExecute(ply, command, arguments)
+	local success, message, phrases = command(ply, unpack(arguments))
 	
 	--nil = script error
 	--false = failed

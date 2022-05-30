@@ -52,15 +52,17 @@ function PYRITION:ConsoleExecute(ply, command, arguments)
 		return false
 	end
 	
-	local success, message, phrases = PYRITION:ConsoleCommandExecute(ply, command, unpack(arguments))
+	self:ConsoleCommandFilterArguments(ply, command, arguments)
+	
+	local success, message, phrases = self:ConsoleCommandExecute(ply, command, arguments)
 		
-	if message then PYRITION:LanguageQueue(success or ply, message, table.Merge({executor = ply}, phrases or {}))
+	if message then self:LanguageQueue(success or ply, message, table.Merge({executor = ply}, phrases or {}))
 	elseif success then
 		if not command.Downloaded then
 			--we don't send a message for downloaded commands
 			PYRITION:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
 		end
-	else PYRITION:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
+	else self:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
 	
 	return success
 end

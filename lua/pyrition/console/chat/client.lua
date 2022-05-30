@@ -1,9 +1,11 @@
 --locals
+local chat_limit = 126
 local color_cursor = Color(217, 217, 217)
 local color_hightlight = Color(255, 156, 2)
 local color_hint = Color(112, 112, 112)
 local color_text = color_white
 local on_player_chat = PYRITION._OnPlayerChat
+local unsafe_truncation
 
 local command_prefixes = {
 	["/"] = true,
@@ -170,9 +172,29 @@ local function find_chat()
 							
 							if silent_command then return end
 							
-							RunConsoleCommand("say", prefix and prefix .. text or text)
+							local text = prefix and prefix .. text or text
+							local text_width = #text
+							
+							if text_width >= chat_limit then
+								local note =  language.GetPhrase("pyrition.chat.truncated")
+								local note_width = #note - 8 + math.ceil(math.log(text_width + 1, 10))
+								local text_width = chat_limit - note_width
+								local whittle = string.Left(text, text_width)
+								
+								while unsafe_truncation(whittle, text_width) do
+									text_width = text_width - 1
+									whittle = string.Left(text, text_width)
+									
+									if text_width <= 0 then break end
+								end
+								
+								whittle = string.Left(text, text_width - 1)
+								text = whittle .. PYRITION:LanguageFormatTranslated(note, {count = utf8.len(text) - utf8.len(whittle)})
+							end
+							
+							RunConsoleCommand("say", text)
 						end
-						
+						--
 						function text_entry:OnKeyCode(code)
 							if code == KEY_ESCAPE then chat.Close()
 							elseif code == KEY_BACKSPACE and self:GetText() == "" then hacking_panel:RestoreChatInput(team_chat, true) end
@@ -449,6 +471,8 @@ local function on_player_chat_detour(self, ply, message, team_chat, ply_dead, ..
 	
 	return supressed
 end
+
+function unsafe_truncation(text, limit) return utf8.len(text, 1, limit) == utf8.len(text, 1, limit - 1) end
 
 --pyrition hooks
 function PYRITION:PyritionConsoleChatPosted(ply, message, team_chat, ply_dead, supressed) end
