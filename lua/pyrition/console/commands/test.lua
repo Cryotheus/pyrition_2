@@ -1,11 +1,17 @@
 --command for debugging
 local COMMAND = {
 	Arguments = {
-		Required = 2,
+		Required = 3,
 		
 		"Integer",
 		"Time",
-		"Player"
+		
+		{
+			Class = "Player",
+			Optional = true
+		},
+		
+		"String"
 	},
 	
 	Console = true

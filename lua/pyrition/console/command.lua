@@ -121,6 +121,8 @@ function PYRITION:ConsoleCommandFilterArgument(ply, settings, argument)
 	
 	assert(command_argument_data, "ID10T-11: Attempt to filter command argument with non-existent command argument class " .. tostring(class) .. ".")
 	
+	print(class)
+	
 	return command_argument_data[1](settings, ply, argument)
 end
 
@@ -138,24 +140,24 @@ function PYRITION:ConsoleCommandFilterArguments(ply, command, arguments)
 		local command_argument = command_arguments[index]
 		local valid, value, message = self:ConsoleCommandFilterArgument(ply, command_argument, arguments[index])
 		
+		print(index, valid, command_argument.Class)
+		
 		if valid then
 			arguments[index] = value
 			index = index + 1
 		else
 			if command_argument.Optional then
-				argument_count = argument_count - 1
+				arguments[index] = nil
 				
-				table.remove(command_arguments, index)
+				if index <= required then required = required + 1 end
 			else
 				if index <= required then return false, index, message
 				else arguments[index] = nil end
-				
-				index = index + 1
 			end
+			
+			index = index + 1
 		end
 	end
-	
-	PrintTable(arguments)
 	
 	return true
 end
