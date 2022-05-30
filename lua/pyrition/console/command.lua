@@ -57,7 +57,7 @@ local function network_execution(self, ply, ...)
 	do --command arguments
 		for index, argument in ipairs{...} do
 			net.WriteBool(true)
-			net.WriteString(argument)
+			net.WriteString(tostring(argument))
 		end
 		
 		net.WriteBool(false)
@@ -121,23 +121,22 @@ function PYRITION:ConsoleCommandFilterArgument(ply, settings, argument)
 	
 	assert(command_argument_data, "ID10T-11: Attempt to filter command argument with non-existent command argument class " .. tostring(class) .. ".")
 	
-	--TODO: WIP!!!
+	return command_argument_data[1](settings, ply, argument)
 end
 
-function PYRITION:ConsoleCommandFilterArguments(ply, command, ...)
+function PYRITION:ConsoleCommandFilterArguments(ply, command, arguments)
 	--basically, fail the execution if a required argument is invalid
 	--and ignore optional arguments that are invalid
 	--if we have an argument marked with Optional and it is invalid, pop it
-	local arguments = {...}
 	local argument_count = #arguments
 	local command_arguments = command.Arguments
 	local index = 1
-	local required = command.Required
+	local required = command_arguments.Required
 	
-	--I can't adjust the index ipairs is on...
+	--I can't adjust the index ipairs is on so I'm using a while loop
 	while index < argument_count do
 		local command_argument = command_arguments[index]
-		local valid, value, message = self:ConsoleCommandFilterArgument(ply, command_argument, argument)
+		local valid, value, message = self:ConsoleCommandFilterArgument(ply, command_argument, arguments[index])
 		
 		if valid then
 			arguments[index] = value
@@ -148,7 +147,7 @@ function PYRITION:ConsoleCommandFilterArguments(ply, command, ...)
 				
 				table.remove(command_arguments, index)
 			else
-				if index <= required then return false, message
+				if index <= required then return false, index, message
 				else arguments[index] = nil end
 				
 				index = index + 1
@@ -156,7 +155,7 @@ function PYRITION:ConsoleCommandFilterArguments(ply, command, ...)
 		end
 	end
 	
-	return arguments
+	return true
 end
 
 function PYRITION:ConsoleCommandGet(parents, modify, max_depth)

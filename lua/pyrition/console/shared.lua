@@ -52,19 +52,33 @@ function PYRITION:ConsoleExecute(ply, command, arguments)
 		return false
 	end
 	
-	self:ConsoleCommandFilterArguments(ply, command, arguments)
+	local filter_success, fail_index, fail_message
 	
-	local success, message, phrases = self:ConsoleCommandExecute(ply, command, arguments)
+	if CLIENT and command.Downloaded then filter_success = true
+	else filter_success, fail_index, fail_message = self:ConsoleCommandFilterArguments(ply, command, arguments) end
+	
+	if filter_success then
+		local success, message, phrases = self:ConsoleCommandExecute(ply, command, arguments)
+			
+		if message then self:LanguageQueue(success or ply, message, table.Merge({executor = ply}, phrases or {}))
+		elseif success then
+			if not command.Downloaded then
+				--we don't send a message for downloaded commands
+				PYRITION:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
+			end
+		else self:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
 		
-	if message then self:LanguageQueue(success or ply, message, table.Merge({executor = ply}, phrases or {}))
-	elseif success then
-		if not command.Downloaded then
-			--we don't send a message for downloaded commands
-			PYRITION:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
-		end
-	else self:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
-	
-	return success
+		return success
+	else
+		self:LanguageQueue(ply, fail_message and "pyrition.command.failed.argument.detailed" or "pyrition.command.failed.argument", {
+			class = (command_arguments[fail_index] or {Class = "nil"}).Class,
+			command = command_localization(command),
+			index = "#" .. fail_index,
+			message = fail_message
+		})
+		
+		return false
+	end
 end
 
 function PYRITION:ConsoleParseArguments(arguments_string)

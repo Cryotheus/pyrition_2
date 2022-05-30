@@ -28,7 +28,7 @@ local function build_panel_roster(parent)
 	return roster
 end
 
-local function find_chat()
+local function find_chat() --welcome to egypt
 	local panel = vgui.GetKeyboardFocus()
 	
 	if IsValid(panel) and panel:GetName() == "ChatInput" then
@@ -175,7 +175,7 @@ local function find_chat()
 							local text = prefix and prefix .. text or text
 							local text_width = #text
 							
-							if text_width >= chat_limit then
+							if text_width > chat_limit then
 								local note =  language.GetPhrase("pyrition.chat.truncated")
 								local note_width = #note - 8 + math.ceil(math.log(text_width + 1, 10))
 								local text_width = chat_limit - note_width

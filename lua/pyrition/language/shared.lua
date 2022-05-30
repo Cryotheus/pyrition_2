@@ -101,11 +101,13 @@ local function replace_tags(self, text, phrases, colored)
 	
 	--if prefixed with #, localize the string
 	--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal"
+	PrintTable(phrases or {"nah"})
+	
 	for tag, phrase in pairs(phrases) do
 		if isstring(phrase) then
-			if string.StartWith(phrase, "\\#") then print("escaped", phrase) phrases[tag] = string.sub(phrase, 2)
-			elseif string.StartWith(phrase, "#") then print("localized", phrase) phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
-			else print("standad", phrase) phrases[tag] = phrase end
+			if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)
+			elseif string.StartWith(phrase, "#") then phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
+			else phrases[tag] = phrase end
 		end
 	end
 	
@@ -143,7 +145,7 @@ local function replace_tags(self, text, phrases, colored)
 				prefix = prefix,
 				prefix_color = prefix_color and get_color(prefix_color),
 				tag = tag,
-				text = phrases[tag] or "[>" .. tag .. "<]"
+				text = phrases[tag] or "[:" .. tag .. "]"
 			})
 		else build_text(accumulator, text, old_finish, #text) end
 	until match == nil
@@ -312,7 +314,7 @@ PYRITION:GlobalHookCreate("LanguageRegisterKieve")
 PYRITION:GlobalHookCreate("LanguageRegisterTieve")
 
 PYRITION:LanguageRegisterColor(color_command, "command")
-PYRITION:LanguageRegisterColor(color_misc, "attempts", "duration", "map", "message", "reason", "time", "visit")
+PYRITION:LanguageRegisterColor(color_misc, "attempts", "class", "duration", "index", "map", "message", "reason", "time", "visit")
 PYRITION:LanguageRegisterColor(color_player, "executor", "name", "player", "target", "targets")
 
 PYRITION:LanguageRegisterKieve(kieve_executor, "executor")

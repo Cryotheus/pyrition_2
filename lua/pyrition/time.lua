@@ -79,7 +79,7 @@ local function parse_time(text, default_unit)
 	
 	if text == "" then return false end
 	
-	local time = 0
+	local time = false
 	local report = {}
 	
 	for matched in string.gmatch(text, "[%d]+[%D]*") do
@@ -97,7 +97,7 @@ local function parse_time(text, default_unit)
 				else default = TIME_SECOND end
 			end
 			
-			time = time + numerical * multiplier
+			time = (time or 0) + numerical * multiplier
 		else return false end
 	end
 	

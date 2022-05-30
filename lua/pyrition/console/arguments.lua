@@ -25,13 +25,15 @@ end
 
 --post
 PYRITION:ConsoleCommandRegisterArgument("Integer", function(settings, ply, argument)
-	local default = settings.Default
-	local integer = tonumber(argument) or default
+	local integer = tonumber(argument)
+	
+	if not integer then return false end
+	
 	local maximum = settings.Maximum
 	local minimum = settings.Minimum
 	
 	--no inf with integers, ok?
-	if math.abs(integer) == math.huge then integer = default end
+	if math.abs(integer) == math.huge then return false end
 	if maximum then integer = math.min(integer, maximum) end
 	if minimum then integer = math.max(integer, minimum) end
 	
@@ -85,7 +87,10 @@ end, function(settings)
 end)
 
 PYRITION:ConsoleCommandRegisterArgument("Number", function(settings, ply, argument)
-	local number = tonumber(argument) or settings.Default
+	local number = tonumber(argument)
+	
+	if not number then return end
+	
 	local maximum = settings.Maximum
 	local minimum = settings.Minimum
 	local rounding = settings.Rounding
@@ -206,8 +211,8 @@ PYRITION:ConsoleCommandRegisterArgument("String", function(settings, ply, argume
 	local maximum = settings.Maximum
 	local minimum = settings.Minimum
 	
-	if maximum and length > maximum then string.Left(argument, maximum)
-	elseif minimum and length < minimum or argument == "" then argument = default end
+	if maximum and length > maximum then argument = string.Left(argument, maximum)
+	elseif minimum and length < minimum then return false end
 	
 	return argument and true or false, argument
 end, function(settings, executor, argument)
@@ -243,13 +248,15 @@ end, function(settings)
 end)
 
 PYRITION:ConsoleCommandRegisterArgument("Time", function(settings, ply, argument)
-	local default = settings.Default
-	local time = parse_time(argument) or default
+	local time = parse_time(argument)
+	
+	if not time then return false end
+	
 	local maximum = settings.Maximum
 	local minimum = settings.Minimum
 	
 	--no inf with time, ok?
-	if math.abs(time) == math.huge then time = default end
+	if math.abs(time) == math.huge then return false, nil end
 	if maximum then time = math.min(time, maximum) end
 	if minimum then time = math.max(time, minimum) end
 	
