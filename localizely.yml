@@ -19,6 +19,9 @@ download:
     - file: resource/localization/el/pyrition.properties
       locale_code: el
   files:
+    - file: resource/localization/es-ES/pyrition.properties
+      locale_code: es-ES
+  files:
     - file: resource/localization/ru/pyrition.properties
       locale_code: ru
   params:
