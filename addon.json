@@ -9,13 +9,14 @@
 	"ignore": [
 		"*.bat",
 		"*.gma",
+		"*.md",
 		"*.pdn",
 		"*.txt",
+		"*.yml",
 		"*.zip",
 		".git*",
 		"license",
 		"LICENSE",
-		"*.md",
 		"wiki/*"
 	]
 }
