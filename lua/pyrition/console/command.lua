@@ -134,7 +134,7 @@ function PYRITION:ConsoleCommandFilterArguments(ply, command, arguments)
 	local required = command_arguments.Required
 	
 	--I can't adjust the index ipairs is on so I'm using a while loop
-	while index < argument_count do
+	while index <= argument_count do
 		local command_argument = command_arguments[index]
 		local valid, value, message = self:ConsoleCommandFilterArgument(ply, command_argument, arguments[index])
 		
@@ -154,6 +154,8 @@ function PYRITION:ConsoleCommandFilterArguments(ply, command, arguments)
 			end
 		end
 	end
+	
+	PrintTable(arguments)
 	
 	return true
 end

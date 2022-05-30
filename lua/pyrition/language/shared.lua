@@ -101,8 +101,6 @@ local function replace_tags(self, text, phrases, colored)
 	
 	--if prefixed with #, localize the string
 	--if the # is wanted, a backslash can be used to escape like "\\#pyrition.commands.heal"
-	PrintTable(phrases or {"nah"})
-	
 	for tag, phrase in pairs(phrases) do
 		if isstring(phrase) then
 			if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)

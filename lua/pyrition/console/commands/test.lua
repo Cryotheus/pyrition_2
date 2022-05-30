@@ -1,3 +1,4 @@
+--command for debugging
 local COMMAND = {
 	Arguments = {
 		Required = 2,
@@ -11,6 +12,8 @@ local COMMAND = {
 }
 
 function COMMAND:Execute(ply, integer, time, targets)
+	print(ply, integer, time, targets)
+	
 	if istable(targets) then PrintTable(targets) end
 	
 	return true
