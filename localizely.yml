@@ -2,18 +2,18 @@ config_version: 1.0
 project_id: f115d755-6280-44b5-b69f-5167a175540f
 file_type: java_properties
 upload:
-	files: # List of files for upload to Localizely. Usually it is just one file used for the main locale
-		- file: resource/localization/en/pyrition_commands.properties
-			locale_code: en
-		- file: resource/localization/en/pyrition_convars.properties
-			locale_code: en
-		- file: resource/localization/en/pyrition.properties
-			locale_code: en
+  files: # List of files for upload to Localizely. Usually it is just one file used for the main locale
+    - file: resource/localization/en/pyrition_commands.properties
+      locale_code: en
+    - file: resource/localization/en/pyrition_convars.properties
+      locale_code: en
+    - file: resource/localization/en/pyrition.properties
+      locale_code: en
 download:
-	files: # List of files for download from Localizely.
-		- file: resource/localization/ru/pyrition_commands.properties
-			locale_code: ru
-		- file: resource/localization/ru/pyrition_convars.properties
-			locale_code: ru
-		- file: resource/localization/ru/pyrition.properties
-			locale_code: ru
+  files: # List of files for download from Localizely.
+    - file: resource/localization/ru/pyrition_commands.properties
+      locale_code: ru
+    - file: resource/localization/ru/pyrition_convars.properties
+      locale_code: ru
+    - file: resource/localization/ru/pyrition.properties
+      locale_code: ru
