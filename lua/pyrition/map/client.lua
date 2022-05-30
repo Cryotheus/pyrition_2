@@ -52,7 +52,7 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 		end
 		
 		do --refresh button
-			local button = form:Button("Refresh")
+			local button = form:Button("#refresh")
 			form.RefreshButton = button
 			
 			button:Dock(TOP)

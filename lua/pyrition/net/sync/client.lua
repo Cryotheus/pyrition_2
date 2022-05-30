@@ -34,10 +34,9 @@ hook.Add("PopulateToolMenu", "PyritionNetSync", function()
 		form:ClearControls()
 		
 		do --refresh button
-			local button = form:Button("Refresh")
+			local button = form:Button("#refresh")
 			
 			button:SetMaterial("icon16/arrow_refresh.png")
-			button:SetText("Refresh")
 			
 			function button:DoClick() list_view:Refresh() end
 		end

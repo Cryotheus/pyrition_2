@@ -1,8 +1,4 @@
 local teleport_history = PYRITION.PlayerTeleportHistory
-local teleport_history_length = PYRITION.PlayerTeleportHistoryLength
-
---local functions
-local function calculate_reverse_index(index, length) return length - index + 1 end
 
 --pyrition functions
 function PYRITION:PlayerTeleportRefreshGUI()
@@ -34,7 +30,7 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 		end
 		
 		do --refresh button
-			local button = form:Button("Refresh")
+			local button = form:Button("#refresh")
 			
 			button:Dock(TOP)
 			button:SetMaterial("icon16/arrow_refresh.png")
@@ -76,7 +72,6 @@ hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 			end
 			
 			function list_view:Refresh()
-				local button_index = button.TeleportIndex
 				local history_length = #teleport_history
 				
 				self:Clear()
