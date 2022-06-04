@@ -106,7 +106,7 @@ local function replace_tags(self, text, phrases, colored)
 			if string.StartWith(phrase, "\\#") then phrases[tag] = string.sub(phrase, 2)
 			elseif string.StartWith(phrase, "#") then phrases[tag] = language.GetPhrase(string.sub(phrase, 2))
 			else phrases[tag] = phrase end
-		end
+		elseif istable(phrase) and #phrase == 1 then phrases[tag] = phrase[1] end
 	end
 	
 	repeat
@@ -224,13 +224,15 @@ end
 local function kieve_targets(index, text, text_data, texts, key_values, phrases)
 	if text == language.GetPhrase("pyrition.player.list.everyone") then return nil, color_everyone end
 	
+	local samegular = key_values.samegular
 	local executor = phrases.executor --who ran the command
 	local ply = local_player
 	local themself = text == executor and key_values.themself --the text to use if target is the executor
 	local value_self = executor and key_values.self --the text to use if we're the target and executor
 	local you = text == ply and key_values.you --the text to use if we're the target
 	
-	if value_self and you and executor == ply then return value_self, color_self
+	if samegular and text == phrases.targets then return samegular
+	elseif value_self and you and executor == ply then return value_self, color_self
 	elseif you then return you, color_self
 	elseif themself then return themself, color_player end
 end
