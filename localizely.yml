@@ -9,19 +9,14 @@ download:
   files:
     - file: resource/localization/bg/pyrition.properties
       locale_code: bg
-  files:
     - file: resource/localization/cs/pyrition.properties
       locale_code: cs
-  files:
     - file: resource/localization/de/pyrition.properties
       locale_code: de
-  files:
     - file: resource/localization/el/pyrition.properties
       locale_code: el
-  files:
     - file: resource/localization/es-ES/pyrition.properties
       locale_code: es-ES
-  files:
     - file: resource/localization/ru/pyrition.properties
       locale_code: ru
   params:
