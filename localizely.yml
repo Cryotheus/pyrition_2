@@ -3,7 +3,7 @@ project_id: f115d755-6280-44b5-b69f-5167a175540f
 file_type: java_properties
 upload:
   files:
-    - file: resource/localization/en/pyrition_commands.properties
+    - file: resource/localization/en/pyrition.properties
       locale_code: en
 download:
   files:
