@@ -8,7 +8,9 @@ local MODEL = {Priority = 10}
 --local function
 local function read_map(self, index)
 	local map = self:ReadEnumeratedString("map")
-	map_votes[map] = self:ReadUInt(max_players_bits)
+	local votes = self:ReadUInt(max_players_bits)
+	
+	map_votes[map] = votes ~= 0 and votes or nil
 	
 	duplex_set(PYRITION.MapList, index, map)
 end

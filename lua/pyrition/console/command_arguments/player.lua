@@ -46,12 +46,12 @@ function ARGUMENT:Complete(ply, settings, argument)
 end
 
 function ARGUMENT:Filter(ply, settings, argument)
-	if settings.Manual then return true, targetting end
+	if settings.Manual then return true, argument end
 	
 	local find, message
 	
-	if settings.Default and not targetting or targetting == "" then find, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply, settings.Single, settings.Selfless)
-	else find, message = PYRITION:PyritionPlayerFind(targetting, ply, settings.Single, settings.Selfless) end
+	if settings.Default and not argument or argument == "" then find, message = PYRITION:PlayerFindWithFallback(argument, ply, ply, settings.Single, settings.Selfless)
+	else find, message = PYRITION:PyritionPlayerFind(argument, ply, settings.Single, settings.Selfless) end
 	
 	return find and true or false, find, message
 end

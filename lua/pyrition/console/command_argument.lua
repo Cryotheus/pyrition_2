@@ -31,7 +31,7 @@ function PYRITION:ConsoleCommandArgumentFilter(ply, settings, argument)
 	
 	assert(command_argument, "ID10T-11: Attempt to filter command argument with non-existent command argument class " .. tostring(class) .. ".")
 	
-	return command_argument(settings, ply, argument)
+	return command_argument(ply, settings, argument)
 end
 
 function PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments)
