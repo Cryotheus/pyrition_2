@@ -4,6 +4,7 @@ local COMMAND = {
 		
 		{
 			Class = "Player",
+			Default = true,
 			Optional = true
 		},
 		
@@ -25,33 +26,20 @@ local player_meta = FindMetaTable("Player")
 COMMAND.SetFunction = entity_meta.SetHealth
 
 --command functions
-function COMMAND:Execute(ply, targetting, amount)
-	local message
-	local targets = {ply}
+function COMMAND:Execute(ply, targets, amount)
+	local modified = {IsPlayerList = true}
+	local set_function = self.SetFunction
 	
-	if amount == nil then amount = targetting
-	else targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply) end
-	if not targets then return false, message end
-	
-	local amount = tonumber(amount)
-	
-	if amount then
-		local modified = {IsPlayerList = true}
-		local set_function = self.SetFunction
-		
-		for index, target in ipairs(targets) do
-			if target:Alive() then
-				set_function(target, amount)
-				table.insert(modified, target)
-			end
+	for index, target in ipairs(targets) do
+		if target:Alive() then
+			set_function(target, amount)
+			table.insert(modified, target)
 		end
-		
-		if table.IsEmpty(modified) then return false, "pyrition.commands.health.missed" end
-		
-		return true, "pyrition.commands.health.success", {targets = modified}
 	end
 	
-	return false, "pyrition.commands.health.fail"
+	if table.IsEmpty(modified) then return false, "pyrition.commands.health.missed" end
+	
+	return true, "pyrition.commands.health.success", {targets = modified}
 end
 
 --post

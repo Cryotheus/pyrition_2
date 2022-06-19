@@ -55,7 +55,7 @@ function PYRITION:ConsoleExecute(ply, command, arguments)
 	local filter_success, fail_index, fail_message
 	
 	if CLIENT and command.Downloaded then filter_success = true
-	else filter_success, fail_index, fail_message = self:ConsoleCommandFilterArguments(ply, command, arguments) end
+	else filter_success, fail_index, fail_message = self:ConsoleCommandArgumentValidate(ply, command, arguments) end
 	
 	if filter_success then
 		local success, message, phrases = self:ConsoleCommandExecute(ply, command, arguments)
@@ -148,11 +148,13 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 			if settings then
 				local class = settings.Class
 				local class_argument = arguments[depth + command_argument_index] or ""
-				local completion_function = command_argument_classes[class][2]
+				local command_argument_object = command_argument_classes[class]
 				
-				if completion_function then
+				if command_argument_object.Complete then
 					local insertions
-					insertions, hint = completion_function(settings, LocalPlayer(), class_argument)
+					
+					--because hint is in a higher scope
+					insertions, hint = command_argument_object:Complete(LocalPlayer(), settings, class_argument)
 					
 					if insertions and next(insertions) then
 						--remove the blank command completion

@@ -7,6 +7,10 @@
 --please note, entries beginning with _ in the PYRITION table are local functions made global
 local developer = GetConVar("developer")
 
+--false in MENU state
+--was deprecated, but kept it because of stream models
+SHARED = CLIENT or SERVER or false
+
 if PYRITION then
 	local removing = {}
 	

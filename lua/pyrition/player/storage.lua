@@ -3,6 +3,7 @@ local pyrmysql = pyrmysql
 local escape_string = pyrmysql.SQLStr
 local player_storage_players = PYRITION.PlayerStoragePlayers or {}
 local player_storages = PYRITION.PlayerStorages or {}
+local read_only = false --RELEASE: convar this
 
 --all the type names both MySQL and SQLite accept... probably...
 local valid_type_names = {
@@ -147,8 +148,7 @@ function PYRITION:PlayerStorageLoad(ply, key, queue, tracker, emulated)
 end
 
 function PYRITION:PlayerStorageSave(ply, key, query)
-	if ply:IsBot() then return end
-	
+	if read_only or ply:IsBot() then return end
 	
 	local database_name = PYRITION.SQLDatabaseName
 	local query = queue and pyrmysql.queueQuery or pyrmysql.query

@@ -38,18 +38,15 @@ function PYRITION:LanguageQueue(ply, key, phrases, option)
 	if ply == true then
 		for index, ply in ipairs(player.GetHumans()) do self:LanguageQueue(ply, key, phrases, option) end
 		
-		return self:LanguageDisplay(false, key, phrases, true)
+		--send the broadcast to console
+		return self:LanguageDisplay("chat", key, phrases, true)
 	end
 	
+	--if the ply is the server
 	if ply == nil or ply == game.GetWorld() then return self:LanguageDisplay(false, key, phrases) end
 	
-	local model
-	local models = self:NetSyncGetModels(class, ply)
-	
-	if models then model = next(models)
-	else model = self:NetSyncAdd("language", ply) end
-	
-	model:AddMessage(key, phrases, option)
+	--get an existing stream model or create one, then write the message to it
+	self:NetStreamModelGet("language", ply)(key, phrases, option or "chat")
 end
 
 function PYRITION:LanguageRegister(key) self:NetAddEnumeratedString("language", key) end

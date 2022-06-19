@@ -4,31 +4,25 @@ local COMMAND = {
 }
 
 --command function
-function COMMAND:Execute(ply, targetting)
-	local targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply)
-	
-	if targets then
-		for index, target in ipairs(targets) do
-			target:Extinguish()
-			
-			if target:Alive() then
-				local armor = target:Armor()
-				local max_health = target:GetMaxHealth()
-				
-				if target:Health() < max_health then target:SetHealth(max_health) end
-				
-				if armor > 0 then
-					local max_armor = target:GetMaxArmor()
-					
-					if armor < max_armor then target:SetArmor(max_armor) end
-				end
-			else target:Spawn() end
-		end
+function COMMAND:Execute(ply, targets)
+	for index, target in ipairs(targets) do
+		target:Extinguish()
 		
-		return true, "pyrition.commands.heal.success", {targets = targets}
+		if target:Alive() then
+			local armor = target:Armor()
+			local max_health = target:GetMaxHealth()
+			
+			if target:Health() < max_health then target:SetHealth(max_health) end
+			
+			if armor > 0 then
+				local max_armor = target:GetMaxArmor()
+				
+				if armor < max_armor then target:SetArmor(max_armor) end
+			end
+		else target:Spawn() end
 	end
 	
-	return false, message
+	return true, "pyrition.commands.heal.success", {targets = targets}
 end
 
 --registration

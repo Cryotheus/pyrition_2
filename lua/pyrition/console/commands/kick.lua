@@ -32,28 +32,16 @@ local COMMAND_MULTI = {
 }
 
 --command function
-function COMMAND:Execute(ply, targetting, reason)
-	local target, message = PYRITION:PlayerFind(targetting, ply, true)
+function COMMAND:Execute(ply, target, reason)
+	PYRITION:PlayerKick(target, reason)
 	
-	if target then
-		target:Kick(reason or "")
-		
-		return true, reason and "pyrition.commands.kick.explicable" or "pyrition.commands.kick.inexplicable", {target = target, reason = reason}
-	end
-	
-	return false, message
+	return true, reason and "pyrition.commands.kick.explicable" or "pyrition.commands.kick.inexplicable", {target = target, reason = reason}
 end
 
-function COMMAND_MULTI:Execute(ply, targetting, reason)
-	local targets, message = PYRITION:PlayerFind(targetting, supplicant)
+function COMMAND_MULTI:Execute(ply, targets, reason)
+	for index, target in ipairs(targets) do PYRITION:PlayerKick(target, reason) end
 	
-	if targets then
-		for index, target in ipairs(targets) do PYRITION:PlayerKick(target, reason) end
-		
-		return true, reason and "pyrition.commands.kick.multiple.explicable" or "pyrition.commands.kick.multiple.inexplicable", {targets = targets, reason = reason}
-	end
-	
-	return false, message
+	return true, reason and "pyrition.commands.kick.multiple.explicable" or "pyrition.commands.kick.multiple.inexplicable", {targets = targets, reason = reason}
 end
 
 --post

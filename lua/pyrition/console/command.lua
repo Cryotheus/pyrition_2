@@ -1,7 +1,6 @@
 --locals
 local assert = assert
 local build_command_list
-local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses
 local commands = PYRITION.ConsoleCommands or {}
 local grow_command_tree
 local isstring = isstring
@@ -72,7 +71,7 @@ function grow_command_tree(commands, maximum_depth, depth)
 	local tree = {}
 	
 	for key, value in pairs(commands) do
-		if is_pyrition_command(value) and key ~= "BaseClass" then
+		if is_pyrition_command(value) then
 			if depth >= maximum_depth then tree[value.Name] = {}
 			else tree[value.Name] = grow_command_tree(value, maximum_depth, depth + 1) end
 		end
@@ -115,53 +114,6 @@ end
 function command_meta:__tostring() return "PyritionCommand [" .. table.concat(self.Parents, ".") .. "]" end
 
 --pyrition functions
-function PYRITION:ConsoleCommandFilterArgument(ply, settings, argument)
-	local class = settings.Class
-	local command_argument_data = command_argument_classes[class]
-	
-	assert(command_argument_data, "ID10T-11: Attempt to filter command argument with non-existent command argument class " .. tostring(class) .. ".")
-	
-	print(class)
-	
-	return command_argument_data[1](settings, ply, argument)
-end
-
-function PYRITION:ConsoleCommandFilterArguments(ply, command, arguments)
-	--basically, fail the execution if a required argument is invalid
-	--and ignore optional arguments that are invalid
-	--if we have an argument marked with Optional and it is invalid, pop it
-	local argument_count = #arguments
-	local command_arguments = command.Arguments
-	local index = 1
-	local required = command_arguments.Required
-	
-	--I can't adjust the index ipairs is on so I'm using a while loop
-	while index <= argument_count do
-		local command_argument = command_arguments[index]
-		local valid, value, message = self:ConsoleCommandFilterArgument(ply, command_argument, arguments[index])
-		
-		print(index, valid, command_argument.Class)
-		
-		if valid then
-			arguments[index] = value
-			index = index + 1
-		else
-			if command_argument.Optional then
-				arguments[index] = nil
-				
-				if index <= required then required = required + 1 end
-			else
-				if index <= required then return false, index, message
-				else arguments[index] = nil end
-			end
-			
-			index = index + 1
-		end
-	end
-	
-	return true
-end
-
 function PYRITION:ConsoleCommandGet(parents, modify, max_depth)
 	if isstring(parents) then parents = string.Split(parents, " ") end
 	
@@ -184,6 +136,14 @@ function PYRITION:ConsoleCommandGet(parents, modify, max_depth)
 	end
 	
 	return branch, count
+end
+
+function PYRITION:ConsoleCommandGetChildren(command)
+	local children = {}
+	
+	for key, value in pairs(command) do if is_pyrition_command(value) then table.insert(children, value) end end
+	
+	return next(children) and children or false
 end
 
 function PYRITION:ConsoleCommandGetExisting(parents)
@@ -302,31 +262,6 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	end
 	
 	return command
-end
-
-function PYRITION:PyritionConsoleCommandRegisterArgument(class, filter_function, auto_complete, write_function, read_function)
-	assert(isstring(class) and isfunction(filter_function) and isfunction(auto_complete), "ID10T-10: Argument mismatch in registering command arguments.")
-	assert(read_function and write_function or not (read_function or write_function), "ID10T-13: Either both network functions or no network functions are required.")
-	
-	if SERVER then self:NetAddEnumeratedString("command_argument", class) end
-	
-	command_argument_classes[class] = {
-		--first return should be a bool for validity of argument
-		--second return should be the value itself, and is ignored if invalid
-		--third return is a message
-		filter_function,
-		
-		--return should be a list of strings for the command's completion
-		auto_complete,
-		
-		--first argument is the settings of the argument
-		--optional, used to network the argument's data
-		write_function,
-		
-		--first argument is the settings of the argument
-		--optional, used to network the argument's data
-		read_function
-	}
 end
 
 function PYRITION:PyritionConsoleCommandReloaded(old_command, new_command) MsgC(Color(255, 192, 46), "[Pyrition] Reloaded '" .. old_command .. "'\n") end

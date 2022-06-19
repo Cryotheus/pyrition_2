@@ -1,6 +1,6 @@
 local prefix_functions = {
 	["@"] = function(needle, supplicant) --player you're looking at
-		--TODO: this!
+		--POST: this!
 		return false, "Unavailable."
 	end,
 	
@@ -102,7 +102,6 @@ function PYRITION:PyritionPlayerFind(needle, supplicant, single, exclude_supplic
 	else --find by name
 		local all_players = player.GetAll()
 		local builder = {}
-		local player_count = #all_players
 		
 		needle = string.lower(needle)
 		

@@ -18,8 +18,6 @@ local COMMAND = {
 }
 
 function COMMAND:Execute(ply, integer, time, targets)
-	print(ply, integer, time, targets)
-	
 	if istable(targets) then PrintTable(targets) end
 	
 	return true

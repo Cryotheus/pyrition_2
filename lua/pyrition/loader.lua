@@ -5,17 +5,27 @@
 --motivation: whats that
 
 local config = {
-	duplex = 23,	--0010 111
-	gradient = 23,	--0010 111
-	ip = 18,		--0010 010
-	loader = 4,		--0000 100
-	time = 23,		--0010 111
+	convention = 23,	--0010 111
+	duplex = 23,		--0010 111
+	gradient = 23,		--0010 111
+	ip = 18,			--0010 010
+	loader = 4,			--0000 100
+	time = 23,			--0010 111
 	
 	console = {
 		chat = {
 			calculator = 61,	--111 101
 			client = 53,		--110 101
 			server = 50,		--110 010
+		},
+		
+		command_arguments = {
+			integer = 63,	--111 111
+			map = 63,		--111 111
+			number = 63,	--111 111
+			player = 63,	--111 111
+			string = 63,	--111 111
+			time = 63,		--111 111
 		},
 		
 		commands = {
@@ -35,11 +45,11 @@ local config = {
 			test = 74,			--1001 010
 		},
 		
-		command = 55,	--110 111
-		arguments = 63,	--110 111
-		server = 58,	--111 010
-		shared = 47,	--101 111
-		sync = 63,		--111 111
+		command = 55,			--110 111
+		command_argument = 55,	--110 111
+		server = 58,			--111 010
+		shared = 47,			--101 111
+		stream = 63,			--111 111
 	},
 	
 	global = {
@@ -55,14 +65,14 @@ local config = {
 		library = 18,	--010 010
 		shared = 47,	--101 111
 		server = 42,	--101 010
-		sync = 55,		--110 111
+		stream = 55,	--110 111
 	},
 	
 	map = {
 		client = 69,	--1000 101
 		shared = 63,	--0111 111
 		server = 66,	--1000 010
-		sync = 71,		--1000 111
+		stream = 71,	--1000 111
 	},
 	
 	net = {
@@ -72,10 +82,11 @@ local config = {
 		server = 34,			--100 010
 		shared = 31,			--011 111
 		
-		sync = {
-			client = 37,	--100 101
+		stream = {
+			client = 53,	--110 101
+			shared = 47,	--101 111
 			model = 47,		--101 111
-			server = 34,	--100 010
+			server = 50,	--110 010
 		}
 	},
 	
@@ -96,7 +107,7 @@ local config = {
 			client = 61,	--111 101
 			server = 58,	--111 010
 			shared = 55,	--110 111
-			sync = 63,		--111 111
+			stream = 63,	--111 111
 		}
 	},
 	

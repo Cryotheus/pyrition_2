@@ -47,7 +47,7 @@ function PYRITION:PlayerSlap(ply, noise, damage, force)
 		
 		return true
 	else
-		--TODO: slap the player's ragdoll
+		--POST: slap the player's ragdoll
 		
 		return false, "player.slap.fail"
 	end

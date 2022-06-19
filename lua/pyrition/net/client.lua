@@ -3,16 +3,11 @@ local jerry = 0.24027821356 --this is jerry, a very special number. do not worry
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
 local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] = fooplex[string]
 
---pyrition functions
-function PYRITION:NetReadEnumeratedString(namespace)
+--local functions
+local function read_enumerated_string(namespace, ply, text, enumeration)
 	local enumerations = net_enumerations[namespace]
-	local text
 	
-	assert(enumerations, 'ID10T-2/C: Attempt to read enumerated string using non-existent namespace "' .. tostring(namespace) .. '"')
-	
-	if net.ReadBool() then text = net.ReadString(text) end
-	
-	local enumeration = net.ReadUInt(net_enumeration_bits[namespace]) + 1
+	assert(enumerations, "ID10T-2/C: Attempt to read enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
 	
 	if text then
 		enumerations[enumeration] = text
@@ -24,19 +19,44 @@ function PYRITION:NetReadEnumeratedString(namespace)
 	return enumerations[enumeration]
 end
 
-function PYRITION:NetWriteEnumeratedString(namespace, text)
+local function write_enumerated_string(namespace, text)
 	local enumerations = net_enumerations[namespace]
 	
-	assert(enumerations, 'ID10T-3/C: Attempt to write enumerated string using non-existent namespace "' .. namespace .. '"')
+	assert(enumerations, "ID10T-3/C: Attempt to write enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
 	
 	local enumeration = enumerations[text]
 	
-	if enumeration then
-		net.WriteBool(false)
-		net.WriteUInt(enumeration - 1, net_enumeration_bits[namespace])
-	else
+	if enumeration then return false, text, enumeration, net_enumeration_bits[namespace] end
+	
+	return true, text, nil, net_enumeration_bits[namespace]
+end
+
+--globals
+PYRITION._ReadEnumeratedString = read_enumerated_string
+PYRITION._WriteEnumeratedString = write_enumerated_string
+
+--internal pyrition functions
+function PYRITION._RecipientIterable() return false end
+
+--pyrition functions
+function PYRITION:NetReadEnumeratedString(namespace)
+	return read_enumerated_string(
+		namespace,
+		nil,
+		net.ReadBool() and net.ReadString(),
+		net.ReadUInt(net_enumeration_bits[namespace]) + 1
+	)
+end
+
+function PYRITION:NetWriteEnumeratedString(namespace, text)
+	local send_raw, text, enumeration, enumeration_bits = write_enumerated_string(namespace, text)
+	
+	if send_raw then
 		net.WriteBool(true)
 		net.WriteString(text)
+	else
+		net.WriteBool(false)
+		net.WriteUInt(enumeration - 1, enumeration_bits)
 	end
 end
 
@@ -130,16 +150,6 @@ hook.Add("PopulateToolMenu", "PyritionNet", function()
 end)
 
 --net
-net.Receive("pyrition", function(length, ply)
-	--syncs the bits for enumerations
-	repeat
-		local namespace = net.ReadString()
-		net_enumeration_bits[namespace] = net.ReadUInt(5) + 1
-		
-		if not net_enumerations[namespace] then net_enumerations[namespace] = {} end
-	until not net.ReadBool()
-end)
-
 net.Receive("pyrition_teach", function()
 	--this is received when the server is teaching us enumerations that we didn't use
 	repeat

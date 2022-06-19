@@ -4,65 +4,35 @@ local MODEL = {
 	Priority = 65535
 }
 
---sync model functions
-function MODEL:BuildWriteList(bits)
-	local items = {}
-	
-	for key, value in pairs(bits or PYRITION.NetEnumerationBits) do table.insert(items, key) end
-	
-	self.Items = items
-	self.Maximum = #items
-	
-	return items
-end
+--stream model functions
+function MODEL:InitialSync(ply, emulated) return true end
 
-function MODEL:FinishWrite() self.Tree = nil end
-
-function MODEL:Initialize()
-	if SERVER then
-		self:BuildWriteList()
-		
-		self.Index = 1
-	end
-end
-
-function MODEL:InitialSync(ply, emulated)
-	--elevated priority for initial enum syncs
-	self.Priority = self.Priority + 1
-	
-	return true
-end
-
-function MODEL:Read()
-	local net_bits = PYRITION.NetEnumerationBits
+function MODEL:Read(ply)
+	local enumeration_bits = PYRITION.NetEnumerationBits
 	local net_enumerations = PYRITION.NetEnumeratedStrings
 	
 	repeat
-		local namespace = net.ReadString()
-		
-		net_bits[namespace] = net.ReadUInt(5) + 1
+		local namespace = self:ReadString()
+		enumeration_bits[namespace] = self:ReadUInt(5) + 1
 		
 		if not net_enumerations[namespace] then net_enumerations[namespace] = {} end
-	until not net.ReadBool()
+	until not self:ReadBool()
 end
 
 function MODEL:Write(ply)
-	local index = self.Index
-	local namespace = self.Items[index]
+	local passed = false
 	
-	net.WriteString(namespace)
-	net.WriteUInt(PYRITION.NetEnumerationBits[namespace] - 1, 5)
-	
-	if index >= self.Maximum then
-		net.WriteBool(false)
+	for namespace, bits in pairs(self.Bits or PYRITION.NetEnumerationBits) do
+		if passed then self:WriteBool(true)
+		else passed = true end
 		
-		return true
+		self:WriteString(namespace)
+		self:WriteUInt(bits - 1, 5)
 	end
 	
-	net.WriteBool(true)
-	
-	self.Index = index + 1
+	self:WriteBool(false)
+	self:Complete()
 end
 
 --post
-PYRITION:NetSyncModelRegister("enumeration_bits", MODEL)
+PYRITION:NetStreamModelRegister("enumeration_bits", CLIENT, MODEL)

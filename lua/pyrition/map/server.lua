@@ -2,9 +2,9 @@ util.AddNetworkString("pyrition_map")
 
 --locals
 local duplex_insert = PYRITION._DuplexInsert
-local map_vote_percentage = 0.5 --TODO: ConVar this!
-local map_vote_threshold = 3 --TODO: ConVar this!
-local map_votes = PYRITION.MapVotes or {}
+local map_vote_percentage = 0.5 --RELEASE: ConVar this!
+local map_vote_threshold = 3 --RELEASE: ConVar this!
+local map_votes = PYRITION.MapVotes
 local maps = PYRITION.MapList
 local player_votes = PYRITION.MapPlayerVotes or {}
 

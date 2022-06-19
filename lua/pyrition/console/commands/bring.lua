@@ -12,22 +12,16 @@ local COMMAND = {
 }
 
 --command function
-function COMMAND:Execute(ply, targetting)
-	local targets, message = PYRITION:PlayerFind(targetting, ply, false, true)
+function COMMAND:Execute(ply, targets)
+	local landings, landing_count = PYRITION:PlayerLanding(ply, targets, self.Force)
 	
-	if targets then
-		local landings, landing_count = PYRITION:PlayerLanding(ply, targets, self.Force)
+	if landing_count == #targets then
+		for index, target in ipairs(targets) do PYRITION:PlayerTeleport(target, landings[index], "bring", ply) end
 		
-		if landing_count == #targets then
-			for index, target in ipairs(targets) do PYRITION:PlayerTeleport(target, landings[index], "bring", ply) end
-			
-			return true, "pyrition.commands.bring.success", {targets = targets}
-		else return false, "pyrition.player.landing.insufficient" end
-		
-		return false, "pyrition.player.landing.fail"
-	end
+		return true, "pyrition.commands.bring.success", {targets = targets}
+	else return false, "pyrition.player.landing.insufficient" end
 	
-	return false, message
+	return false, "pyrition.player.landing.fail"
 end
 
 --post

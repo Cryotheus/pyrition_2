@@ -16,23 +16,18 @@ local COMMAND = {
 --local COMMAND_FORCED = {}
 
 --command function
-function COMMAND:Execute(ply, traveller_targetting, targetting)
-	local target, message = PYRITION:PlayerFind(targetting, ply, true)
-	local travellers, message = PYRITION:PlayerFind(traveller_targetting, ply, false)
+function COMMAND:Execute(ply, travellers, target)
+	if #travellers == 1 and travellers[1] == target then return false, "pyrition.commands.send.fail.self" end
 	
-	if target and travellers then
-		local landings, landing_count = PYRITION:PlayerLanding(target, travellers)
-		
-		if landing_count == #travellers then
-			for index, traveller in ipairs(travellers) do PYRITION:PlayerTeleport(traveller, landings[index], "send", target) end
-			
-			return true, "pyrition.commands.send.success", {target = target, targets = travellers}
-		else return false, "pyrition.player.landing.insufficient" end
-		
-		return false, "pyrition.player.landing.fail"
-	end
+	local landings, landing_count = PYRITION:PlayerLanding(target, travellers)
 	
-	return false, message
+	if landing_count == #travellers then
+		for index, traveller in ipairs(travellers) do PYRITION:PlayerTeleport(traveller, landings[index], "send", target) end
+		
+		return true, "pyrition.commands.send.success", {target = target, targets = travellers}
+	else return false, "pyrition.player.landing.insufficient" end
+	
+	return false, "pyrition.player.landing.fail"
 end
 
 --local COMMAND_FORCED = table.Copy(COMMAND)

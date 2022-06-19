@@ -28,7 +28,6 @@ local controlling_hibernate = not sv_hibernate_think:GetBool()
 --localized into scope/environment
 local CreateConVar = CreateConVar
 local cvars = cvars
-local debug = debug
 local escape_function
 local error = error
 local hibernate
@@ -272,10 +271,7 @@ end, "pyrmysql")
 --module functions
 function begin()
 	if connected_to_mysql then
-		if queued_queries then
-			debug.Trace()
-			error("Transaction ongoing!")
-		end
+		if queued_queries then error("Transaction ongoing!") end
 		
 		queued_queries = {}
 	else sql.Begin() end

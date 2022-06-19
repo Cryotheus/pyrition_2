@@ -194,7 +194,7 @@ local function find_chat() --welcome to egypt
 							
 							RunConsoleCommand("say", text)
 						end
-						--
+						
 						function text_entry:OnKeyCode(code)
 							if code == KEY_ESCAPE then chat.Close()
 							elseif code == KEY_BACKSPACE and self:GetText() == "" then hacking_panel:RestoreChatInput(team_chat, true) end

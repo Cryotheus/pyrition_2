@@ -4,6 +4,7 @@ util.AddNetworkString("pyrition_teach")
 --locals
 local bits = PYRITION._Bits
 local duplex_insert = PYRITION._DuplexInsert
+local hacking_players = {}
 local loading_players = {} --dictionary[ply] = ply:TimeConnected false if message emulated
 local load_time = 30
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
@@ -13,17 +14,55 @@ local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] =
 local teaching_queue = {}
 
 --local functions
+local function read_enumerated_string(namespace, ply, text, enumeration)
+	local enumerations = net_enumerations[namespace]
+	
+	assert(enumerations, "ID10T-2/S: Attempt to read enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
+	
+	if text then
+		--we're not king tut, we return if there's text and it's not restricted if ply is provided
+		if ply then
+			--we must verify the enumeration, don't trust the client!
+			local enumeration = enumerations[text]
+			
+			if enumeration then
+				local teaching = teaching_queue[ply]
+				
+				if teaching then
+					local namespace_teaching = teaching[namespace]
+					
+					if namespace_teaching then namespace_teaching[enumeration] = true
+					else teaching[namespace] = {[enumeration] = true} end
+				else teaching_queue[ply] = {[namespace] = {[enumeration] = true}} end
+			end
+		end
+		
+		return text
+	end
+	
+	return enumerations[enumeration + 1]
+end
+
+local function recipient_iterable(object)
+	if object == true then return player.GetAll()
+	elseif IsEntity(object) then return {object}
+	elseif type(recipients) == "CRecipientFilter" then return recipients:GetPlayers()
+	elseif istable(object) then return object end
+
+	return false
+end
+
 local function recipient_pairs(recipients)
-	if recipients == true then recipients = player.GetAll()
-	elseif IsEntity(recipients) then recipients = {recipients}
-	elseif type(recipients) == "CRecipientFilter" then recipients = recipients:GetPlayers() end
+	local players = recipient_iterable(recipients)
 	
-	assert(istable(recipients), "bad argument #1 to 'recipient_pairs' (table, Player, or CRecipientFilter expected, got " .. type(recipients) .. ")")
+	assert(istable(players), "ID10T-14: Bad argument #1 to 'recipient_pairs' (true, table, Player, or CRecipientFilter expected, got " .. type(recipients) .. ")")
 	
-	return ipairs(recipients), recipients, 0
+	return ipairs(players), players, 0
 end
 
 local function track_enumerations(namespace, enumeration, recipients)
+	if true then return true end
+	
 	local send_raw = false
 	local tracker = net_enumeration_players[namespace]
 	
@@ -44,10 +83,25 @@ local function track_enumerations(namespace, enumeration, recipients)
 	return send_raw
 end
 
+local function write_enumerated_string(namespace, text, recipients)
+	local enumerations = net_enumerations[namespace]
+	
+	assert(enumerations, "ID10T-3/S: Attempt to write enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
+	
+	local enumeration = enumerations[text]
+	
+	assert(enumeration, "ID10T-3.1: Attempt to write enumerated string using non-existent enumeration '" .. tostring(text) .. "'")
+	
+	return track_enumerations(namespace, enumeration, recipients), text, enumeration, net_enumeration_bits[namespace]
+end
+
 --globals
 PYRITION.NetEnumerationPlayers = net_enumeration_players
 PYRITION.NetEnumerationUpdates = net_enumeration_updates
+PYRITION._ReadEnumeratedString = read_enumerated_string
+PYRITION._RecipientIterable = recipient_iterable --internal
 PYRITION._RecipientPairs = recipient_pairs --internal
+PYRITION._WriteEnumeratedString = write_enumerated_string
 
 --pyrition functions
 function PYRITION:NetIsEnumerated(namespace, index)
@@ -57,62 +111,27 @@ function PYRITION:NetIsEnumerated(namespace, index)
 end
 
 function PYRITION:NetReadEnumeratedString(namespace, ply)
-	local enumerations = net_enumerations[namespace]
-	
-	assert(enumerations, "ID10T-2/S: Attempt to read enumerated string using non-existent namespace '" .. namespace .. "'")
-	
-	if net.ReadBool() then
-		local text = net.ReadString()
-		local enumeration = enumerations[text]
-		
-		if enumeration and ply then
-			local teaching = teaching_queue[ply]
-			
-			if teaching then
-				local namespace_teaching = teaching[namespace]
-				
-				if namespace_teaching then namespace_teaching[enumeration] = true
-				else teaching[namespace] = {[enumeration] = true} end
-			else teaching_queue[ply] = {[namespace] = {[enumeration] = true}} end
-			
-			--we should queue this up, yeah?
-			--net.Start("pyrition")
-			--net.WriteString(namespace)
-			--net.WriteUInt(net_enumeration_bits[namespace], 5)
-			--net.WriteBool(false)
-			--net.Send(ply)
-		end
-		
-		return text
-	end
-	
-	return enumerations[net.ReadUInt(net_enumeration_bits[namespace]) + 1]
+	return read_enumerated_string(
+		namespace,
+		ply,
+		net.ReadBool() and net.ReadString(),
+		net.ReadUInt(net_enumeration_bits[namespace])
+	)
 end
 
 function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
-	local enumerations = net_enumerations[namespace]
+	local send_raw, text, enumeration, enumeration_bits = write_enumerated_string(namespace, text, recipients)
 	
-	assert(enumerations, "ID10T-3/S: Attempt to write enumerated string using non-existent namespace '" .. namespace .. "'")
+	if send_raw then
+		net.WriteBool(true)
+		net.WriteString(text)
+	else net.WriteBool(false) end
 	
-	local enumeration = enumerations[text]
-	
-	assert(enumeration, "ID10T-3.1: Attempt to write enumerated string using non-existent enumeration '" .. text .. "'")
-	
-	local send_raw = track_enumerations(namespace, enumeration, recipients)
-	
-	net.WriteBool(send_raw)
-	
-	if send_raw then net.WriteString(text) end
-	
-	net.WriteUInt(enumeration - 1, net_enumeration_bits[namespace])
+	net.WriteUInt(enumeration, enumeration_bits)
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetPlayerInitialized(ply, emulated)
-	PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply})
-	
-	for class, model_table in pairs(self.NetSyncModels) do if model_table.InitialSync and model_table:InitialSync(ply, emulated) then self:NetSyncAdd(class, ply) end end
-end
+function PYRITION:PyritionNetPlayerInitialized(ply, emulated) PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply}) end
 
 function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 	local duplex = net_enumerations[namespace]
@@ -148,7 +167,8 @@ function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 	--update bits
 	local new_bits = bits(#duplex)
 	
-	net_enumeration_bits[namespace] = new_bits
+	if new_bits < 1 then net_enumeration_bits[namespace] = 1
+	else net_enumeration_bits[namespace] = new_bits end
 	
 	--update the enumeration bits for clients if it changed
 	if last_bits ~= new_bits and player.GetCount() > 0 then net_enumeration_updates[namespace] = new_bits end
@@ -179,22 +199,11 @@ hook.Add("Think", "PyritionNet", function()
 	end
 	
 	if next(net_enumeration_updates) then
-		local first = true
-		local item_count
-		local items
-		
 		for index, ply in ipairs(player.GetAll()) do
 			if not loading_players[ply] then --no need to sync people who have yet to load in
-				local model = PYRITION:NetSyncAdd("enumeration_bits", ply)
-			
-				if first then
-					first = false
-					items = model:BuildWriteList(net_enumeration_updates)
-					item_count = #items
-				else
-					model.Items = items
-					model.Maximum = item_count
-				end
+				local model = PYRITION:NetStreamModelCreate("enumeration_bits", ply)
+				
+				model.Bits = net_enumeration_updates
 			end
 		end
 		
@@ -238,10 +247,15 @@ end)
 
 --net
 net.Receive("pyrition", function(length, ply)
-	if loading_players[ply] == nil and false then --TODO: remove "and false" once done debugging
+	if loading_players[ply] == nil and false then --RELEASE: remove "and false" once done debugging
 		if sv_allowcslua:GetBool() then return end
 		
-		PYRITION:LanguageDisplay("hacker", "pyrition.net.load.hacker", {player = ply})
+		if hacking_players[ply] then ply:Kick("#HLX_KILL_ENEMIES_WITHMANHACK_NAME")
+		else
+			PYRITION:LanguageDisplay("hacker", "pyrition.net.load.hacker", {player = ply})
+			
+			hacking_players[ply] = true
+		end
 	else
 		if loading_players[ply] == false then
 			PYRITION:LanguageDisplay("prodigal", "pyrition.net.load.delayed", {player = ply})
