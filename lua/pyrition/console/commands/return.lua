@@ -1,6 +1,13 @@
 local COMMAND = {
-	Arguments = {"Player"},
-	Console = true
+	Arguments = {
+		{
+			Class = "Player",
+			Default = true
+		}
+	},
+	
+	Console = true,
+	Required = 1
 }
 
 local COMMAND_TO = {
@@ -25,6 +32,9 @@ local COMMAND_TO = {
 --command function
 function COMMAND:Execute(ply, targets)
 	local returners = {IsPlayerList = true}
+	
+	print("bruh", type(targets), targets)
+	if istable(targets) then PrintTable(targets) end
 	
 	for index, target in ipairs(targets) do PYRITION:PlayerTeleportReturn(target) end
 	

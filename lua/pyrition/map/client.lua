@@ -16,8 +16,15 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 			perform_layout(self, width, height)
 			
 			local image = form.MapThumbnail
+			local votes_column = list_view.VotesColumn
+			local votes_column_header = votes_column.Header
 			
+			--thumbnail
 			image:SetTall(image:GetWide())
+			
+			--votes column header
+			surface.SetFont(votes_column_header:GetFont())
+			votes_column:SetFixedWidth(surface.GetTextSize(votes_column_header:GetText()) + 8)
 		end
 		
 		do --button
@@ -79,8 +86,11 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 			form.MapListView = list_view
 			
 			list_view:AddColumn("##"):SetFixedWidth(32)
-			list_view:AddColumn("Map")
-			list_view:AddColumn("Votes")
+			list_view:AddColumn("#pyrition.spawnmenu.categories.user.map.columns.map")
+			
+			local votes_column = list_view:AddColumn("#pyrition.spawnmenu.categories.user.map.columns.votes")
+			list_view.VotesColumn = votes_column
+			
 			list_view:Dock(TOP)
 			list_view:SetMultiSelect(false)
 			
@@ -157,13 +167,14 @@ end)
 net.Receive("pyrition_map", function()
 	if net.ReadBool() then
 		local change_time = net.ReadFloat()
+		local delay = math.Round(change_time - CurTime())
 		local map_name = PYRITION:NetReadEnumeratedString("map")
 		
 		PYRITION.MapChanging = true
 		PYRITION.MapChanges = change_time
 		PYRITION.MapChangesTo = map_name
 		
-		PYRITION:LanguageDisplay("chat", pyrition.map.change, {map = map_name, time = delay})
+		PYRITION:LanguageDisplay("chat", "pyrition.map.change", {map = map_name, time = delay})
 		
 		return
 	end
