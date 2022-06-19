@@ -15,6 +15,8 @@ function MODEL:Read()
 			Unix = self:ReadUInt(32),
 		}
 	end
+	
+	PYRITION:PlayerTeleportRefreshGUI()
 end
 
 function MODEL:Write(ply)
@@ -23,6 +25,8 @@ function MODEL:Write(ply)
 	self:WriteUInt(#history, teleport_history_length_bits)
 	
 	for index, data in ipairs(history) do
+		local note = data.Note
+		
 		if IsEntity(note) then
 			self:WriteBool(true)
 			self:WritePlayer(note)

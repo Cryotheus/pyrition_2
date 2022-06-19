@@ -172,7 +172,9 @@ local function find_chat() --welcome to egypt
 							
 							if silent_command then return end
 							
-							local text = prefix and prefix .. text or text
+							text = string.TrimRight(text)
+							text = prefix and prefix .. text or text
+							
 							local text_width = #text
 							
 							if text_width > chat_limit then

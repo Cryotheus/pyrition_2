@@ -4,7 +4,7 @@ local MODEL = {Priority = 60}
 
 --local functions
 local function read_command(self, parents)
-	local name = self:ReadString()
+	local name = self:ReadEnumeratedString("command")
 	local required = self:ReadByte()
 	
 	local argument_count = self:ReadByte()
@@ -45,7 +45,7 @@ local function write_command(self, ply, parents, command)
 	local arguments = command.Arguments
 	
 	table.insert(parents, command.Name)
-	self:WriteString(command.Name)
+	self:WriteEnumeratedString("command", command.Name)
 	self:WriteByte(arguments.Required)
 	self:WriteByte(#arguments)
 	
