@@ -30,11 +30,8 @@ local COMMAND_TO = {
 }
 
 --command function
-function COMMAND:Execute(ply, targets)
+function COMMAND:Execute(_ply, targets)
 	local returners = {IsPlayerList = true}
-	
-	print("bruh", type(targets), targets)
-	if istable(targets) then PrintTable(targets) end
 	
 	for index, target in ipairs(targets) do PYRITION:PlayerTeleportReturn(target) end
 	
@@ -43,7 +40,7 @@ function COMMAND:Execute(ply, targets)
 	return true, "pyrition.commands.return.success", {returners = returners}
 end
 
-function COMMAND_TO:Execute(ply, targets, entry)
+function COMMAND_TO:Execute(_ply, targets, entry)
 	local returners = {IsPlayerList = true}
 	
 	for index, target in ipairs(targets) do if PYRITION:PlayerTeleportReturn(target, entry) then table.insert(returners, target) end end

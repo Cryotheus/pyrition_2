@@ -5,7 +5,7 @@ local color_hightlight = Color(255, 156, 2)
 local color_hint = Color(112, 112, 112)
 local color_text = color_white
 local on_player_chat = PYRITION._OnPlayerChat
-local unsafe_truncation
+local utf8_safe = PYRITION._UTF8Safe
 
 local command_prefixes = {
 	["/"] = true,
@@ -73,7 +73,7 @@ local function find_chat() --welcome to egypt
 				self:SetVisible(false)
 			end
 			
-			function hacking_panel:OnMousePressed(code)
+			function hacking_panel:OnMousePressed()
 				local frame = self.Frame
 				
 				if IsValid(frame) then hud_chat:MakePopup() end
@@ -86,7 +86,7 @@ local function find_chat() --welcome to egypt
 				self:RestoreChat()
 			end
 			
-			function hacking_panel:Paint(width, height) end
+			function hacking_panel:Paint() end
 			
 			function hacking_panel:ReplaceChatInput(team_chat, silent_command, starting_text, prefix)
 				local chat_input = self.ChatInput
@@ -104,8 +104,8 @@ local function find_chat() --welcome to egypt
 					local chat_input_prompt = self.ChatInputPrompt
 					local chat_input_prompt_text = language.GetPhrase(silent_command and "pyrition.chat.run.silent" or "pyrition.chat.run")
 					local chat_input_replacement = vgui.Create("EditablePanel", chat_input_line)
-					local starting_text = starting_text or ""
 					chat_input_replacement.SilentCommand = silent_command
+					starting_text = starting_text or ""
 					self.ChatInputReplacement = chat_input_replacement
 					
 					chat_input_prompt:SetText(chat_input_prompt_text)
@@ -183,7 +183,7 @@ local function find_chat() --welcome to egypt
 								local text_width = chat_limit - note_width
 								local whittle = string.Left(text, text_width)
 								
-								while unsafe_truncation(whittle, text_width) do
+								while utf8_safe(whittle, text_width) do
 									text_width = text_width - 1
 									whittle = string.Left(text, text_width)
 									
@@ -294,7 +294,7 @@ local function find_chat() --welcome to egypt
 				end
 			end
 			
-			function hacking_panel:RestoreChat(team_chat)
+			function hacking_panel:RestoreChat()
 				hud_chat:SetParent(view_port)
 				hud_chat:SetPos(22, 618)
 				hud_chat:SetSize(720, 270)
@@ -358,7 +358,7 @@ local function find_chat() --welcome to egypt
 						hud_chat:SetParent(view_port)
 					end
 					
-					function frame:Paint(width, height)
+					function frame:Paint(width)
 						draw.RoundedBox(8, 0, 0, width, 24, header_color)
 						
 						surface.SetDrawColor(0, 0, 0, 128)
@@ -474,10 +474,10 @@ local function on_player_chat_detour(self, ply, message, team_chat, ply_dead, ..
 	return supressed
 end
 
-function unsafe_truncation(text, limit) return utf8.len(text, 1, limit) == utf8.len(text, 1, limit - 1) end
+function utf8_safe(text, limit) return utf8.len(text, 1, limit) == utf8.len(text, 1, limit - 1) end
 
 --pyrition hooks
-function PYRITION:PyritionConsoleChatPosted(ply, message, team_chat, ply_dead, supressed) end
+function PYRITION:PyritionConsoleChatPosted(_ply, _message, _team_chat, _ply_dead, _supressed) end
 
 --hooks
 hook.Add("FinishChat", "PyritionConsoleChat", function()

@@ -11,8 +11,6 @@ local COMMAND = {
 
 --command function
 function COMMAND:Execute(ply, target)
-	if istable(target) then PrintTable(target) end
-	
 	local landings, landing_count = PYRITION:PlayerLanding(target, {ply})
 	
 	if landing_count == 1 then

@@ -7,10 +7,10 @@ local language_tieves = PYRITION.LanguageTieves or {}
 local local_player = SERVER and game.GetWorld() or LocalPlayer()
 local nice_time = PYRITION._TimeNicefy
 
---colors, stolen from ULX >:D
+--colors sto- "inspired" by ULX
 local color_command = Color(224, 128, 64)
 local color_console = Color(255, 64, 64)
-local color_default = Color(151, 211, 255)
+local color_default = Color(196, 230, 255) --Color(151, 211, 255)
 local color_everyone = Color(0, 128, 128)
 local color_misc = Color(0, 255, 0)
 local color_player = Color(255, 224, 0)
@@ -129,7 +129,7 @@ local function replace_tags(self, text, phrases, colored)
 				local value = boom[1]
 				
 				if global_kieves[key] then global_key_values[key] = boom
-				else key_values[key] = #boom > 1 and boom or value end
+				else key_values[key] = #boom > 1 and boom or value or true end
 			end
 			
 			build_text(accumulator, text, old_finish, start - 1)
@@ -216,28 +216,34 @@ local function replace_tags(self, text, phrases, colored)
 end
 
 --kieve functions
-local function kieve_executor(index, text, text_data, texts, key_values, phrases)
+local function kieve_executor(_index, text, _text_data, _texts, key_values, _phrases)
 	if text == local_player then return key_values.you, color_self
 	elseif text == game.GetWorld() then return key_values.console, color_console end
 end
 
-local function kieve_targets(index, text, text_data, texts, key_values, phrases)
-	if text == language.GetPhrase("pyrition.player.list.everyone") then return nil, color_everyone end
+local function kieve_targets(_index, text, text_data, _texts, key_values, phrases)
+	local everyone = language.GetPhrase("pyrition.player.list.everyone")
 	
-	local samegular = key_values.samegular
+	if text == everyone then return nil, color_everyone end
+	
+	if key_values.selfless then
+		local original = text_data.original
+		
+		if istable(original) and player.GetCount() - #original == 1 then return everyone, color_everyone end
+	end
+	
 	local executor = phrases.executor --who ran the command
 	local ply = local_player
 	local themself = text == executor and key_values.themself --the text to use if target is the executor
 	local value_self = executor and key_values.self --the text to use if we're the target and executor
 	local you = text == ply and key_values.you --the text to use if we're the target
 	
-	if samegular and text == phrases.targets then return samegular
-	elseif value_self and you and executor == ply then return value_self, color_self
+	if value_self and you and executor == ply then return value_self, color_self
 	elseif you then return you, color_self
 	elseif themself then return themself, color_player end
 end
 
-local function tieve_time(index, text, text_data, texts, key_values, phrases)
+local function tieve_time(_index, text, _text_data, _texts, _key_values, _phrases)
 	local time = tonumber(text)
 	
 	if time then return nice_time(time, 1) end
@@ -320,8 +326,12 @@ PYRITION:LanguageRegisterColor(color_player, "executor", "name", "player", "targ
 PYRITION:LanguageRegisterKieve(kieve_executor, "executor")
 PYRITION:LanguageRegisterKieve(kieve_targets, "target", "targets")
 
-PYRITION:LanguageRegisterOption("center", function(formatted, key, phrases) local_player:PrintMessage(HUD_PRINTCENTER, formatted) end)
-PYRITION:LanguageRegisterOption("chat", function(formatted_table, key, phrases) chat.AddText(unpack(formatted_table)) end, true)
-PYRITION:LanguageRegisterOption("console", function(formatted, key, phrases) MsgC(color_white, formatted, "\n") end)
+PYRITION:LanguageRegisterOption("center", function(formatted, _key, _phrases) local_player:PrintMessage(HUD_PRINTCENTER, formatted) end)
+PYRITION:LanguageRegisterOption("chat", function(formatted_table, _key, _phrases) chat.AddText(unpack(formatted_table)) end, true)
+
+PYRITION:LanguageRegisterOption("console", function(formatted_table)
+	table.insert(formatted_table, "\n")
+	MsgC(unpack(formatted_table))
+end)
 
 PYRITION:LanguageRegisterTieve(tieve_time, "time", "visit")

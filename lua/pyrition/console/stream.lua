@@ -33,7 +33,9 @@ end
 
 local function read_commands(self, parents)
 	while self:ReadBool() do
+		--MsgC(Color(192, 0, 255), "reading command " .. self:Distance() .. "\n")
 		read_command(self, parents)
+		--MsgC(Color(0, 0, 255), "read command " .. self:Distance() .. "\n")
 		
 		if self:ReadBool() then read_commands(self, parents) end
 		
@@ -41,7 +43,7 @@ local function read_commands(self, parents)
 	end
 end
 
-local function write_command(self, ply, parents, command)
+local function write_command(self, _ply, parents, command)
 	local arguments = command.Arguments
 	
 	table.insert(parents, command.Name)
@@ -70,7 +72,9 @@ local function write_commands(self, ply, parents, commands)
 		
 		local children = PYRITION:ConsoleCommandGetChildren(command)
 		
+		--MsgC(Color(192, 0, 255), "writing command " .. self:Size() .. "\n")
 		write_command(self, ply, parents, command)
+		--MsgC(Color(0, 0, 255), "wrote command " .. self:Size() .. "\n")
 		
 		if children then
 			self:WriteBool(true)
@@ -85,7 +89,7 @@ local function write_commands(self, ply, parents, commands)
 end
 
 --stream model functions
-function MODEL:InitialSync(ply, emulated) return true end
+function MODEL:InitialSync() return true end
 function MODEL:Read() read_commands(self, {}) end
 
 function MODEL:Write(ply)

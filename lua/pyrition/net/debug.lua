@@ -6,29 +6,29 @@ local originals = PYRITION.NetDebugOriginals or {}
 PYRITION.NetDebugOriginals = originals
 
 --post
-for key, value in pairs(net) do
-	if isfunction(value) and key ~= "ReadBit" and (string.StartWith(key, "Read") or string.StartWith(key, "Write")) then
-		local original = originals[key] or net[key]
-		originals[key] = original
-		
-		net[key] = function(...)
-			local returns = {original(...)}
+if false then
+	for key, value in pairs(net) do
+		if isfunction(value) and key ~= "ReadBit" and (string.StartWith(key, "Read") or string.StartWith(key, "Write")) then
+			local original = originals[key] or net[key]
+			originals[key] = original
 			
-			drint(drint_level, key, ...)
-			
-			if next(returns) then
-				drint(drint_level, "returns", unpack(returns))
-				drint(drint_level, "")
+			net[key] = function(...)
+				local returns = {original(...)}
 				
-				return unpack(returns)
+				drint(drint_level, key, ...)
+				
+				if next(returns) then
+					drint(drint_level, "returns", unpack(returns))
+					drint(drint_level, "")
+					
+					return unpack(returns)
+				end
+				
+				drint(drint_level, "")
 			end
-			
-			drint(drint_level, "")
 		end
 	end
 end
 
 resource.AddSingleFile("resource/localization/en/pyrition.properties")
-resource.AddSingleFile("resource/localization/en/pyrition_commands.properties")
-resource.AddSingleFile("resource/localization/ru/pyrition.properties")
-resource.AddSingleFile("resource/localization/ru/pyrition_commands.properties")
+resource.AddSingleFile("resource/localization/de/pyrition.properties")

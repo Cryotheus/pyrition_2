@@ -1,5 +1,11 @@
 local COMMAND = {
-	Arguments = {"Player"},
+	Arguments = {
+		{
+			Class = "Player",
+			Default = true
+		}
+	},
+	
 	Console = true
 }
 
@@ -9,26 +15,20 @@ local player_meta = FindMetaTable("Player")
 COMMAND.KillFunction = player_meta.Kill
 
 --command function
-function COMMAND:Execute(ply, targetting)
-	local targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply)
+function COMMAND:Execute(_ply, targets)
+	local kill_function = self.KillFunction
+	local slain = {IsPlayerList = true}
 	
-	if targets then
-		local kill_function = self.KillFunction
-		local slain = {IsPlayerList = true}
-		
-		for index, target in ipairs(targets) do
-			if target:Alive() then
-				kill_function(target)
-				table.insert(slain, target)
-			end
+	for index, target in ipairs(targets) do
+		if target:Alive() then
+			kill_function(target)
+			table.insert(slain, target)
 		end
-		
-		if #slain == 0 then return false, "pyrition.commands.slay.missed" end
-		
-		return true, "pyrition.commands.slay.success", {targets = slain}
 	end
 	
-	return false, message
+	if #slain == 0 then return false, "pyrition.commands.slay.missed" end
+	
+	return true, "pyrition.commands.slay.success", {targets = slain}
 end
 
 --post

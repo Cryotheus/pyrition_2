@@ -10,11 +10,11 @@ local _R = debug.getregistry()
 --local tables
 local command_indexing = {
 	Execute = function(self, ...) return false, self .. " is missing an Execute method override. Please report this to the developer." end,
-	Initialize = function(self, ...) return true end,
+	Initialize = function(_self, ...) return true end,
 	IsPyritionCommand = true,
 	MetaName = "PyritionCommand",
-	OnReload = function(self, new_command) end,
-	OnReloaded = function(self, old_command) end,
+	OnReload = function(_self, _new_command) end,
+	OnReloaded = function(_self, _old_command) end,
 }
 
 local command_meta = {
@@ -36,7 +36,7 @@ function build_command_list(commands, maximum_depth, depth, returns)
 	return returns
 end
 
-local function network_execution(self, ply, ...)
+local function network_execution(self, _ply, ...)
 	--used for server-side commands that are executable by the client
 	net.Start("pyrition_command")
 	
@@ -264,7 +264,7 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	return command
 end
 
-function PYRITION:PyritionConsoleCommandReloaded(old_command, new_command) MsgC(Color(255, 192, 46), "[Pyrition] Reloaded '" .. old_command .. "'\n") end
+function PYRITION:PyritionConsoleCommandReloaded(old_command, _new_command) MsgC(Color(255, 192, 46), "[Pyrition] Reloaded '" .. old_command .. "'\n") end
 
 function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 	local branch = commands

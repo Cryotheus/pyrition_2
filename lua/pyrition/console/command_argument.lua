@@ -22,7 +22,7 @@ _R.PyritionStream = stream_public
 --meta functions
 function argument_public:__call(...) return self:Filter(...) end
 function argument_public:__tostring() return "PyritionCommandArgument [" .. self.Class .. "]" end
-function argument_meta:Filter(ply, settings, argument) ErrorNoHalt("ID10T-19: Object " .. tostring(self) .. " is missing Filter method.") end
+function argument_meta:Filter(_ply, _settings, _argument) ErrorNoHalt("ID10T-19: Object " .. tostring(self) .. " is missing Filter method.") end
 
 --pyrition functions
 function PYRITION:ConsoleCommandArgumentFilter(ply, settings, argument)
@@ -34,7 +34,7 @@ function PYRITION:ConsoleCommandArgumentFilter(ply, settings, argument)
 	return command_argument(ply, settings, argument)
 end
 
-function PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments)
+function PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments) --input validation and type casting
 	--basically, fail the execution if a required argument is invalid
 	--and ignore optional arguments that are invalid
 	--if we have an argument marked with Optional and it is invalid, pop it
@@ -44,8 +44,12 @@ function PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments)
 	local required = command_arguments.Required
 	
 	--I can't adjust the index ipairs is on so I'm using a while loop
-	while index <= argument_count do
+	while index <= math.min(argument_count, #command_arguments) do
 		local command_argument = command_arguments[index]
+		
+		--if we have more arguments than 
+		if not command_argument then break end
+		
 		local valid, value, message = self:ConsoleCommandArgumentFilter(ply, command_argument, arguments[index])
 		
 		if valid then

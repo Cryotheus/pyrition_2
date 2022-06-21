@@ -1,6 +1,7 @@
 util.AddNetworkString("pyrition_map")
 
 --locals
+local duplex_inherit_entry = PYRITION._DuplexInheritEntry
 local duplex_insert = PYRITION._DuplexInsert
 local map_vote_percentage = 0.5 --RELEASE: ConVar this!
 local map_vote_threshold = 3 --RELEASE: ConVar this!
@@ -56,7 +57,23 @@ function PYRITION:MapChange(map_name, delay)
 		self:NetWriteEnumeratedString("map", map_name, true)
 		net.Broadcast()
 	end
+	
+	self:MapSync(map_name)
 end
+
+function PYRITION:MapDisable(map_name) --coming soon!
+	
+end
+
+function PYRITION:MapDisableGame(game_root) --coming soon!
+	
+end
+
+function PYRITION:MapEnable(map_name) --coming soon!
+	
+end
+
+function PYRITION:MapSync(map_name) duplex_inherit_entry(self:NetStreamModelQueue("map", true, {}), maps, map_name) end
 
 function PYRITION:MapThink()
 	if CurTime() < self.MapChanges then return end
@@ -67,22 +84,29 @@ end
 
 function PYRITION:MapVote(ply, map_name)
 	if self.MapChanging then return false, "pyrition.map.fail.change" end
+	if ply:IsBot() then return false end
 	
 	local current_vote = player_votes[ply]
 	
 	if current_vote then
 		if current_vote == map_name then return false, "pyrition.map.fail.duplicate" end
 		
-		PYRITION:MapVoteAnnul(ply)
+		PYRITION:MapVoteRetract(ply)
 	end
 	
 	local current_votes = map_votes[map_name] or 0
 	local new_votes = current_votes + 1
+	local player_count = #player.GetHumans()
 	
 	map_votes[map_name] = new_votes
 	player_votes[ply] = map_name
 	
-	if new_votes > map_vote_threshold and new_votes / player.GetCount() > map_vote_percentage then self:MapChange(map_name) end
+	if (new_votes > map_vote_threshold or map_vote_threshold < player_count) and new_votes / player_count > map_vote_percentage then
+		--we should probably wait until players from the previous map have all connected
+		self:MapChange(map_name)
+	end
+	
+	self:MapSync(map_name)
 	
 	return true
 end
@@ -97,6 +121,8 @@ function PYRITION:MapVoteAnnul(map_name)
 		
 		map_votes[map_name] = 0
 		
+		self:MapSync(map_name)
+		
 		return next(victims) and victims or false
 	end
 	
@@ -110,6 +136,8 @@ function PYRITION:MapVoteRetract(ply)
 	if map_name then
 		map_votes[map_name] = map_votes[map_name] - 1
 		player_votes[ply] = nil
+		
+		self:MapSync(map_name)
 		
 		return true
 	end

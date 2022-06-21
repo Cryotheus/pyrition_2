@@ -1,14 +1,14 @@
 util.AddNetworkString("pyrition_command")
 
 --hooks
-hook.Add("PyritionConsoleCommandRegister", "PyritionConsole", function(parents, command, base_parents)
+hook.Add("PyritionConsoleCommandRegister", "PyritionConsole", function(parents)
 	if isstring(parents) then parents = string.Split(parents, " ") end
 	
 	PYRITION:NetAddEnumeratedString("command", parents)
 end)
 
 --net
-net.Receive("pyrition_command", function(length, ply)
+net.Receive("pyrition_command", function(_length, ply)
 	local arguments = {}
 	local parents = {}
 	

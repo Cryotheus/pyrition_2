@@ -11,6 +11,7 @@ local config = {
 	ip = 18,			--0010 010
 	loader = 4,			--0000 100
 	time = 23,			--0010 111
+	utf8 = 23,			--0010 111
 	
 	console = {
 		chat = {
@@ -35,6 +36,7 @@ local config = {
 			health = 74,		--1001 010
 			kick = 74,			--1001 010
 			map = 74,			--1001 010
+			message = 74,		--1001 010
 			noclip = 74,		--1001 010
 			respawn = 74,		--1001 010
 			["return"] = 74,	--1001 010
@@ -85,8 +87,13 @@ local config = {
 		stream = {
 			client = 53,	--110 101
 			shared = 47,	--101 111
-			model = 47,		--101 111
 			server = 50,	--110 010
+			
+			model = {
+				client = 53,	--110 101
+				server = 50,	--110 010
+				shared = 47,	--101 111
+			}
 		}
 	},
 	
@@ -101,6 +108,11 @@ local config = {
 		identity = {
 			client = 21,	--0010 101
 			server = 66		--1000 010
+		},
+		
+		message = {
+			client = 29,	--11 101
+			server = 26,	--11 010
 		},
 		
 		teleport = {

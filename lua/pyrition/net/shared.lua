@@ -17,10 +17,11 @@ end
 local function read_player() return Entity(net.ReadUInt(max_players_bits)) end
 local function write_player(ply) net.WriteUInt(ply:EntIndex(), max_players_bits) end
 
---globals
+--post function setup
 max_clients_bits = bits(max_clients_bits)
 max_players_bits = bits(max_players_bits)
 
+--globals
 PYRITION.NetEnumeratedStrings = net_enumerations
 PYRITION.NetEnumerationBits = net_enumeration_bits
 PYRITION.NetMaxClientBits = max_clients_bits
@@ -30,3 +31,13 @@ PYRITION._MaybeRead = maybe_read
 PYRITION._MaybeWrite = maybe_write
 PYRITION._ReadPlayer = read_player
 PYRITION._WritePlayer = write_player
+
+--pyrition functions
+function PYRITION:NetThink()
+	if SERVER then self:NetThinkServer() end
+	if next(self.NetStreamModelsQueued) then self:NetStreamModelThink() end
+	if next(self.NetStreamQueue) then self:NetStreamThink() end
+end
+
+--hooks
+hook.Add("Think", "PyritionNet", function() PYRITION:NetThink() end)

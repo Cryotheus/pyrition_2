@@ -269,7 +269,7 @@ function stream_meta:Dump(zeros)
 	else file.Write(target .. self.Name .. ".dmp.dat", data) end
 end
 
-function stream_meta:NetRead(ply)
+function stream_meta:NetRead()
 	self.Data = self.Data .. net_ReadData(net_ReadUInt(16) + 1)
 	
 	return net_ReadBool()
@@ -319,7 +319,7 @@ function stream_meta:NetWrite(length)
 	return false, write_length
 end
 
-function stream_meta:Read(ply) end
+function stream_meta:Read(_ply) end
 
 function stream_meta:ReadAlign() --adjusts the read pointer to the next byte
 	if self.PointerBit == 0 then return end
@@ -894,10 +894,10 @@ function PYRITION:NetStreamIncoming(class, uid, ply)
 			stream.UID = uid
 			active_streams_classed[uid] = stream
 			
-			if self.NetStreamModels[class] then self:NetStreamModel(stream) end
+			if self.NetStreamModelMethods[class] then self:NetStreamModel(stream) end
 		end
 		
-		if stream:NetRead(ply) then
+		if stream:NetRead() then
 			active_streams_classed[uid] = nil
 			
 			return stream
@@ -976,7 +976,7 @@ function PYRITION:NetStreamWrite(stream_queue)
 end
 
 --cvars
-cvars.AddChangeCallback("pyrition_net_stream_bytes", function(convar, old, new)
+cvars.AddChangeCallback("pyrition_net_stream_bytes", function(_name, _old, new)
 	new = pyrition_net_stream_bytes:GetInt()
 	
 	if block_convar(pyrition_net_stream_bytes, maximum_bytes_sent, new) then return end
@@ -984,7 +984,7 @@ cvars.AddChangeCallback("pyrition_net_stream_bytes", function(convar, old, new)
 	maximum_bytes_sent = new
 end, "PyritionNetStream")
 
-cvars.AddChangeCallback("pyrition_net_stream_channels", function(convar, old, new)
+cvars.AddChangeCallback("pyrition_net_stream_channels", function(_name, _old, new)
 	new = pyrition_net_stream_channels:GetInt()
 	
 	if block_convar(pyrition_net_stream_channels, maximum_layer_size, new) then return end
@@ -996,7 +996,7 @@ end, "PyritionNetStream")
 hook.Add("Think", "PyritionNetStream", function() if next(stream_send_queue) then PYRITION:NetStreamThink() end end)
 
 --net
-net.Receive("pyrition_stream", function(length, ply)
+net.Receive("pyrition_stream", function(_length, ply)
 	local streams_completed = {}
 	
 	repeat

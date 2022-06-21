@@ -36,10 +36,17 @@ function PYRITION:LanguageQueue(ply, key, phrases, option)
 	
 	--having ply = true means to broadcast to everyone
 	if ply == true then
+		--RELEASE: send messages only to loaded players
 		for index, ply in ipairs(player.GetHumans()) do self:LanguageQueue(ply, key, phrases, option) end
 		
 		--send the broadcast to console
-		return self:LanguageDisplay("chat", key, phrases, true)
+		return self:LanguageDisplay("messaging", key, phrases, true)
+	end
+	
+	if istable(ply) then
+		for index, entry in ipairs(ply) do self:LanguageQueue(entry, key, phrases, option) end
+		
+		return self:LanguageDisplay("messaging", key, phrases)
 	end
 	
 	--if the ply is the server

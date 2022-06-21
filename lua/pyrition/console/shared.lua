@@ -3,7 +3,7 @@ local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses or {}
 local is_pyrition_command
 
 --local functions
-local function command_callback(ply, command, arguments)
+local function command_callback(ply, arguments, no_fail_response)
 	local arguments_count = #arguments
 	local command, depth = PYRITION:ConsoleCommandGet(arguments, true)
 	
@@ -13,11 +13,20 @@ local function command_callback(ply, command, arguments)
 		
 		for index = depth + 1, arguments_count do table.insert(subbed_arguments, arguments[index]) end
 		
-		PYRITION:ConsoleExecute(ply, command, subbed_arguments)
+		PYRITION:ConsoleExecute(ply, command, subbed_arguments, no_fail_response)
 	end
 end
 
 local function command_localization(command) return "#pyrition.commands." .. table.concat(command.Parents, ".") end
+
+local function create_master_command(command_name, help, no_fail_response)
+	concommand.Add(
+		command_name,
+		function(ply, _command, arguments) command_callback(ply, arguments, no_fail_response) end,
+		function(command, arguments_string) return PYRITION:ConsoleComplete(command .. " ", arguments_string) end,
+		language.GetPhrase(help or "pyrition.command.help")
+	)
+end
 
 local function insert_prefixed_commands(completions, tree, validation_prefix, command_prefix)
 	for name, command in pairs(tree) do
@@ -34,7 +43,7 @@ PYRITION.ConsoleCommandArgumentClasses = command_argument_classes
 PYRITION._IsPyritionCommand = is_pyrition_command
 
 --pyrition functions
-function PYRITION:ConsoleExecute(ply, command, arguments)
+function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 	local command_arguments = command.Arguments or {}
 	local required = command_arguments.Required or 0
 	
@@ -59,26 +68,35 @@ function PYRITION:ConsoleExecute(ply, command, arguments)
 	
 	if filter_success then
 		local success, message, phrases = self:ConsoleCommandExecute(ply, command, arguments)
-			
-		if message then self:LanguageQueue(success or ply, message, table.Merge({executor = ply}, phrases or {}))
+		
+		--if we failed and we have failed execution response disabled, stop here
+		if not success and no_fail_response then return false end
+		
+		if message then
+			self:LanguageQueue(
+				command.SilentResponse and ply or success or ply,
+				message,
+				table.Merge({executor = ply},
+				phrases or {})
+			)
 		elseif success then
-			if not command.Downloaded then
-				--we don't send a message for downloaded commands
-				PYRITION:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
-			end
+			--we don't send a message for downloaded commands
+			if command.Downloaded then return success end
+			
+			PYRITION:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
 		else self:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
 		
 		return success
-	else
+	elseif not no_fail_response then
 		self:LanguageQueue(ply, fail_message and "pyrition.command.failed.argument.detailed" or "pyrition.command.failed.argument", {
 			class = (command_arguments[fail_index] or {Class = "nil"}).Class,
 			command = command_localization(command),
 			index = "#" .. fail_index,
-			message = fail_message
+			message = "#" .. fail_message
 		})
-		
-		return false
 	end
+	
+	return false
 end
 
 function PYRITION:ConsoleParseArguments(arguments_string)
@@ -186,16 +204,14 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 	return completions, hint
 end
 
---console commands
-concommand.Add(
-	SERVER and game.SinglePlayer() and sv_pyrition or "pyrition",
-	command_callback,
+--post
+if SERVER and game.SinglePlayer() then
+	create_master_command("sv_pyrition")
+	create_master_command("sv_pyrition_nfr", "pyrition.command.help.nfr", true)
+else
+	create_master_command("pyrition")
+	create_master_command("pyrition_nfr", "pyrition.command.help.nfr", true)
 	
-	function(command, arguments_string)
-		--yeah that's right, autocomplete on console ⌐■_■
-		--only useful for singleplayer or custom srcds consoles
-		return PYRITION:ConsoleComplete(command .. " ", arguments_string)
-	end,
-	
-	language.GetPhrase("pyrition.command.help")
-)
+	--hee hee hee haw |\/\/|
+	create_master_command("ulx", "pyrition.command.help.ulx")
+end

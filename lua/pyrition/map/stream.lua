@@ -1,6 +1,7 @@
 --locals
 local duplex_set = PYRITION._DuplexSet
 local maps = PYRITION.MapList
+local map_status = PYRITION.MapStatus
 local map_votes = PYRITION.MapVotes
 local max_players_bits = PYRITION.NetMaxPlayerBits
 local MODEL = {Priority = 10}
@@ -8,20 +9,22 @@ local MODEL = {Priority = 10}
 --local function
 local function read_map(self, index)
 	local map = self:ReadEnumeratedString("map")
-	local votes = self:ReadUInt(max_players_bits)
+	map_status[index] = self:ReadBool()
 	
+	local votes = self:ReadUInt(max_players_bits)
 	map_votes[map] = votes ~= 0 and votes or nil
 	
 	duplex_set(PYRITION.MapList, index, map)
 end
 
-local function write_map(self, update_maps, map)
+local function write_map(self, _update_maps, map)
 	self:WriteEnumeratedString("map", map)
+	self:WriteBool(map_status[map])
 	self:WriteUInt(map_votes[map] or 0, max_players_bits)
 end
 
 --stream model functions
-function MODEL:InitialSync(ply, emulated) return true end
+function MODEL:InitialSync() return true end
 
 function MODEL:Read()
 	local bits = PYRITION.NetEnumerationBits.map
@@ -31,7 +34,7 @@ function MODEL:Read()
 	else for _ = 0, self:ReadUInt(bits) do read_map(self, self:ReadUInt(bits) + 1) end end
 end
 
-function MODEL:Write(ply, update_maps)
+function MODEL:Write(_ply, update_maps)
 	local bits = PYRITION.NetEnumerationBits.map
 	local update_maps = update_maps or maps
 	

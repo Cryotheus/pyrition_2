@@ -2,6 +2,12 @@
 local duplex_set
 
 --local functions
+local function duplex_inherit_entry(target, source, index)
+	if isnumber(index) then return duplex_set(target, index, source[index]) end
+	
+	return duplex_set(target, source[index], index)
+end
+
 local function duplex_destroy(duplex) --turn a duplex into a list
 	for index, value in ipairs(duplex) do duplex[value] = nil end
 	
@@ -127,6 +133,7 @@ end
 --globals
 PYRITION._DuplexDestroy = duplex_destroy
 PYRITION._DuplexExtract = duplex_extract
+PYRITION._DuplexInheritEntry = duplex_inherit_entry
 PYRITION._DuplexInsert = duplex_insert
 PYRITION._DuplexIsFooplex = duplex_is_fooplex
 PYRITION._DuplexMake = duplex_make
@@ -140,6 +147,7 @@ PYRITION._DuplexUnset = duplex_unset
 
 local duplex_destroy = PYRITION._DuplexDestroy
 local duplex_extract = PYRITION._DuplexExtract
+local duplex_inherit_entry = PYRITION._DuplexInheritEntry
 local duplex_insert = PYRITION._DuplexInsert
 local duplex_is_fooplex = PYRITION._DuplexIsFooplex
 local duplex_make = PYRITION._DuplexMake

@@ -14,6 +14,14 @@ local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] =
 local teaching_queue = {}
 
 --local functions
+local function loaded_players()
+	local players = {}
+	
+	for index, ply in ipairs(player.GetAll()) do if not loading_players[ply] then table.insert(players) end end
+	
+	return players
+end
+
 local function read_enumerated_string(namespace, ply, text, enumeration)
 	local enumerations = net_enumerations[namespace]
 	
@@ -98,6 +106,7 @@ end
 --globals
 PYRITION.NetEnumerationPlayers = net_enumeration_players
 PYRITION.NetEnumerationUpdates = net_enumeration_updates
+PYRITION._GetLoadedPlayers = loaded_players
 PYRITION._ReadEnumeratedString = read_enumerated_string
 PYRITION._RecipientIterable = recipient_iterable --internal
 PYRITION._RecipientPairs = recipient_pairs --internal
@@ -117,6 +126,68 @@ function PYRITION:NetReadEnumeratedString(namespace, ply)
 		net.ReadBool() and net.ReadString(),
 		net.ReadUInt(net_enumeration_bits[namespace])
 	)
+end
+
+function PYRITION:NetThinkServer()
+	for ply, time_spawned in pairs(loading_players) do
+		if time_spawned and ply:TimeConnected() - time_spawned > load_time then
+			PYRITION:LanguageDisplay("prodigal", "pyrition.net.load.late", {
+				duration = math.Round(ply:TimeConnected() - time_spawned, 2),
+				player = ply,
+				time = load_time,
+			})
+			
+			loading_players[ply] = false
+			
+			PYRITION:NetPlayerInitialized(ply, true)
+		end
+	end
+	
+	if next(net_enumeration_updates) then
+		for index, ply in ipairs(player.GetAll()) do
+			if not loading_players[ply] then --no need to sync people who have yet to load in
+				local model = PYRITION:NetStreamModelCreate("enumeration_bits", ply)
+				
+				model.Bits = net_enumeration_updates
+			end
+		end
+		
+		table.Empty(net_enumeration_updates)
+	end
+	
+	if next(teaching_queue) then
+		for ply, namespaces in pairs(teaching_queue) do
+			net.Start("pyrition_teach")
+			
+			local passed_namespace = false
+			
+			for namespace, teach_enumerations in pairs(namespaces) do
+				local bits = net_enumeration_bits[namespace]
+				local enumerations = net_enumerations[namespace]
+				local passed_enumeration = false
+				
+				net.WriteString(namespace)
+				
+				for enumeration in pairs(teach_enumerations) do
+					net.WriteString(enumerations[enumeration])
+					net.WriteUInt(enumeration - 1, bits)
+					
+					if passed_enumeration then net.WriteBool(true)
+					else passed_enumeration = true end
+				end
+				
+				net.WriteBool(false)
+				
+				if passed_namespace then net.WriteBool(true)
+				else passed_namespace = true end
+			end
+			
+			net.WriteBool(false)
+			net.Send(ply)
+		end
+		
+		table.Empty(teaching_queue)
+	end
 end
 
 function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
@@ -182,68 +253,6 @@ hook.Add("PlayerDisconnected", "PyritionNet", function(ply)
 end)
 
 hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply) loading_players[ply] = ply:TimeConnected() end)
-
-hook.Add("Think", "PyritionNet", function()
-	for ply, time_spawned in pairs(loading_players) do
-		if time_spawned and ply:TimeConnected() - time_spawned > load_time then
-			PYRITION:LanguageDisplay("prodigal", "pyrition.net.load.late", {
-				duration = math.Round(ply:TimeConnected() - time_spawned, 2),
-				player = ply,
-				time = load_time,
-			})
-			
-			loading_players[ply] = false
-			
-			PYRITION:NetPlayerInitialized(ply, true)
-		end
-	end
-	
-	if next(net_enumeration_updates) then
-		for index, ply in ipairs(player.GetAll()) do
-			if not loading_players[ply] then --no need to sync people who have yet to load in
-				local model = PYRITION:NetStreamModelCreate("enumeration_bits", ply)
-				
-				model.Bits = net_enumeration_updates
-			end
-		end
-		
-		table.Empty(net_enumeration_updates)
-	end
-	
-	if next(teaching_queue) then
-		for ply, namespaces in pairs(teaching_queue) do
-			net.Start("pyrition_teach")
-			
-			local passed_namespace = false
-			
-			for namespace, teach_enumerations in pairs(namespaces) do
-				local bits = net_enumeration_bits[namespace]
-				local enumerations = net_enumerations[namespace]
-				local passed_enumeration = false
-				
-				net.WriteString(namespace)
-				
-				for enumeration in pairs(teach_enumerations) do
-					net.WriteString(enumerations[enumeration])
-					net.WriteUInt(enumeration - 1, bits)
-					
-					if passed_enumeration then net.WriteBool(true)
-					else passed_enumeration = true end
-				end
-				
-				net.WriteBool(false)
-				
-				if passed_namespace then net.WriteBool(true)
-				else passed_namespace = true end
-			end
-			
-			net.WriteBool(false)
-			net.Send(ply)
-		end
-		
-		table.Empty(teaching_queue)
-	end
-end)
 
 --net
 net.Receive("pyrition", function(length, ply)

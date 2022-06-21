@@ -1,14 +1,14 @@
 local prefix_functions = {
-	["@"] = function(needle, supplicant) --player you're looking at
+	["@"] = function(_needle, _supplicant) --player you're looking at
 		--POST: this!
 		return false, "Unavailable."
 	end,
 	
 	["#"] = function(...) return PYRITION:PlayerFindByUserID(...) end, --user id
 	["$"] = function(...) return PYRITION:PlayerFindBySteamID(...) end, --steam id
-	["%"] = function(needle, supplicant) return false, "Unavailable." end, --everyone in your user group and above
+	["%"] = function(_needle, _supplicant) return false, "Unavailable." end, --everyone in your user group and above
 	
-	["^"] = function(needle, supplicant) --yourself, everyone in your user group, or everyone in a user group
+	["^"] = function(_needle, _supplicant) --yourself, everyone in your user group, or everyone in a user group
 		if #needle > 0 then
 			--find players of the specified user group
 			local first_character = string.Left(needle, 1)
@@ -24,14 +24,14 @@ local prefix_functions = {
 		end
 	end,
 	
-	["*"] = function(needle, supplicant) return player.GetAll() end --everyone
+	["*"] = function(_needle, _supplicant) return player.GetAll() end --everyone
 }
 
 --globals
 PYRITION.PlayerFindPrefixes = prefix_functions
 
 --pyrition functions
-function PYRITION:PlayerFindByUserGroup(user_group, supplicant)
+function PYRITION:PlayerFindByUserGroup(user_group, _supplicant)
 	local players = {}
 	
 	for index, ply in ipairs(player.GetAll()) do if ply:IsUserGroup(user_group) then table.insert(players, ply) end end
@@ -39,7 +39,7 @@ function PYRITION:PlayerFindByUserGroup(user_group, supplicant)
 	return players
 end
 
-function PYRITION:PlayerFindBySteamID(needle, supplicant)
+function PYRITION:PlayerFindBySteamID(needle, _supplicant)
 	local all_players = player.GetAll()
 	local players = false
 	
@@ -58,7 +58,7 @@ function PYRITION:PlayerFindBySteamID(needle, supplicant)
 	return players
 end
 
-function PYRITION:PlayerFindByUserID(user_id, supplicant)
+function PYRITION:PlayerFindByUserID(user_id, _supplicant)
 	user_id = tonumber(user_id)
 	
 	if user_id then

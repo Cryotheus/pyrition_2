@@ -1,4 +1,5 @@
 --locals
+local map_status = PYRITION.MapStatus or {}
 local map_votes = PYRITION.MapVotes or {}
 local maps = PYRITION.MapList or {}
 
@@ -13,5 +14,6 @@ end
 
 --globals
 PYRITION.MapList = maps
+PYRITION.MapStatus = map_status
 PYRITION.MapVotes = map_votes
 PYRITION._DefixMap = defix

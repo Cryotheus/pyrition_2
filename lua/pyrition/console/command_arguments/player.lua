@@ -50,8 +50,6 @@ function ARGUMENT:Filter(ply, settings, argument)
 	
 	local find, message
 	
-	print("yuh bruh", ply, settings, argument)
-	
 	if settings.Default and not argument or argument == "" then find, message = PYRITION:PlayerFindWithFallback(argument, ply, ply, settings.Single, settings.Selfless)
 	else find, message = PYRITION:PyritionPlayerFind(argument, ply, settings.Single, settings.Selfless) end
 	

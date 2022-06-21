@@ -1,11 +1,17 @@
 local current_map = game.GetMap()
+local map_status = PYRITION.MapStatus
+local map_votes = PYRITION.MapVotes
 local maps = PYRITION.MapList
+
+--local functions
+local function lead_zeros(number, width) return string.rep("0", width - math.floor(math.log10(number))) .. number end
 
 --hooks
 hook.Add("PopulateToolMenu", "PyritionMap", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Pyrition", "Map", "#pyrition.spawnmenu.categories.user.map", "", "", function(form)
 		local button
 		local button_admin
+		local check_box
 		local image
 		local list_view
 		local perform_layout = form.PerformLayout
@@ -15,16 +21,25 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 		function form:PerformLayout(width, height)
 			perform_layout(self, width, height)
 			
-			local image = form.MapThumbnail
+			--local image = form.MapThumbnail
+			local index_column = list_view.IndexColumn
+			local maps_column = list_view.MapsColumn
 			local votes_column = list_view.VotesColumn
 			local votes_column_header = votes_column.Header
+			
+			--set font
+			surface.SetFont(votes_column_header:GetFont())
 			
 			--thumbnail
 			image:SetTall(image:GetWide())
 			
-			--votes column header
-			surface.SetFont(votes_column_header:GetFont())
-			votes_column:SetFixedWidth(surface.GetTextSize(votes_column_header:GetText()) + 8)
+			--header widths
+			local index_width = surface.GetTextSize(string.rep("0", math.ceil(math.log10(#maps)))) + 16
+			local votes_width = surface.GetTextSize(votes_column_header:GetText()) + 8
+			
+			index_column:SetFixedWidth(index_width)
+			maps_column:SetFixedWidth(math.max(width - index_width - votes_width - 20, 36))
+			votes_column:SetFixedWidth(votes_width)
 		end
 		
 		do --button
@@ -81,23 +96,45 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 			end
 		end
 		
+		do --check box
+			check_box = vgui.Create("DCheckBoxLabel")
+			form.VisiblityCheckBox = list_view
+			
+			check_box:SetChecked(false)
+			check_box:SetText("#pyrition.spawnmenu.categories.user.map.check_box")
+			
+			function check_box:OnChange() list_view:Refresh() end
+			
+			form:AddItem(check_box)
+		end
+		
+		do --thumbnail
+			image = vgui.Create("DImage", form)
+			form.MapThumbnail = image
+			
+			image:SetMaterial("matsys_regressiontest/background")
+			image:SetVisible(false)
+		end
+		
 		do --list
 			list_view = vgui.Create("DListView", form)
 			form.MapListView = list_view
 			
-			list_view:AddColumn("##"):SetFixedWidth(32)
-			list_view:AddColumn("#pyrition.spawnmenu.categories.user.map.columns.map")
-			
+			local index_column = list_view:AddColumn("##")
+			local maps_column = list_view:AddColumn("#pyrition.spawnmenu.categories.user.map.columns.map")
 			local votes_column = list_view:AddColumn("#pyrition.spawnmenu.categories.user.map.columns.votes")
+			
+			list_view.IndexColumn = index_column
+			list_view.MapsColumn = maps_column
 			list_view.VotesColumn = votes_column
 			
 			list_view:Dock(TOP)
 			list_view:SetMultiSelect(false)
 			
-			function list_view:DoDoubleClick(index, row_panel) button:DoClick() end
+			function list_view:DoDoubleClick() button:DoClick() end
 			
-			function list_view:OnRowSelected(index, row_panel)
-				local map = maps[index]
+			function list_view:OnRowSelected(_index, row_panel)
+				local map = maps[row_panel.MapIndex]
 				local material_name = "maps/thumb/" .. map .. ".png"
 				button.Map = map
 				button_admin.Map = map
@@ -116,22 +153,29 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 			
 			function list_view:Refresh()
 				local maps_length = #maps
+				local maps_zeroes = math.floor(math.log10(maps_length))
 				local selected_index
 				local selected_map = button.Map
+				local show_disabled = check_box:GetChecked()
 				
 				self:Clear()
 				self:SetHeight(math.max(maps_length + 1, 2) * 17)
 				
 				for index, map in ipairs(maps) do
-					local line = self:AddLine(tostring(index), map, "0")
-					
-					if map == selected_map then selected_index = index end
-					
-					if map == current_map then
-						for index, label in ipairs(line.Columns) do
-							label:SetFont("DermaDefaultBold")
-							label:SetTextColor(Color(16, 112, 32))
-						end
+					if show_disabled or map_status[map] then
+						local votes = map_votes[map]
+						local line = self:AddLine(
+							lead_zeros(index, maps_zeroes),
+							map,
+							votes and tostring(votes) or ""
+						)
+						
+						line.MapIndex = index
+						
+						line:SetTooltip("test!")
+						
+						if map == selected_map then selected_index = index end
+						if map == current_map then for index, label in ipairs(line.Columns) do label:SetFont("DermaDefaultBold") end end
 					end
 				end
 				
@@ -152,14 +196,8 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 			form:AddItem(list_view)
 		end
 		
-		do --thumbnail
-			image = vgui.Create("DImage", form)
-			form.MapThumbnail = image
-			
-			form:AddItem(image)
-			image:SetMaterial("matsys_regressiontest/background")
-			image:SetVisible(false)
-		end
+		--after list view
+		form:AddItem(image)
 	end)
 end)
 
