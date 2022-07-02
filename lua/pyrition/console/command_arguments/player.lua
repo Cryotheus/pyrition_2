@@ -1,6 +1,7 @@
 --locals
 local ARGUMENT = {}
 local insert_if_matching = PYRITION._InsertIfMatching
+local max_players_bits = PYRITION.NetMaxPlayerBits
 local prefix_functions = PYRITION.PlayerFindPrefixes
 
 --local functions
@@ -14,7 +15,7 @@ end
 --command argument methods
 function ARGUMENT:Complete(ply, settings, argument)
 	local argument = string.lower(argument)
-	local completions = {}
+	local completions = {} --needle, supplicant, single, exclude_supplicant, allow_empty
 	local targets = PYRITION:PlayerFind(argument, ply, false, settings.Selfless, true)
 	
 	if targets then
@@ -57,24 +58,38 @@ function ARGUMENT:Filter(ply, settings, argument)
 end
 
 function ARGUMENT:Read(stream, settings)
+	if settings.Manual then return stream:ReadString() end
+	if settings.Single then return stream:ReadPlayer(argument) end
+	
+	return stream:ReadList(max_players_bits, stream.ReadPlayer)
+end
+
+function ARGUMENT:ReadSettings(stream, settings)
 	if stream:ReadBool() then
 		settings.Manual = true
 		
 		return
 	end
 	
-	settings.Default = stream:ReadMaybe("ReadBool")
-	settings.Selfless = stream:ReadMaybe("ReadBool")
-	settings.Single = stream:ReadMaybe("ReadBool")
+	settings.Default = stream:ReadBool()
+	settings.Selfless = stream:ReadBool()
+	settings.Single = stream:ReadBool()
 end
 
-function ARGUMENT:Write(stream, settings)
+function ARGUMENT:Write(stream, settings, argument)
+	if settings.Manual then return stream:WriteString(argument) end
+	if settings.Single then return stream:WritePlayer(argument) end
+	
+	stream:WriteList(argument, max_players_bits, stream.WritePlayer)
+end
+
+function ARGUMENT:WriteSettings(stream, settings)
 	if settings.Manual then return self:WriteBool(true) end
 	
 	stream:WriteBool(false)
-	stream:WriteMaybe("WriteBool", settings.Default)
-	stream:WriteMaybe("WriteBool", settings.Selfless)
-	stream:WriteMaybe("WriteBool", settings.Single)
+	stream:WriteBool(settings.Default)
+	stream:WriteBool(settings.Selfless)
+	stream:WriteBool(settings.Single)
 end
 
 --post

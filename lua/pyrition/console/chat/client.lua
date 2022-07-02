@@ -5,7 +5,7 @@ local color_hightlight = Color(255, 156, 2)
 local color_hint = Color(112, 112, 112)
 local color_text = color_white
 local on_player_chat = PYRITION._OnPlayerChat
-local utf8_safe = PYRITION._UTF8Safe
+local utf8_safe = PYRITION._StringUTF8Safe
 
 local command_prefixes = {
 	["/"] = true,

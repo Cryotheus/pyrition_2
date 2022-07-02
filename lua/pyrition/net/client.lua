@@ -4,7 +4,7 @@ local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace]
 local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] = fooplex[string]
 
 --local functions
-local function read_enumerated_string(namespace, ply, text, enumeration)
+local function read_enumerated_string(namespace, _ply, text, enumeration)
 	local enumerations = net_enumerations[namespace]
 	
 	assert(enumerations, "ID10T-2/C: Attempt to read enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
@@ -61,10 +61,10 @@ function PYRITION:NetWriteEnumeratedString(namespace, text)
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetClientInitialized(ply) end
+function PYRITION:PyritionNetClientInitialized(_ply) end
 
 --console commands
-concommand.Add("pd", function(ply, command, arguments, arguments_string)
+concommand.Add("pd", function(_ply, _command, _arguments, _arguments_string)
 	net.Start("pyrition")
 	net.SendToServer()
 end, nil, "Pyrition's debug command. If you are reading this and you're not on a test server, please report it.")
@@ -97,7 +97,7 @@ hook.Add("PopulateToolMenu", "PyritionNet", function()
 		do
 			category_list = vgui.Create("DCategoryList", form)
 			
-			function category_list:PerformLayout(width, height)
+			function category_list:PerformLayout()
 				self:PerformLayoutInternal()
 				self:SetTall(self:GetCanvas():GetTall())
 			end

@@ -10,7 +10,7 @@ local read_enumerated_string = PYRITION._ReadEnumeratedString
 local wordless
 
 --local globals
-local active_streams = PYRITION.NetStreamsActive or {}
+local active_streams = PYRITION.NetStreamsActive or {} --table[ply][class][uid] = stream, but on CLIENT its table[class][uid]
 local max_players_bits = PYRITION.NetMaxPlayerBits
 local net_enumeration_bits = PYRITION.NetEnumerationBits
 local stream_classes = PYRITION.NetStreamClasses or {} --table[class] = bool: should we recieve it?
@@ -19,7 +19,7 @@ local stream_send_queue = PYRITION.NetStreamQueue or {} --list of streams, on se
 local _R = debug.getregistry()
 
 --convars
-local convar_flags = (SERVER and FCVAR_ARCHIVE or 0) + FCVAR_NEVER_AS_STRING + FCVAR_REPLICATED
+local convar_flags = bit.bor(SERVER and FCVAR_ARCHIVE or 0, FCVAR_REPLICATED)
 local pyrition_net_stream_bytes = CreateConVar("pyrition_net_stream_bytes", "64000", convar_flags, "string helptext", 1024, 64000)
 local pyrition_net_stream_channels = CreateConVar("pyrition_net_stream_channels", "8", convar_flags, "string helptext", 1)
 
@@ -118,6 +118,16 @@ local function benchmark(key, samples, max_tries, try, generation)
 	end
 	
 	return duration
+end
+
+local function byte_safe(text, index) return string_byte(text, index) or 0 end
+
+local function bytes_safe(text, start, finish)
+	local bytes = {string_byte(text, start, finish)}
+	
+	for index = #bytes + 1, finish do table_insert(bytes, 0) end
+	
+	return unpack(bytes)
 end
 
 local function descending_sort(sorted)
@@ -339,11 +349,11 @@ function stream_meta:ReadBit()
 		self.Pointer = read_byte + 1
 		self.PointerBit = 0
 		
-		return string_byte(self.Data, read_byte) % 2
+		return byte_safe(self.Data, read_byte) % 2
 	else
 		self.PointerBit = read_bit + 1
 		
-		return bit_rshift(string_byte(self.Data, self.Pointer), 7 - read_bit) % 2
+		return bit_rshift(byte_safe(self.Data, self.Pointer), 7 - read_bit) % 2
 	end
 end
 
@@ -368,10 +378,11 @@ function stream_meta:ReadBits(bits) --for reading less than a byte
 		self.PointerBit = 0
 	else self.PointerBit = new_bits end
 	
-	return bit_rshift(bit_band(string_byte(self.Data, byte_pointer), get_right_mask(remaining_bits)), remaining_bits - bits)
+	return bit_rshift(bit_band(byte_safe(self.Data, byte_pointer), get_right_mask(remaining_bits)), remaining_bits - bits)
 end
 
 function stream_meta:ReadBool() return self:ReadBit() == 1 end
+function stream_meta:ReadBoolNot() return self:ReadBit() == 0 end --because "repeat ... until not ReadBool" is done a lot, this eliminates an op
 
 function stream_meta:ReadByte()
 	local bit_pointer = self.PointerBit
@@ -379,10 +390,10 @@ function stream_meta:ReadByte()
 	
 	self.Pointer = byte_pointer + 1
 	
-	if bit_pointer == 0 then return string_byte(self.Data, byte_pointer)
+	if bit_pointer == 0 then return byte_safe(self.Data, byte_pointer)
 	else
 		local data = self.Data
-		local byte, next_byte = string_byte(data, byte_pointer, byte_pointer + 1)
+		local byte, next_byte = bytes_safe(data, byte_pointer, byte_pointer + 1)
 		
 		return wordless(bit_lshift(byte, bit_pointer)) + bit_rshift(next_byte, 8 - bit_pointer)
 	end
@@ -407,13 +418,19 @@ function stream_meta:ReadInt(bits)
 	return self:ReadUInt(bits)
 end
 
+function stream_meta:ReadList(bits, method, ...)
+	local items = {}
+	
+	for index = 0, self:ReadUInt(bits) do table_insert(items, method(self, ...)) end
+end
+
 function stream_meta:ReadLong()
 	if self:ReadBool() then return -self:ReadULong() end
 	
 	return self:ReadULong()
 end
 
-function stream_meta:ReadMaybe(key, ...) if self:ReadBool() then return self[key](self, ...) end end
+function stream_meta:ReadMaybe(method, ...) if self:ReadBool() then return method(self, ...) end end
 
 function stream_meta:ReadPlayer() return Entity(self:ReadUInt(max_players_bits)) end
 
@@ -432,15 +449,6 @@ end
 function stream_meta:ReadString() return self:ReadStringRaw(self:ReadUShort()) end
 
 function stream_meta:ReadStringRaw(length)
-	--[[ reliable debug
-	local bytes = {}
-	
-	for index = 1, length do bytes[index] = self:ReadByte() end
-	
-	return string_char(unpack(bytes))
-	--]]
-	
-	---[[ optimized
 	local read_bit = self.PointerBit
 	local read_byte = self.Pointer
 	local read_target = read_byte + length
@@ -450,11 +458,11 @@ function stream_meta:ReadStringRaw(length)
 	if read_bit == 0 then return string_sub(self.Data, read_byte, read_target - 1)
 	else
 		local data = self.Data
-		local bytes = {string_byte(data, read_byte, math_min(read_target, read_byte + char_offset))}
+		local bytes = {bytes_safe(data, read_byte, math_min(read_target, read_byte + char_offset))}
 		local characters = {}
 		
 		--for oversized strings
-		for index = char_start, length, char_limit do table_Add(bytes, {string_byte(data, index, index + 1)}) end
+		for index = char_start, length, char_limit do table_Add(bytes, {bytes_safe(data, index, index + 1)}) end
 		
 		for index = 1, length do
 			table_insert(
@@ -464,7 +472,16 @@ function stream_meta:ReadStringRaw(length)
 		end
 		
 		return string_char(unpack(characters))
-	end --]]
+	end
+end
+
+function stream_meta:ReadTerminatedList(items, method, ...)
+	local items = {}
+	
+	repeat table_insert(items, method(self, ...))
+	until self:ReadNotBool()
+	
+	return items
 end
 
 function stream_meta:ReadTerminatedString()
@@ -506,9 +523,9 @@ function stream_meta:ReadULong()
 	
 	self.Pointer = read_byte + 4
 	
-	if read_bit == 0 then first, second, third, fourth = string_byte(self.Data, read_byte, read_byte + 3)
+	if read_bit == 0 then first, second, third, fourth = bytes_safe(self.Data, read_byte, read_byte + 3)
 	else
-		local alpha, bravo, charlie, delta, echo = string_byte(self.Data, read_byte, read_byte + 4)
+		local alpha, bravo, charlie, delta, echo = bytes_safe(self.Data, read_byte, read_byte + 4)
 		local remaining_bits = 8 - read_bit
 		
 		first = wordless(bit_lshift(alpha, read_bit)) + bit_rshift(bravo, remaining_bits)
@@ -619,17 +636,23 @@ function stream_meta:WriteInt(integer, bits) --maximum effort
 	self:WriteUInt(math.abs(integer), bits)
 end
 
+function stream_meta:WriteList(items, bits, method, ...)
+	self:WriteUInt(#items - 1, bits)
+	
+	for index, item in ipairs(items) do method(self, item, ...) end
+end
+
 function stream_meta:WriteLong(long)
 	self:WriteBool(long < 0)
 	self:WriteULong(math.abs(long))
 end
 
-function stream_meta:WriteMaybe(key, value, ...)
+function stream_meta:WriteMaybe(method, value, ...)
 	if value == nil then return self:WriteBool(false) end
 	
 	self:WriteBool(true)
 	
-	return self[key](self, value, ...)
+	return method(self, value, ...)
 end
 
 function stream_meta:WritePlayer(ply) self:WriteUInt(ply:EntIndex(), max_players_bits) end
@@ -672,6 +695,19 @@ function stream_meta:WriteStringRaw(text)
 		self.Byte = wordless(bit_lshift(previous_byte, bits_remaining))
 		self.Data = self.Data .. string_char(unpack(bytes))
 	end
+end
+
+function stream_meta:WriteTerminatedList(items, method, ...)
+	local passed = false
+	
+	for index, item in ipairs(items) do
+		if passed then self:WriteBool(true)
+		else passed = true end
+		
+		method(self, item, ...)
+	end
+	
+	self:WriteBool(false)
 end
 
 function stream_meta:WriteTerminatedString(text)
@@ -916,12 +952,6 @@ function PYRITION:NetStreamIncoming(class, uid, ply)
 	end
 end
 
-function PYRITION:NetStreamRegisterClass(class, realm, enumerated)
-	stream_classes[class] = realm
-	
-	if SERVER and enumerated then self:NetAddEnumeratedString("stream", class) end
-end
-
 function PYRITION:NetStreamSend(stream)
 	stream.BytesSent = 0
 	stream.Sending = true
@@ -943,7 +973,6 @@ function PYRITION:NetStreamSend(stream)
 	table.insert(stream_queue, stream)
 end
 
---pyrition hooks
 function PYRITION:NetStreamWrite(stream_queue)
 	local bytes_sent = 0
 	local completed = {}
@@ -974,6 +1003,9 @@ function PYRITION:NetStreamWrite(stream_queue)
 	
 	net_WriteBool(false)
 end
+
+--pyrition hooks
+function PYRITION:PyritionNetStreamRegisterClass(class, realm, _enumerated) stream_classes[class] = realm end
 
 --cvars
 cvars.AddChangeCallback("pyrition_net_stream_bytes", function(_name, _old, new)
@@ -1011,6 +1043,9 @@ net.Receive("pyrition_stream", function(_length, ply)
 	
 	for index, stream in ipairs(streams_completed) do stream:Read(ply) end
 end)
+
+--post
+PYRITION:GlobalHookCreate("NetStreamRegisterClass")
 
 --debug
 if false then

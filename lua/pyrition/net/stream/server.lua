@@ -1,6 +1,7 @@
 util.AddNetworkString("pyrition_stream")
 
 --locals
+local active_streams = PYRITION.NetStreamsActive
 local stream_send_queue = PYRITION.NetStreamQueue
 local table_insert = table.insert
 
@@ -39,4 +40,12 @@ function PYRITION:NetStreamThink()
 end
 
 --hooks
-hook.Add("PlayerDisconnected", "NetStream", function(ply) stream_send_queue[ply] = nil end)
+hook.Add("PlayerDisconnected", "NetStream", function(ply)
+	active_streams[ply] = nil
+	stream_send_queue[ply] = nil
+end)
+
+hook.Add("PyritionNetStreamRegisterClass", "PyritionNetStream", function(class, _realm, enumerated) if enumerated then PYRITION:NetAddEnumeratedString("stream", class) end end)
+
+--post
+PYRITION:NetAddEnumeratedString("stream")

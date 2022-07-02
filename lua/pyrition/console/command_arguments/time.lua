@@ -7,7 +7,7 @@ local time_thresholds = PYRITION.TimeThresholds
 local time_units = PYRITION.TimeUnits
 
 --command argument methods
-function ARGUMENT:Complete(ply, settings, argument)
+function ARGUMENT:Complete(_ply, settings, argument)
 	local completions = {}
 	local default = settings.Default
 	local maximum = settings.Maximum
@@ -40,7 +40,7 @@ function ARGUMENT:Complete(ply, settings, argument)
 	return completions
 end
 
-function ARGUMENT:Filter(ply, settings, argument)
+function ARGUMENT:Filter(_ply, settings, argument)
 	local time = parse_time(argument)
 	
 	if not time then return false end
@@ -56,23 +56,26 @@ function ARGUMENT:Filter(ply, settings, argument)
 	return time and true or false, time
 end
 
-function ARGUMENT:Read(stream, settings)
-	settings.Default = stream:ReadMaybe("ReadLong")
-	settings.Maximum = stream:ReadMaybe("ReadLong")
-	settings.Minimum = stream:ReadMaybe("ReadLong")
-	settings.Unit = stream:ReadMaybe("ReadUInt", 3)
+function ARGUMENT:ReadSettings(stream, settings)
+	local read_long = stream.ReadULong
+	
+	settings.Default = stream:ReadMaybe(read_long)
+	settings.Maximum = stream:ReadMaybe(read_long)
+	settings.Minimum = stream:ReadMaybe(read_long)
+	settings.Unit = stream:ReadMaybe(stream.ReadUInt, 3)
 end
 
-function ARGUMENT:Write(stream, settings)
+function ARGUMENT:WriteSettings(stream, settings)
+	local write_long = stream.WriteULong
 	local unit = settings.Unit
 	
-	stream:WriteMaybe("WriteLong", settings.Default)
-	stream:WriteMaybe("WriteLong", settings.Maximum)
-	stream:WriteMaybe("WriteLong", settings.Minimum)
+	stream:WriteMaybe(write_long, settings.Default)
+	stream:WriteMaybe(write_long, settings.Maximum)
+	stream:WriteMaybe(write_long, settings.Minimum)
 	
 	for index, threshold in ipairs(time_thresholds) do
 		--find the unit we are using, and write it by its index
-		if unit == threshold then return stream:WriteMaybe("WriteUInt", index, 3) end
+		if unit == threshold then return stream:WriteMaybe(stream.WriteUInt, index, 3) end
 	end
 	
 	--if we did not find the threshold, write the WriteMaybe's bool

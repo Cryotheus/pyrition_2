@@ -8,7 +8,7 @@ local prefix_functions = {
 	["$"] = function(...) return PYRITION:PlayerFindBySteamID(...) end, --steam id
 	["%"] = function(_needle, _supplicant) return false, "Unavailable." end, --everyone in your user group and above
 	
-	["^"] = function(_needle, _supplicant) --yourself, everyone in your user group, or everyone in a user group
+	["^"] = function(needle, supplicant) --yourself, everyone in your user group, or everyone in a user group
 		if #needle > 0 then
 			--find players of the specified user group
 			local first_character = string.Left(needle, 1)

@@ -45,25 +45,31 @@ PYRITION._IsPyritionCommand = is_pyrition_command
 --pyrition functions
 function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 	local command_arguments = command.Arguments or {}
+	local filter_success, fail_index, fail_message
 	local required = command_arguments.Required or 0
 	
-	if not IsValid(ply) then ply = game.GetWorld() end
+	ply = IsValid(ply) and ply or game.GetWorld()
 	
 	if ply == game.GetWorld() and not command.Console then
 		--we shouldn't let the console run commands that are not marked as console safe
-		return PYRITION:LanguageQueue(ply, "pyrition.command.failed.console", {command = command_localization(command)})
+		return self:LanguageQueue(ply, "pyrition.command.failed.console", {command = command_localization(command)})
 	end
 	
+	--always need arguments
+	if not arguments then arguments = {} end
+	
 	if #arguments < required then
-		if required == 1 then PYRITION:LanguageQueue(ply, "pyrition.command.failed.required_arguments.singular", {command = command_localization(command)})
-		else PYRITION:LanguageQueue(ply, "pyrition.command.failed.required_arguments", {command = command_localization(command), count = required}) end
+		if required == 1 then self:LanguageQueue(ply, "pyrition.command.failed.required_arguments.singular", {command = command_localization(command)})
+		else self:LanguageQueue(ply, "pyrition.command.failed.required_arguments", {command = command_localization(command), count = required}) end
 		
 		return false
 	end
 	
-	local filter_success, fail_index, fail_message
-	
-	if CLIENT and command.Downloaded then filter_success = true
+	--if we don't have the command send it to the server for execution
+	if CLIENT and command.Downloaded then
+		PYRITION:ConsoleCommandSend(command, arguments, ply)
+		
+		return true
 	else filter_success, fail_index, fail_message = self:ConsoleCommandArgumentValidate(ply, command, arguments) end
 	
 	if filter_success then
@@ -83,7 +89,7 @@ function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 			--we don't send a message for downloaded commands
 			if command.Downloaded then return success end
 			
-			PYRITION:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
+			self:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
 		else self:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
 		
 		return success
@@ -91,8 +97,8 @@ function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 		self:LanguageQueue(ply, fail_message and "pyrition.command.failed.argument.detailed" or "pyrition.command.failed.argument", {
 			class = (command_arguments[fail_index] or {Class = "nil"}).Class,
 			command = command_localization(command),
-			index = "#" .. fail_index,
-			message = "#" .. fail_message
+			index = "#" .. tostring(fail_index or -1),
+			message = "#" .. tostring(fail_message or "nil")
 		})
 	end
 	

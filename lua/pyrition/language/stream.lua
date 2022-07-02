@@ -1,5 +1,5 @@
 --locals
-local MODEL = {Priority = 5}
+local MODEL = {Priority = 10}
 
 --stream model functions
 function MODEL:Initialize() if SERVER then self:Send() end end
@@ -22,26 +22,26 @@ function MODEL:Read()
 						phrases[tag] = players
 						
 						repeat table.insert(players, self:ReadPlayer())
-						until not self:ReadBool()
+						until self:ReadBoolNot()
 					else
 						local items = {}
 						phrases[tag] = items
 						
 						repeat table.insert(items, self:ReadString())
-						until not self:ReadBool()
+						until self:ReadBoolNot()
 					end
 				else --item
 					if self:ReadBool() then phrases[tag] = self:ReadPlayer()
 					else phrases[tag] = self:ReadString() end
 				end
-			until not self:ReadBool()
+			until self:ReadBoolNot()
 		end
 		
 		PYRITION:LanguageDisplay(option, key, phrases)
 	end
 end
 
-function MODEL:Write(ply, key, phrases, option)
+function MODEL:Write(_ply, key, phrases, option)
 	--flag that there is a message to read
 	self:WriteBool(true)
 	
@@ -93,13 +93,6 @@ function MODEL:Write(ply, key, phrases, option)
 		
 		self:WriteBool(false)
 	else self:WriteBool(false) end
-end
-
-function MODEL:WriteFooter()
-	self:WriteBool(false) --this marks that no more messages remain
-	self:WriteEndBits() --complete the byte so whatever remaining bits get sent
-	
-	return true --we changed the Data field using Write methods, so we return true
 end
 
 --post

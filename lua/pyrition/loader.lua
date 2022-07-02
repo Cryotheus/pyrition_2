@@ -10,8 +10,8 @@ local config = {
 	gradient = 23,		--0010 111
 	ip = 18,			--0010 010
 	loader = 4,			--0000 100
+	string = 31,		--0011 111
 	time = 23,			--0010 111
-	utf8 = 23,			--0010 111
 	
 	console = {
 		chat = {
@@ -44,14 +44,17 @@ local config = {
 			slap = 74,			--1001 010
 			slay = 74,			--1001 010
 			strip = 74,			--1001 010
-			test = 74,			--1001 010
+		},
+		
+		stream = {
+			command = 63,	--111 111
+			commands = 63,	--111 111
 		},
 		
 		command = 55,			--110 111
 		command_argument = 55,	--110 111
 		server = 58,			--111 010
 		shared = 47,			--101 111
-		stream = 63,			--111 111
 	},
 	
 	global = {

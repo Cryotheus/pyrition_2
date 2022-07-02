@@ -10,7 +10,7 @@ local nice_time = PYRITION._TimeNicefy
 --colors sto- "inspired" by ULX
 local color_command = Color(224, 128, 64)
 local color_console = Color(255, 64, 64)
-local color_default = Color(196, 230, 255) --Color(151, 211, 255)
+local color_default = Color(255, 230, 196) --Color(196, 230, 255) --Color(151, 211, 255)
 local color_everyone = Color(0, 128, 128)
 local color_misc = Color(0, 255, 0)
 local color_player = Color(255, 224, 0)

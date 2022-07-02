@@ -4,7 +4,7 @@ local defix = PYRITION._DefixMap
 local maps = PYRITION.MapList
 
 --command argument methods
-function ARGUMENT:Complete(ply, settings, argument)
+function ARGUMENT:Complete(_ply, _settings, argument)
 	local completions = {}
 	
 	--add all maps prefixed with the text
@@ -24,7 +24,7 @@ function ARGUMENT:Complete(ply, settings, argument)
 	return completions
 end
 
-function ARGUMENT:Filter(ply, settings, argument)
+function ARGUMENT:Filter(_ply, _settings, argument)
 	if not argument then return false end
 	if maps[argument] then return true, argument end
 	

@@ -38,13 +38,12 @@ function PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments) --inpu
 	--basically, fail the execution if a required argument is invalid
 	--and ignore optional arguments that are invalid
 	--if we have an argument marked with Optional and it is invalid, pop it
-	local argument_count = #arguments
 	local command_arguments = command.Arguments
-	local index = 1
+	local index_limit = math.min(#arguments, #command_arguments)
 	local required = command_arguments.Required
 	
-	--I can't adjust the index ipairs is on so I'm using a while loop
-	while index <= math.min(argument_count, #command_arguments) do
+	--while index <= index_limit do
+	for index = 1, index_limit do
 		local command_argument = command_arguments[index]
 		
 		--if we have more arguments than 
@@ -52,9 +51,7 @@ function PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments) --inpu
 		
 		local valid, value, message = self:ConsoleCommandArgumentFilter(ply, command_argument, arguments[index])
 		
-		if valid then
-			arguments[index] = value
-			index = index + 1
+		if valid then arguments[index] = value
 		else
 			if command_argument.Optional then
 				arguments[index] = nil
@@ -64,12 +61,10 @@ function PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments) --inpu
 				if index <= required then return false, index, message
 				else arguments[index] = nil end
 			end
-			
-			index = index + 1
 		end
 	end
 	
-	return true
+	return true, index_limit
 end
 
 --pyrition hooks

@@ -2,7 +2,7 @@
 local model_queue = PYRITION.NetStreamModelsQueued or {} --table[class] = rich list {Target, ... arguments}
 local stream_model_methods = PYRITION.NetStreamModelMethods or {}
 local stream_models = PYRITION.NetStreamModels or {} --table[class] = lite object
-local stream_models_active = PYRITION.NetStreamModelsActive or {} 
+local stream_models_active = PYRITION.NetStreamModelsActive or {} --table[class][stream] = target
 
 --local tables
 local model_meta = {
@@ -103,6 +103,7 @@ end
 --pyrition hooks
 function PYRITION:PyritionNetStreamModelRegister(class, realm, model, base_class)
 	local base = base_class and stream_model_methods[base_class]
+	local enumerate = model.EnumerateClass
 	
 	model.Class = class
 	
@@ -129,7 +130,7 @@ function PYRITION:PyritionNetStreamModelRegister(class, realm, model, base_class
 		model = table.Merge(table.Copy(base), model)
 	end
 	
-	self:NetStreamRegisterClass(class, realm, model.EnumerateClass)
+	self:NetStreamRegisterClass(class, realm, enumerate == nil or enumerate)
 	
 	stream_model_methods[class] = model
 	stream_models_active[class] = stream_models_active[class] or {}

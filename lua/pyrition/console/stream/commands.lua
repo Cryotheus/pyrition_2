@@ -1,3 +1,4 @@
+--sync a list of commands to the client
 --locals
 local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses
 local MODEL = {Priority = 60}
@@ -21,7 +22,7 @@ local function read_command(self, parents)
 		
 		if command_argument then
 			--if we have special fields to read
-			if command_argument.Read then command_argument:Read(self, settings) end
+			if command_argument.ReadSettings then command_argument:ReadSettings(self, settings) end
 		else ErrorNoHalt("ID10T-12/C: Invalid command argument class " .. tostring(class) .. " for sync.") end
 		
 		arguments[index] = settings
@@ -61,7 +62,7 @@ local function write_command(self, _ply, parents, command)
 		
 		if command_argument then
 			--if we have special fields to write
-			if command_argument.Write then command_argument:Write(self, settings) end
+			if command_argument.WriteSettings then command_argument:WriteSettings(self, settings) end
 		else ErrorNoHalt("ID10T-12/C: Invalid command argument class " .. tostring(class) .. " for sync.") end
 	end
 end
@@ -98,4 +99,4 @@ function MODEL:Write(ply)
 end
 
 --post
-PYRITION:NetStreamModelRegister("command", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("commands", CLIENT, MODEL)

@@ -1,9 +1,12 @@
 --locals
 local ARGUMENT = {}
+local bits = PYRITION._Bits
 local insert_if_matching = PYRITION._InsertIfMatching
+local long_maximum = 2 ^ 31 - 1
+local long_minimum = -1 - long_maximum
 
 --command argument methods
-function ARGUMENT:Complete(ply, settings, argument)
+function ARGUMENT:Complete(_ply, settings, argument)
 	--return should be a list of strings for the command's completion
 	local completions = {}
 	local default = settings.Default
@@ -36,13 +39,14 @@ function ARGUMENT:Complete(ply, settings, argument)
 	return completions
 end
 
-function ARGUMENT:Filter(ply, settings, argument)
+function ARGUMENT:Filter(_ply, settings, argument)
 	--first return should be a bool for validity of argument
 	--second return should be the value itself, and is ignored if the first return is false
 	--third return is a message, and is only useful if the first return is false
 	local integer = tonumber(argument)
 	
 	if not integer then return false end
+	if not settings.Signed and integer < 0 then return false end
 	
 	local maximum = settings.Maximum
 	local minimum = settings.Minimum
@@ -56,23 +60,37 @@ function ARGUMENT:Filter(ply, settings, argument)
 end
 
 function ARGUMENT:Read(stream, settings)
-	local signed = stream:ReadBool()
-	local key = signed and "ReadLong" or "ReadULong"
+	local maximum = settings.Maximum or long_maximum
+	local minimum = settings.Minimum or settings.Signed and 0 or long_minimum
 	
-	settings.Signed = signed
-	settings.Default = stream:ReadMaybe(key)
-	settings.Maximum = stream:ReadMaybe(key)
-	settings.Minimum = stream:ReadMaybe(key)
+	return stream:ReadUInt(bits(maximum - minimum + 1)) - minimum
 end
 
-function ARGUMENT:Write(stream, settings)
+function ARGUMENT:ReadSettings(stream, settings)
+	local signed = stream:ReadBool()
+	local read_long = signed and stream.ReadLong or stream.ReadULong
+	
+	settings.Signed = signed
+	settings.Default = stream:ReadMaybe(read_long)
+	settings.Maximum = stream:ReadMaybe(read_long)
+	settings.Minimum = stream:ReadMaybe(read_long)
+end
+
+function ARGUMENT:Write(stream, settings, argument)
+	local maximum = settings.Maximum or long_maximum
+	local minimum = settings.Minimum or settings.Signed and 0 or long_minimum
+	
+	stream:WriteUInt(argument + minimum, bits(maximum - minimum + 1))
+end
+
+function ARGUMENT:WriteSettings(stream, settings)
 	local signed = settings.Signed
-	local key = signed and "WriteLong" or "WriteULong"
+	local write_long = signed and stream.WriteLong or stream.WriteULong
 	
 	stream:WriteBool(signed)
-	stream:WriteMaybe(key, settings.Default)
-	stream:WriteMaybe(key, settings.Maximum)
-	stream:WriteMaybe(key, settings.Minimum)
+	stream:WriteMaybe(write_long, settings.Default)
+	stream:WriteMaybe(write_long, settings.Maximum)
+	stream:WriteMaybe(write_long, settings.Minimum)
 end
 
 --post

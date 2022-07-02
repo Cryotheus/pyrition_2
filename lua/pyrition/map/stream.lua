@@ -4,7 +4,7 @@ local maps = PYRITION.MapList
 local map_status = PYRITION.MapStatus
 local map_votes = PYRITION.MapVotes
 local max_players_bits = PYRITION.NetMaxPlayerBits
-local MODEL = {Priority = 10}
+local MODEL = {Priority = 20}
 
 --local function
 local function read_map(self, index)

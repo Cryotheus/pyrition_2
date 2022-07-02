@@ -36,33 +36,8 @@ function build_command_list(commands, maximum_depth, depth, returns)
 	return returns
 end
 
-local function network_execution(self, _ply, ...)
-	--used for server-side commands that are executable by the client
-	net.Start("pyrition_command")
-	
-	do --command namespace
-		local passed = false
-		
-		for index, parent in ipairs(self.Parents) do
-			if passed then net.WriteBool(true)
-			else passed = true end
-			
-			PYRITION:NetWriteEnumeratedString("command", parent)
-		end
-		
-		net.WriteBool(false)
-	end
-	
-	do --command arguments
-		for index, argument in ipairs{...} do
-			net.WriteBool(true)
-			net.WriteString(tostring(argument))
-		end
-		
-		net.WriteBool(false)
-	end
-	
-	net.SendToServer()
+local function network_execution(self) --used for server-side commands that are executable by the client
+	ErrorNoHalt("ID10T-22: Attempt to execute command " .. tostring(self) .. " from client when it is only available on the server!")
 	
 	return true
 end
@@ -158,6 +133,11 @@ end
 
 function PYRITION:ConsoleCommandGetList(subject) return build_command_list(subject or commands, maximum_depth, 0) end
 function PYRITION:ConsoleCommandGetTree(maximum_depth) return grow_command_tree(commands, maximum_depth or 4, 0) end
+
+function PYRITION:ConsoleCommandSend(command, arguments, ply) --run a command on the other realm
+	--
+	self:NetStreamModelGet("command", ply)(command, arguments)
+end
 
 --pyrition hooks
 function PYRITION:PyritionConsoleCommandDownload(parents, arguments)

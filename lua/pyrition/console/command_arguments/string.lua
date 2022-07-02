@@ -1,9 +1,10 @@
 --locals
 local ARGUMENT = {}
 local insert_if_matching = PYRITION._InsertIfMatching
+local replace_unsafe = PYRITION._StringReplaceUnsafe
 
 --command argument methods
-function ARGUMENT:Complete(ply, settings, argument)
+function ARGUMENT:Complete(_ply, settings, argument)
 	local completions = {}
 	local default = settings.Default
 	local maximum = settings.Maximum
@@ -28,7 +29,7 @@ function ARGUMENT:Complete(ply, settings, argument)
 	return completions
 end
 
-function ARGUMENT:Filter(ply, settings, argument)
+function ARGUMENT:Filter(_ply, settings, argument)
 	local default = settings.Default
 	
 	if not argument then return default and true or false, default end
@@ -40,19 +41,23 @@ function ARGUMENT:Filter(ply, settings, argument)
 	if maximum and length > maximum then argument = string.Left(argument, maximum)
 	elseif minimum and length < minimum then return false, nil, PYRITION:LanguageFormat("pyrition.command.argument.string.minimum", {minimum = minimum}) end
 	
+	if argument then return true, settings.Safe and replace_unsafe(argument) or argument end
+	
 	return argument and true or false, argument
 end
 
-function ARGUMENT:Read(stream, settings)
-	settings.Default = stream:ReadMaybe("ReadString")
-	settings.Maximum = stream:ReadMaybe("ReadLong")
-	settings.Minimum = stream:ReadMaybe("ReadLong")
+function ARGUMENT:ReadSettings(stream, settings)
+	settings.Safe = stream:ReadBool()
+	settings.Default = stream:ReadMaybe(stream.ReadString)
+	settings.Maximum = stream:ReadMaybe(stream.ReadULong)
+	settings.Minimum = stream:ReadMaybe(stream.ReadULong)
 end
 
-function ARGUMENT:Write(stream, settings)
-	stream:WriteMaybe("WriteString", settings.Default)
-	stream:WriteMaybe("WriteLong", settings.Maximum)
-	stream:WriteMaybe("WriteLong", settings.Minimum)
+function ARGUMENT:WriteSettings(stream, settings)
+	stream:WriteBool(settings.Safe)
+	stream:WriteMaybe(stream.WriteString, settings.Default)
+	stream:WriteMaybe(stream.WriteULong, settings.Maximum)
+	stream:WriteMaybe(stream.WriteULong, settings.Minimum)
 end
 
 --post

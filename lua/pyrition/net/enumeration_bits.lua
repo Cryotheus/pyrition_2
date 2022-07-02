@@ -5,9 +5,9 @@ local MODEL = {
 }
 
 --stream model functions
-function MODEL:InitialSync(ply, emulated) return true end
+function MODEL:InitialSync() return true end
 
-function MODEL:Read(ply)
+function MODEL:Read()
 	local enumeration_bits = PYRITION.NetEnumerationBits
 	local net_enumerations = PYRITION.NetEnumeratedStrings
 	
@@ -16,10 +16,10 @@ function MODEL:Read(ply)
 		enumeration_bits[namespace] = self:ReadUInt(5) + 1
 		
 		if not net_enumerations[namespace] then net_enumerations[namespace] = {} end
-	until not self:ReadBool()
+	until self:ReadBoolNot()
 end
 
-function MODEL:Write(ply)
+function MODEL:Write()
 	local passed = false
 	
 	for namespace, bits in pairs(self.Bits or PYRITION.NetEnumerationBits) do

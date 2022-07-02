@@ -48,7 +48,7 @@ local function read_enumerated_string(namespace, ply, text, enumeration)
 		return text
 	end
 	
-	return enumerations[enumeration + 1]
+	return enumerations[enumeration]
 end
 
 local function recipient_iterable(object)
@@ -124,7 +124,7 @@ function PYRITION:NetReadEnumeratedString(namespace, ply)
 		namespace,
 		ply,
 		net.ReadBool() and net.ReadString(),
-		net.ReadUInt(net_enumeration_bits[namespace])
+		net.ReadUInt(net_enumeration_bits[namespace]) + 1
 	)
 end
 
@@ -198,11 +198,11 @@ function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
 		net.WriteString(text)
 	else net.WriteBool(false) end
 	
-	net.WriteUInt(enumeration, enumeration_bits)
+	net.WriteUInt(enumeration -1, enumeration_bits)
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetPlayerInitialized(ply, emulated) PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply}) end
+function PYRITION:PyritionNetPlayerInitialized(ply, _emulated) PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply}) end
 
 function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 	local duplex = net_enumerations[namespace]
@@ -255,7 +255,7 @@ end)
 hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply) loading_players[ply] = ply:TimeConnected() end)
 
 --net
-net.Receive("pyrition", function(length, ply)
+net.Receive("pyrition", function(_length, ply)
 	if loading_players[ply] == nil and false then --RELEASE: remove "and false" once done debugging
 		if sv_allowcslua:GetBool() then return end
 		

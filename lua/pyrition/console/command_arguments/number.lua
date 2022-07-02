@@ -3,7 +3,7 @@ local ARGUMENT = {}
 local insert_if_matching = PYRITION._InsertIfMatching
 
 --command argument methods
-function ARGUMENT:Complete(ply, settings, argument)
+function ARGUMENT:Complete(_ply, settings, argument)
 	local completions = {}
 	local default = settings.Default
 	local maximum = settings.Maximum
@@ -35,7 +35,7 @@ function ARGUMENT:Complete(ply, settings, argument)
 	return completions
 end
 
-function ARGUMENT:Filter(ply, settings, argument)
+function ARGUMENT:Filter(_ply, settings, argument)
 	--first return should be a bool for validity of argument
 	--second return should be the value itself, and is ignored if the first return is false
 	--third return is a message, and is only useful if the first return is false
@@ -54,20 +54,23 @@ function ARGUMENT:Filter(ply, settings, argument)
 	return number and true or false, number
 end
 
-function ARGUMENT:Read(stream, settings)
-	settings.Default = stream:ReadMaybe("ReadFloat")
-	settings.Maximum = stream:ReadMaybe("ReadFloat")
-	settings.Minimum = stream:ReadMaybe("ReadFloat")
-	settings.Rounding = stream:ReadMaybe("ReadUInt", 4)
+function ARGUMENT:ReadSettings(stream, settings)
+	local read_float = stream.ReadFloat
+	
+	settings.Default = stream:ReadMaybe(read_float)
+	settings.Maximum = stream:ReadMaybe(read_float)
+	settings.Minimum = stream:ReadMaybe(read_float)
+	settings.Rounding = stream:ReadMaybe(stream.ReadUInt, 4)
 end
 
-function ARGUMENT:Write(stream, settings)
+function ARGUMENT:WriteSettings(stream, settings)
 	local rounding = settings.Rounding
+	local write_float = stream.WriteFloat
 	
-	stream:WriteMaybe("WriteFloat", settings.Default)
-	stream:WriteMaybe("WriteFloat", settings.Maximum)
-	stream:WriteMaybe("WriteFloat", settings.Minimum)
-	stream:WriteMaybe("WriteUInt", rounding == true and 0 or rounding, 4)
+	stream:WriteMaybe(write_float, settings.Default)
+	stream:WriteMaybe(write_float, settings.Maximum)
+	stream:WriteMaybe(write_float, settings.Minimum)
+	stream:WriteMaybe(stream.WriteUInt, rounding == true and 0 or rounding, 4)
 end
 
 --post

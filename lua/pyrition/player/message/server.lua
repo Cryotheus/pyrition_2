@@ -1,10 +1,6 @@
 --locals
-local blacklisted_characters = "\a\b\f\t\n\r\x01\x02\x03\x04\x05\x06\x07\x08\x09"
 local blocks = {}
-local duplex_make = PYRITION._DuplexMake
-local sequence = "[" .. blacklisted_characters .. "]"
-
-local blacklisted_bytes = duplex_make{string.byte(blacklisted_characters)}
+local replace_unsafe = PYRITION._StringReplaceUnsafe
 
 --local functions
 local function messaging_blocked(ply, target)
@@ -40,16 +36,7 @@ function PYRITION:PlayerMessage(ply, targets, message) --send a private message 
 		end
 	end
 	
-	if string.find(message, sequence) then --if there's an illegal character, reconstruct the string without it
-		local codes = {}
-		
-		for point, code in utf8.codes(message) do
-			if blacklisted_bytes[code] then table.insert(codes, 32)
-			else table.insert(codes, code) end
-		end
-		
-		message = utf8.char(unpack(codes))
-	end
+	message = replace_unsafe(message)
 	
 	if #targets == 1 then --recount, YET AGAIN
 		local target = targets[1]
