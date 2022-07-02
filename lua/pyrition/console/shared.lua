@@ -1,5 +1,6 @@
 --locals
 local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses or {}
+local is_pyrition_command_indexable
 local is_pyrition_command
 local phrase_exists = PYRITION._LanguagePhraseExists
 
@@ -31,17 +32,30 @@ end
 
 local function insert_prefixed_commands(completions, tree, validation_prefix, command_prefix)
 	for name, command in pairs(tree) do
-		if string.StartWith(name, validation_prefix) and is_pyrition_command(command) then
-			table.insert(completions, command_prefix .. name)
-		end
+		--if it's indexable and it's prefixed by validation_prefix, append to completions
+		if string.StartWith(name, validation_prefix) and is_pyrition_command_indexable(command) then table.insert(completions, command_prefix .. name) end
 	end
 end
 
 function is_pyrition_command(object) return istable(object) and object.IsPyritionCommand or false end
 
+function is_pyrition_command_indexable(object)
+	if istable(object) then return object.IsPyritionCommand or object.IsPyritionCommandOrganizer end
+	
+	return false
+end
+
+local function is_pyrition_command_organizer(object)
+	if istable(object) then return not object.IsPyritionCommand and object.IsPyritionCommandOrganizer end
+	
+	return false
+end
+
 --globals
 PYRITION.ConsoleCommandArgumentClasses = command_argument_classes
 PYRITION._IsPyritionCommand = is_pyrition_command
+PYRITION._IsPyritionCommandIndexable = is_pyrition_command_indexable
+PYRITION._IsPyritionCommandOrganizer = is_pyrition_command_organizer
 
 --pyrition functions
 function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
@@ -211,6 +225,9 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 				else hint = nil end
 			end
 		end
+	elseif is_pyrition_command_organizer(tree) then
+		insert_prefixed_commands(completions, tree, next_argument, prefix .. prefix_arguments_string .. " ")
+		table.sort(completions)
 	else
 		insert_prefixed_commands(completions, tree, depth_argument, prefix .. prefix_arguments_string)
 		table.sort(completions)

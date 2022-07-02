@@ -5,6 +5,7 @@ local commands = PYRITION.ConsoleCommands or {}
 local grow_command_tree
 local isstring = isstring
 local is_pyrition_command = PYRITION._IsPyritionCommand
+local is_pyrition_command_indexable = PYRITION._IsPyritionCommandIndexable
 local _R = debug.getregistry()
 
 --local tables
@@ -103,7 +104,7 @@ function PYRITION:ConsoleCommandGet(parents, modify, max_depth)
 			if modify then parents[index] = string.sub(parent, 2) end
 			
 			return branch, index - 1
-		elseif is_pyrition_command(twig) then
+		elseif is_pyrition_command_indexable(twig) then
 			if index > max_depth then return twig, index end
 			
 			branch = twig
@@ -121,6 +122,17 @@ function PYRITION:ConsoleCommandGetChildren(command)
 	return next(children) and children or false
 end
 
+function PYRITION:ConsoleCommandGetChildTables(command)
+	local children = {}
+	
+	for key, value in pairs(command) do
+		if is_pyrition_command(value) then table.insert(children, value)
+		elseif istable(value) and string.lower(key) == key and key == value.Name then table.insert(children, value) end
+	end
+	
+	return next(children) and children or false
+end
+
 function PYRITION:ConsoleCommandGetExisting(parents)
 	if isstring(parents) then parents = string.Split(parents, " ") end
 	
@@ -132,6 +144,31 @@ function PYRITION:ConsoleCommandGetExisting(parents)
 end
 
 function PYRITION:ConsoleCommandGetList(subject) return build_command_list(subject or commands, maximum_depth, 0) end
+
+function PYRITION:ConsoleCommandGetShallow(parents, modify, max_depth)
+	if isstring(parents) then parents = string.Split(parents, " ") end
+	
+	local branch = commands
+	local count = #parents
+	local max_depth = max_depth or math.huge
+	
+	for index, parent in ipairs(parents) do
+		local twig = branch[parent]
+		
+		if string.StartWith(parent, "?") then
+			if modify then parents[index] = string.sub(parent, 2) end
+			
+			return branch, index - 1
+		elseif is_pyrition_command_indexable(twig) then
+			if index > max_depth then return twig, index end
+			
+			branch = twig
+		else return branch, index - 1 end
+	end
+	
+	return branch, count
+end
+
 function PYRITION:ConsoleCommandGetTree(maximum_depth) return grow_command_tree(commands, maximum_depth or 4, 0) end
 
 function PYRITION:ConsoleCommandSend(command, arguments, ply) --run a command on the other realm
@@ -250,8 +287,6 @@ function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 	local branch = commands
 	local count = #parents
 	
-	print("setting", table.concat(parents, "."))
-	
 	for index, parent in ipairs(parents) do
 		local twig = branch[parent]
 		
@@ -261,8 +296,8 @@ function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 			if istable(twig) then
 				children = {}
 				
-				--build a table of child commands
-				for name, child in pairs(twig) do if is_pyrition_command(child) and name ~= "BaseClass" then children[name] = child end end
+				--build a table of child commands and command organizers
+				for name, child in pairs(twig) do if is_pyrition_command_indexable(child) and name ~= "BaseClass" then children[name] = child end end
 				
 				--we empty and merge to maintain the same reference
 				table.Empty(twig)
@@ -271,6 +306,7 @@ function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 				command_table = table.Merge(twig, command_table)
 			else branch[parent] = command_table end
 			
+			command_table.IsPyritionCommandOrganizer = nil
 			command_table.Name = parents[#parents]
 			command_table.Parents = table.Copy(parents)
 			
@@ -280,7 +316,10 @@ function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 			return command_table
 		elseif istable(twig) then branch = twig
 		else
-			twig = {}
+			twig = {
+				IsPyritionCommandOrganizer = true,
+				Name = parent
+			}
 			
 			--maintain reference
 			branch[parent] = twig
