@@ -65,7 +65,11 @@ hook.Add("AddToolMenuCategories", "PyritionSandbox", function()
 	spawnmenu.AddToolCategory("Utilities", "PyritionDevelopers", "#pyrition.spawnmenu.categories.developer")
 end)
 
-hook.Add("PyritionNetClientInitialized", "PyritionSandbox", function(ply) local_player = ply end)
+hook.Add("PyritionNetClientInitialized", "PyritionSandbox", function(ply)
+	local_player = ply
+	
+	if pyrition_sandbox_hud_blocks:GetBool() then enable_hud_blocks() end
+end)
 
---post
-if pyrition_sandbox_hud_blocks:GetBool() then enable_hud_blocks() end
+--autoreload
+if local_player:IsValid() then hook.GetTable().PyritionNetClientInitialized.PyritionSandbox(local_player) end

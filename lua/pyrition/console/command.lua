@@ -250,6 +250,8 @@ function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 	local branch = commands
 	local count = #parents
 	
+	print("setting", table.concat(parents, "."))
+	
 	for index, parent in ipairs(parents) do
 		local twig = branch[parent]
 		
@@ -276,7 +278,7 @@ function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 			if children then table.Merge(command_table, children) end
 			
 			return command_table
-		elseif is_pyrition_command(twig) then branch = twig
+		elseif istable(twig) then branch = twig
 		else
 			twig = {}
 			

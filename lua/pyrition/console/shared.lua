@@ -1,6 +1,7 @@
 --locals
 local command_argument_classes = PYRITION.ConsoleCommandArgumentClasses or {}
 local is_pyrition_command
+local phrase_exists = PYRITION._LanguagePhraseExists
 
 --local functions
 local function command_callback(ply, arguments, no_fail_response)
@@ -78,18 +79,26 @@ function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 		--if we failed and we have failed execution response disabled, stop here
 		if not success and no_fail_response then return false end
 		
+		local success_targets = command.SilentResponse and ply or success or ply
+		
 		if message then
 			self:LanguageQueue(
-				command.SilentResponse and ply or success or ply,
+				success_targets,
 				message,
-				table.Merge({executor = ply},
-				phrases or {})
+				table.Merge(
+					{executor = ply},
+					phrases or {}
+				)
 			)
 		elseif success then
 			--we don't send a message for downloaded commands
 			if command.Downloaded then return success end
 			
-			self:LanguageQueue(ply, "pyrition.command.success", {command = command_localization(command)})
+			local language_key = "pyrition.commands." .. table.concat(command.Parents, ".") .. ".success"
+			
+			if phrase_exists(language_key) then return self:LanguageQueue(success_targets, language_key, table.Merge({executor = ply}, phrases or {})) end
+			
+			self:LanguageQueue(success_targets, "pyrition.command.success", {command = command_localization(command)})
 		else self:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
 		
 		return success

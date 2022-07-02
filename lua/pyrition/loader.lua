@@ -21,16 +21,17 @@ local config = {
 		},
 		
 		command_arguments = {
-			integer = 63,	--111 111
-			map = 63,		--111 111
-			number = 63,	--111 111
-			player = 63,	--111 111
-			string = 63,	--111 111
-			time = 63,		--111 111
+			integer = 71,	--1000 111
+			map = 71,		--1000 111
+			number = 71,	--1000 111
+			player = 71,	--1000 111
+			string = 71,	--1000 111
+			time = 71,		--1000 111
 		},
 		
 		commands = {
 			bring = 74,			--1001 010
+			cleanup = 74,		--1001 010
 			["goto"] = 74,		--1001 010
 			heal = 74,			--1001 010
 			health = 74,		--1001 010
@@ -51,10 +52,10 @@ local config = {
 			commands = 63,	--111 111
 		},
 		
-		command = 55,			--110 111
-		command_argument = 55,	--110 111
+		command = 63,			--111 111
+		command_argument = 63,	--111 111
 		server = 58,			--111 010
-		shared = 47,			--101 111
+		shared = 55,			--110 111
 	},
 	
 	global = {
