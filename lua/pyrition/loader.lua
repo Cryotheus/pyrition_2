@@ -65,6 +65,11 @@ local config = {
 		shared = 7		--000 111
 	},
 	
+	hud_declutter = {
+		blocks = 37,	--100 101
+		crosshair = 37,	--100 101
+	},
+	
 	language = {
 		client = 53,	--101 101
 		debug = 47,		--101 111
@@ -125,6 +130,10 @@ local config = {
 			shared = 55,	--110 111
 			stream = 63,	--111 111
 		}
+	},
+	
+	spawnmenu = {
+		client = 69,	--1000 101
 	},
 	
 	sql = {

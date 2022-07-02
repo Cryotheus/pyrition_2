@@ -6,6 +6,7 @@ local grow_command_tree
 local isstring = isstring
 local is_pyrition_command = PYRITION._IsPyritionCommand
 local is_pyrition_command_indexable = PYRITION._IsPyritionCommandIndexable
+local is_pyrition_command_organizer = PYRITION._IsPyritionCommandOrganizer
 local _R = debug.getregistry()
 
 --local tables
@@ -138,37 +139,13 @@ function PYRITION:ConsoleCommandGetExisting(parents)
 	
 	local branch, count = self:ConsoleCommandGet(parents)
 	
-	if count == #parents then return branch end
+	if is_pyrition_command_organizer(branch) then return false, count end
+	if count == #parents then return branch, count end
 	
-	return false
+	return false, count
 end
 
 function PYRITION:ConsoleCommandGetList(subject) return build_command_list(subject or commands, maximum_depth, 0) end
-
-function PYRITION:ConsoleCommandGetShallow(parents, modify, max_depth)
-	if isstring(parents) then parents = string.Split(parents, " ") end
-	
-	local branch = commands
-	local count = #parents
-	local max_depth = max_depth or math.huge
-	
-	for index, parent in ipairs(parents) do
-		local twig = branch[parent]
-		
-		if string.StartWith(parent, "?") then
-			if modify then parents[index] = string.sub(parent, 2) end
-			
-			return branch, index - 1
-		elseif is_pyrition_command_indexable(twig) then
-			if index > max_depth then return twig, index end
-			
-			branch = twig
-		else return branch, index - 1 end
-	end
-	
-	return branch, count
-end
-
 function PYRITION:ConsoleCommandGetTree(maximum_depth) return grow_command_tree(commands, maximum_depth or 4, 0) end
 
 function PYRITION:ConsoleCommandSend(command, arguments, ply) --run a command on the other realm
@@ -281,7 +258,7 @@ function PYRITION:PyritionConsoleCommandRegister(parents, command, base_parents)
 	return command
 end
 
-function PYRITION:PyritionConsoleCommandReloaded(old_command, _new_command) MsgC(Color(255, 192, 46), "[Pyrition] Reloaded '" .. old_command .. "'\n") end
+function PYRITION:PyritionConsoleCommandReloaded(old_command, _new_command) MsgC(Color(255, 192, 46), "[Pyrition] Reloaded '" .. tostring(old_command) .. "'\n") end
 
 function PYRITION:PyritionConsoleCommandSet(parents, command_table)
 	local branch = commands
