@@ -50,7 +50,7 @@ function PYRITION:LanguageQueue(ply, key, phrases, option)
 	end
 	
 	--if the ply is the server
-	if ply == nil or ply == game.GetWorld() then return self:LanguageDisplay(false, key, phrases) end
+	if ply == nil or ply == game.GetWorld() or ply:EntIndex() == 0 then return self:LanguageDisplay(false, key, phrases) end
 	
 	--get an existing stream model or create one, then write the message to it
 	self:NetStreamModelGet("language", ply)(key, phrases, option or "chat")

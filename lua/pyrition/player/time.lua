@@ -39,7 +39,7 @@ function PYRITION:PyritionPlayerTimeGetSession(ply)
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerStorageLoadedTime(ply, player_data, success)
+function PYRITION:PyritionPlayerStorageLoadedTime(_ply, player_data, _success)
 	local time = os.time()
 	
 	if not player_data.first then
@@ -58,7 +58,7 @@ function PYRITION:PyritionPlayerStorageSaveTime(ply, player_data)
 	local time_difference = time_connected - last_connected_time
 	
 	player_data.LastSessionTime = time_connected
-	player_data.record = math.max(player_data.record, time_connected)
+	player_data.record = math.max(time_connected, player_data.record or 0)
 	player_data.total = player_data.total + time_difference
 	player_data.visit = time
 	player_data.week = player_data.week + time_difference
@@ -66,7 +66,7 @@ function PYRITION:PyritionPlayerStorageSaveTime(ply, player_data)
 	week_lapse(time, player_data)
 end
 
-function PYRITION:PyritionPlayerTimePassedWeek(ply, week_time)
+function PYRITION:PyritionPlayerTimePassedWeek(_ply, week_time)
 	--how much time the player spent in the previous week
 	--used to determine if a player is a regular
 	--we return true if the streak should continue

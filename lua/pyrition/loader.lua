@@ -8,6 +8,7 @@ local config = {
 	convention = 23,	--0010 111
 	duplex = 23,		--0010 111
 	gradient = 23,		--0010 111
+	hibernate = 26,		--0011 010
 	ip = 18,			--0010 010
 	loader = 4,			--0000 100
 	string = 31,		--0011 111
@@ -114,6 +115,17 @@ local config = {
 		storage = 58,	--0111 010
 		time = 66,		--1000 010
 		
+		badge = {
+			server = 26,	--11 010
+			shared = 23,	--10 111
+		},
+		
+		badges = {
+			killer = 55,				--110 111
+			pyrition_developer = 55,	--110 111
+			rosette = 55,				--110 111
+		},
+		
 		identity = {
 			client = 21,	--0010 101
 			server = 66		--1000 010
@@ -138,7 +150,7 @@ local config = {
 	
 	sql = {
 		client = 53,	--110 101
-		mysqlite = 50,	--110 010
+		--mysqlite = 50,	--110 010
 		server = 58,	--111 010
 	}
 }

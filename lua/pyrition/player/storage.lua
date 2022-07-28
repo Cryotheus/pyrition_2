@@ -1,9 +1,8 @@
 --locals
-local pyrmysql = pyrmysql
-local escape_string = pyrmysql.SQLStr
 local player_storage_players = PYRITION.PlayerStoragePlayers or {}
 local player_storages = PYRITION.PlayerStorages or {}
 local read_only = false --RELEASE: convar this
+local short_steam_id = PYRITION._SignificantDigitSteamID
 
 --all the type names both MySQL and SQLite accept... probably...
 local valid_type_names = {
@@ -32,12 +31,7 @@ local valid_type_names = {
 }
 
 --local functions
-local function short_steam_id(steam_id)
-	if IsEntity(steam_id) then steam_id = steam_id:SteamID() end
-	
-	return steam_id[9] .. string.sub(steam_id, 11)
-end
-
+local function escape_string(text) return PYRITION:SQLEscape(text) end
 local function to_bool_string(state) return state and "true" or "false" end
 
 local function to_numerical_string(number)
@@ -100,18 +94,16 @@ local type_name_instruction_functions = {
 --globals
 PYRITION.PlayerStorages = player_storages
 PYRITION.PlayerStoragePlayers = player_storage_players
-PYRITION._SignificantDigitSteamID = short_steam_id
 
 --pyrition functions
-function PYRITION:PlayerStorageLoad(ply, key, queue, tracker, emulated)
+function PYRITION:PlayerStorageLoad(ply, key, tracker)
 	local database_name = PYRITION.SQLDatabaseName
-	local query = queue and pyrmysql.queueQuery or pyrmysql.query
 	local player_data = player_storage_players[ply]
 	local player_datum = player_data[key]
 	local storage_data = player_storages[key]
-	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or storage_data.TableName
+	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or "pyrition_" .. storage_data.TableName
 	
-	query("select * from `" .. table_name .. "` where steam_id = '" .. player_data._ShortSteamID .. "';", function(result)
+	self:SQLQuery("select * from `" .. table_name .. "` where steam_id = '" .. player_data._ShortSteamID .. "';", function(result)
 		if not IsValid(ply) then return end
 		
 		if not player_datum then
@@ -127,56 +119,54 @@ function PYRITION:PlayerStorageLoad(ply, key, queue, tracker, emulated)
 			for index, field_key in ipairs(storage_data.Values) do player_datum[field_key] = type_name_conversion_functions[type_names[index]](result[field_key]) end
 		end
 		
-		self:PlayerStorageLoaded(ply, key, player_datum, true)
-		
-		if tracker then
-			tracker[key] = nil
-			
-			if table.IsEmpty(tracker) then PYRITION:PlayerStorageLoadFinished(ply, player_data, emulated) end
-		end
+		self:PlayerStorageLoaded(ply, key, player_datum, true, tracker)
 	end, function()
 		if not IsValid(ply) then return end
-		if tracker then tracker[key] = false end
 		
 		if not player_datum then
 			player_datum = {}
 			player_data[key] = player_datum
 		end
 		
-		self:PlayerStorageLoaded(ply, key, player_datum, false)
+		self:PlayerStorageLoaded(ply, key, player_datum, false, tracker)
 	end)
 end
 
-function PYRITION:PlayerStorageSave(ply, key, query)
+function PYRITION:PlayerStorageSave(ply, key)
 	if read_only or ply:IsBot() then return end
 	
 	local database_name = PYRITION.SQLDatabaseName
-	local query = queue and pyrmysql.queueQuery or pyrmysql.query
 	local player_data = player_storage_players[ply]
 	local player_datum = player_data[key]
 	
 	hook.Call("PyritionPlayerStorageSave" .. key, self, ply, player_datum)
 	
 	local storage_data = player_storages[key]
-	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or storage_data.TableName
+	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or "pyrition_" .. storage_data.TableName
 	local type_names = storage_data.TypeNames
 	local values_placed = {"'" .. player_data._ShortSteamID .. "'"}
 	
 	for index, field_key in ipairs(storage_data.Values) do table.insert(values_placed, type_name_instruction_functions[type_names[index]](player_datum[field_key])) end
 	
-	query("replace into `" .. table_name .. "` (" .. storage_data.ValuesString .. ") values(" .. table.concat(values_placed, ", ") .. ");")
+	self:SQLQuery("replace into `" .. table_name .. "` (" .. storage_data.ValuesString .. ") values(" .. table.concat(values_placed, ", ") .. ");")
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerStorageLoaded(ply, key, player_data, success) hook.Call("PyritionPlayerStorageLoaded" .. key, self, ply, player_data, success) end
+function PYRITION:PyritionPlayerStorageLoaded(_ply, key, player_data, _success, tracker)
+	if tracker then
+		tracker[key] = nil
+		
+		if table.IsEmpty(tracker) then PYRITION:PlayerStorageLoadFinished(ply, player_data) end
+	end
+end
 
-function PYRITION:PyritionPlayerStorageLoadFinished(ply, player_data, emulated)
-	if emulated then return end
-	
+function PYRITION:PyritionPlayerStorageLoadFinished(ply, player_data)
 	local chronology = player_data.Time
 	local identity = player_data.Identity
 	local name = identity.name
 	local previous_name = identity.PreviousName
+	
+	debug.Trace()
 	
 	if previous_name then
 		local visit = chronology.visit or os.time()
@@ -220,7 +210,7 @@ function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
 			table.insert(type_names_builder, type_name)
 			table.insert(field_instructions, "`" .. field_key .. "` " .. type_name_instruction)
 			table.insert(values_builder, field_key)
-		else ErrorNoHalt("ID10T-13: Invalid TypeName value '" .. tostring(type_name) .. "' for player storage registration.")
+		else ErrorNoHalt("ID10T-13: Invalid TypeName value '" .. tostring(type_name) .. "' for player storage registration.") end
 	end
 	
 	player_storages[key] = {
@@ -235,41 +225,40 @@ end
 function PYRITION:PyritionPlayerStorageRegistration(database_name)
 	for key, meta_data in pairs(player_storages) do
 		local fields = table.Copy(meta_data.Fields)
+		local table_name = database_name and database_name .. "`.`" .. meta_data.TableName or "pyrition_" .. meta_data.TableName
 		
-		if database_name then
-			table.insert(fields, 1, "`steam_id` varchar(12) not null")
-			pyrmysql.queueQuery("create table if not exists `" .. database_name .. "`.`" .. meta_data.TableName .. "` ("  .. table.concat(fields, ", ") .. ", primary key (steam_id));")
-		else
-			table.insert(fields, 1, "`steam_id` varchar(12) not null primary key") end
-			pyrmysql.queueQuery("create table if not exists `" .. meta_data.TableName .. "` (" .. table.concat(fields, ", ") .. ")")
-		end
+		table.insert(fields, 1, "`steam_id` varchar(12) not null")
+		self:SQLQuery("create table if not exists `" .. table_name .. "` (" .. table.concat(fields, ", ") .. ", primary key (steam_id));",
+			function(...) print("success", ...) end,
+			function(...) print("failure", ...) end
+		)
 	end
 end
 
 --hooks
 hook.Add("PlayerDisconnected", "PyritionPlayerStorage", function(ply)
-	pyrmysql.begin()
-	for key, storage_data in pairs(player_storages) do PYRITION:PlayerStorageSave(ply, key, true) end
-	pyrmysql.commit()
+	PYRITION:SQLBegin()
+	for key, storage_data in pairs(player_storages) do PYRITION:PlayerStorageSave(ply, key) end
+	PYRITION:SQLCommit()
 	
 	player_storage_players[ply] = nil
 end)
 
 hook.Add("PyritionSQLCreateTables", "PyritionPlayerStorage", function(database_name) PYRITION:PlayerStorageRegistration(database_name) end)
 
-hook.Add("PyritionNetPlayerInitialized", "PyritionPlayerStorage", function(ply, eumlated)
+hook.Add("PyritionNetPlayerInitialized", "PyritionPlayerStorage", function(ply, _eumlated)
 	player_storage_players[ply] = {_ShortSteamID = short_steam_id(ply)}
 	local tracker = {}
 	
-	pyrmysql.begin()
+	PYRITION:SQLBegin()
 	
 	for key, storage_data in pairs(player_storages) do
 		tracker[key] = true
 		
-		PYRITION:PlayerStorageLoad(ply, key, true, tracker, false)
+		PYRITION:PlayerStorageLoad(ply, key, true, tracker)
 	end
 	
-	pyrmysql.commit()
+	PYRITION:SQLCommit()
 end)
 
 --post

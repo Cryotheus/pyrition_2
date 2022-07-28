@@ -5,9 +5,9 @@
 --1st class function nation :D
 local block_convar
 local drint = PYRITION._drint
-local write_enumerated_string = PYRITION._WriteEnumeratedString
 local read_enumerated_string = PYRITION._ReadEnumeratedString
 local wordless
+local write_enumerated_string = PYRITION._WriteEnumeratedString
 
 --local globals
 local active_streams = PYRITION.NetStreamsActive or {} --table[ply][class][uid] = stream, but on CLIENT its table[class][uid]
@@ -22,10 +22,12 @@ local _R = debug.getregistry()
 local convar_flags = bit.bor(SERVER and FCVAR_ARCHIVE or 0, FCVAR_REPLICATED)
 local pyrition_net_stream_bytes = CreateConVar("pyrition_net_stream_bytes", "64000", convar_flags, "string helptext", 1024, 64000)
 local pyrition_net_stream_channels = CreateConVar("pyrition_net_stream_channels", "8", convar_flags, "string helptext", 1)
+local pyrition_net_stream_size = CreateConVar("pyrition_net_stream_size", "16000", convar_flags, "string helptext", 1024, 16000)
 
 --cached convars
 local maximum_bytes_sent = pyrition_net_stream_bytes:GetInt()
 local maximum_layer_size = pyrition_net_stream_channels:GetInt()
+local maximum_stream_size = pyrition_net_stream_size:GetInt() * 1024
 
 --local tables
 local stream_meta = {
@@ -280,7 +282,20 @@ function stream_meta:Dump(zeros)
 end
 
 function stream_meta:NetRead()
-	self.Data = self.Data .. net_ReadData(net_ReadUInt(16) + 1)
+	local length = net_ReadUInt(16) + 1
+	local received_length = (self.ReceivedLength or 0) + length
+	
+	if received_length > maximum_stream_size then
+		if self.Oversized then return end
+		
+		self.Data = ""
+		self.Oversized = true
+		
+		return
+	end
+	
+	self.Data = self.Data .. net_ReadData(length)
+	self.ReceivedLength = received_length
 	
 	return net_ReadBool()
 end
@@ -431,7 +446,7 @@ function stream_meta:ReadLong()
 end
 
 function stream_meta:ReadMaybe(method, ...) if self:ReadBool() then return method(self, ...) end end
-
+function stream_meta:ReadNullableTerminatedList(items, ...) return self:ReadBool() and self:ReadTerminatedList(items, ...) or {} end
 function stream_meta:ReadPlayer() return Entity(self:ReadUInt(max_players_bits)) end
 
 function stream_meta:ReadShort()
@@ -653,6 +668,13 @@ function stream_meta:WriteMaybe(method, value, ...)
 	self:WriteBool(true)
 	
 	return method(self, value, ...)
+end
+
+function stream_meta:WriteNullableTerminatedList(items, ...)
+	if table.IsEmpty(items) then return self:WriteBool(false) end
+	
+	self:WriteBool(true)
+	self:WriteTerminatedList(items, ...)
 end
 
 function stream_meta:WritePlayer(ply) self:WriteUInt(ply:EntIndex(), max_players_bits) end
@@ -1008,20 +1030,28 @@ end
 function PYRITION:PyritionNetStreamRegisterClass(class, realm, _enumerated) stream_classes[class] = realm end
 
 --cvars
-cvars.AddChangeCallback("pyrition_net_stream_bytes", function(_name, _old, new)
-	new = pyrition_net_stream_bytes:GetInt()
+cvars.AddChangeCallback("pyrition_net_stream_bytes", function(_name, _old, _new)
+	local new = pyrition_net_stream_bytes:GetInt()
 	
 	if block_convar(pyrition_net_stream_bytes, maximum_bytes_sent, new) then return end
 	
 	maximum_bytes_sent = new
 end, "PyritionNetStream")
 
-cvars.AddChangeCallback("pyrition_net_stream_channels", function(_name, _old, new)
-	new = pyrition_net_stream_channels:GetInt()
+cvars.AddChangeCallback("pyrition_net_stream_channels", function(_name, _old, _new)
+	local new = pyrition_net_stream_channels:GetInt()
 	
 	if block_convar(pyrition_net_stream_channels, maximum_layer_size, new) then return end
 	
 	maximum_layer_size = new
+end, "PyritionNetStream")
+
+cvars.AddChangeCallback("pyrition_net_stream_size", function(_name, _old, _new)
+	local new = pyrition_net_stream_size:GetInt() * 1024
+	
+	if block_convar(pyrition_net_stream_size, maximum_stream_size, new) then return end
+	
+	maximum_stream_size = new
 end, "PyritionNetStream")
 
 --hook

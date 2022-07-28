@@ -65,7 +65,7 @@ function PYRITION:PyritionNetClientInitialized(_ply) end
 
 --console commands
 concommand.Add("pd", function(_ply, _command, _arguments, _arguments_string)
-	net.Start("pyrition")
+	net.Start("pyrition") print("sending init message")
 	net.SendToServer()
 end, nil, "Pyrition's debug command. If you are reading this and you're not on a test server, please report it.")
 
@@ -74,7 +74,7 @@ hook.Add("InitPostEntity", "PyritionNet", function()
 	--we use a timer because everyone else in the entire world also sends net messages here
 	--this is jerry's sole purpose
 	timer.Simple(jerry, function()
-		net.Start("pyrition")
+		net.Start("pyrition") print("sending init message")
 		net.SendToServer()
 		PYRITION:NetClientInitialized(LocalPlayer())
 	end)

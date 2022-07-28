@@ -9,8 +9,9 @@ local phrase_exists = PYRITION._LanguagePhraseExists
 local function command_callback(ply, arguments, no_fail_response)
 	local arguments_count = #arguments
 	local command, depth = PYRITION:ConsoleCommandGet(arguments, true)
+	local ply = ply:IsValid() and ply or game.GetWorld()
 	
-	if not command then PYRITION:LanguageQueue(ply, "pyrition.command.unknown")
+	if not command or command == PYRITION.ConsoleCommands then PYRITION:LanguageQueue(ply, "pyrition.command.unknown")
 	elseif is_pyrition_command_organizer(command) then PYRITION:LanguageQueue(ply, "pyrition.command.unknown.organizer")
 	else
 		local subbed_arguments = {}

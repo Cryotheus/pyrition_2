@@ -17,19 +17,8 @@ function MODEL:Read()
 				local tag = self:ReadTerminatedString()
 				
 				if self:ReadBool() then --list
-					if self:ReadBool() then
-						local players = {}
-						phrases[tag] = players
-						
-						repeat table.insert(players, self:ReadPlayer())
-						until self:ReadBoolNot()
-					else
-						local items = {}
-						phrases[tag] = items
-						
-						repeat table.insert(items, self:ReadString())
-						until self:ReadBoolNot()
-					end
+					if self:ReadBool() then phrases[tag] = self:ReadNullableTerminatedList(self.ReadPlayer)
+					else phrases[tag] = self:ReadNullableTerminatedList(self.ReadString) end
 				else --item
 					if self:ReadBool() then phrases[tag] = self:ReadPlayer()
 					else phrases[tag] = self:ReadString() end
@@ -58,25 +47,11 @@ function MODEL:Write(_ply, key, phrases, option)
 				self:WriteBool(true)
 				
 				if phrase.IsPlayerList then --players
-					for index, ply in ipairs(phrase) do
-						self:WriteBool(true)
-						self:WritePlayer(ply)
-					end
-					
-					self:WriteBool(false)
+					self:WriteBool(true)
+					self:WriteNullableTerminatedList(phrase, self.WritePlayer)
 				else --strings
-					local passed = false
-					
 					self:WriteBool(false)
-					
-					for index, text in ipairs(phrase) do
-						if passed then self:WriteBool(true)
-						else passed = true end
-						
-						self:WriteString(text)
-					end
-					
-					self:WriteBool(false)
+					self:WriteNullableTerminatedList(phrase, self.WriteString)
 				end
 			else --single item, player or string
 				self:WriteBool(false)
@@ -91,8 +66,10 @@ function MODEL:Write(_ply, key, phrases, option)
 			end
 		end
 		
-		self:WriteBool(false)
-	else self:WriteBool(false) end
+		return self:WriteBool(false)
+	end
+	
+	self:WriteBool(false)
 end
 
 --post
