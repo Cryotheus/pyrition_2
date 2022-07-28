@@ -6,12 +6,12 @@ local sv_hibernate_think = GetConVar("sv_hibernate_think")
 --local functions
 local function update_hibernate_think()
 	if pyrition_hibernate_think:GetBool() then
-		if sv_hibernate_think:GetBool() then RunConsoleCommand("sv_hibernate_think", 0) end
+		if not sv_hibernate_think:GetBool() then RunConsoleCommand("sv_hibernate_think", 1) end
 		
 		return
 	end
 	
-	if PYRITION:Hibernating() and not sv_hibernate_think:GetBool() then RunConsoleCommand("sv_hibernate_think", 0) end
+	if PYRITION:Hibernating() and sv_hibernate_think:GetBool() then RunConsoleCommand("sv_hibernate_think", 0) end
 end
 
 --globals
@@ -38,7 +38,7 @@ function PYRITION:Hibernate(key, state) --Toggles hibernation thinking
 	RunConsoleCommand("sv_hibernate_think", 1)
 end
 
-function PYRITION:Hibernating() return next(hibernation_registry) ~= nil end
+function PYRITION:Hibernating() return next(hibernation_registry) == nil end
 
 --convars
 cvars.AddChangeCallback("pyrition_hibernate_think", update_hibernate_think, "PyritionHibernate")
