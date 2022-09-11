@@ -62,6 +62,7 @@ PYRITION._IsPyritionCommandOrganizer = is_pyrition_command_organizer
 
 --pyrition functions
 function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
+	local arguments = arguments or {}
 	local command_arguments = command.Arguments or {}
 	local filter_success, fail_index, fail_message
 	local required = command_arguments.Required or 0
@@ -72,9 +73,6 @@ function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 		--we shouldn't let the console run commands that are not marked as console safe
 		return self:LanguageQueue(ply, "pyrition.command.failed.console", {command = command_localization(command)})
 	end
-	
-	--always need arguments
-	if not arguments then arguments = {} end
 	
 	if #arguments < required then
 		if required == 1 then self:LanguageQueue(ply, "pyrition.command.failed.required_arguments.singular", {command = command_localization(command)})

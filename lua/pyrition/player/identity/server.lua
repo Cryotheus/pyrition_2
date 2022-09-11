@@ -2,7 +2,7 @@
 local player_storage_players = PYRITION.PlayerStoragePlayers
 
 --pyrition hooks
-function PYRITION:PyritionPlayerStorageLoadedIdentity(ply, player_data, success)
+function PYRITION:PyritionPlayerStorageLoadedIdentity(ply, player_data)
 	if not player_data.Loaded then player_data.PreviousName = player_data.name end
 	
 	player_data.Loaded = true

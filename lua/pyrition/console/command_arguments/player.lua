@@ -49,17 +49,46 @@ end
 function ARGUMENT:Filter(ply, settings, argument)
 	if settings.Manual then return true, argument end
 	
-	local find, message
+	if istable(argument) then --validate a player lsit
+		--don't allow invalid players
+		for index, member in ipairs(argument) do if not member:IsValid() or not member:IsPlayerOrWorld() then return false end end
+		
+		argument.IsPlayerList = true
+		
+		return true, argument
+	end
 	
-	if settings.Default and not argument or argument == "" then find, message = PYRITION:PlayerFindWithFallback(argument, ply, ply, settings.Single, settings.Selfless)
-	else find, message = PYRITION:PyritionPlayerFind(argument, ply, settings.Single, settings.Selfless) end
+	if IsEntity(argument) then --validate a player entity
+		--valid player, and is player entity
+		if argument:IsValid() and argument:IsPlayerOrWorld() then return true, argument end
+		
+		return false
+	end
 	
-	return find and true or false, find, message
+	if isstring(argument) then --otherwise, find a player
+		--RELEASE: prevent this from being used as an exploit
+		--if a player has a different name than what the client sees
+		--a player could override this to only send a string and find the player by that original name
+		--otherwise
+		local find, message
+		
+		if settings.Default and not argument or argument == "" then find, message = PYRITION:PlayerFindWithFallback(argument, ply, ply, settings.Single, settings.Selfless)
+		else find, message = PYRITION:PyritionPlayerFind(argument, ply, settings.Single, settings.Selfless) end
+		
+		return find and true or false, find, message
+	end
+	
+	return false
 end
 
 function ARGUMENT:Read(stream, settings)
+	print("READ!", stream)
+	PrintTable(settings)
+	
 	if settings.Manual then return stream:ReadString() end
 	if settings.Single then return stream:ReadPlayer(argument) end
+	
+	print("read list", max_players_bits, stream.ReadPlayer)
 	
 	return stream:ReadList(max_players_bits, stream.ReadPlayer)
 end

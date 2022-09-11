@@ -111,6 +111,7 @@ local config = {
 		find = 31,		--0011 111
 		kick = 26,		--0011 010
 		landing = 26,	--0011 010
+		meta = 23,		--0010 111
 		slap = 26,		--0011 010
 		storage = 58,	--0111 010
 		time = 66,		--1000 010
@@ -150,7 +151,6 @@ local config = {
 	
 	sql = {
 		client = 53,	--110 101
-		--mysqlite = 50,	--110 010
 		server = 58,	--111 010
 	}
 }

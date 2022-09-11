@@ -437,6 +437,8 @@ function stream_meta:ReadList(bits, method, ...)
 	local items = {}
 	
 	for index = 0, self:ReadUInt(bits) do table_insert(items, method(self, ...)) end
+	
+	return items
 end
 
 function stream_meta:ReadLong()
@@ -446,7 +448,7 @@ function stream_meta:ReadLong()
 end
 
 function stream_meta:ReadMaybe(method, ...) if self:ReadBool() then return method(self, ...) end end
-function stream_meta:ReadNullableTerminatedList(items, ...) return self:ReadBool() and self:ReadTerminatedList(items, ...) or {} end
+function stream_meta:ReadNullableTerminatedList(method, ...) return self:ReadBool() and self:ReadTerminatedList(method, ...) or {} end
 function stream_meta:ReadPlayer() return Entity(self:ReadUInt(max_players_bits)) end
 
 function stream_meta:ReadShort()
@@ -490,11 +492,11 @@ function stream_meta:ReadStringRaw(length)
 	end
 end
 
-function stream_meta:ReadTerminatedList(items, method, ...)
+function stream_meta:ReadTerminatedList(method, ...)
 	local items = {}
 	
 	repeat table_insert(items, method(self, ...))
-	until self:ReadNotBool()
+	until self:ReadBoolNot()
 	
 	return items
 end
@@ -652,6 +654,8 @@ function stream_meta:WriteInt(integer, bits) --maximum effort
 end
 
 function stream_meta:WriteList(items, bits, method, ...)
+	if not istable(items) then items = {items} end
+	
 	self:WriteUInt(#items - 1, bits)
 	
 	for index, item in ipairs(items) do method(self, item, ...) end

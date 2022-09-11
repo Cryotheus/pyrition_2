@@ -1,6 +1,4 @@
 --locals
-local player_storage_players = PYRITION.PlayerStoragePlayers or {}
-local player_storages = PYRITION.PlayerStorages or {}
 local read_only = false --RELEASE: convar this
 local short_steam_id = PYRITION._SignificantDigitSteamID
 
@@ -92,23 +90,27 @@ local type_name_instruction_functions = {
 }
 
 --globals
-PYRITION.PlayerStorages = player_storages
-PYRITION.PlayerStoragePlayers = player_storage_players
+PYRITION.PlayerStorages = PYRITION.PlayerStorages or {}
+PYRITION.PlayerStoragesLoading = PYRITION.PlayerStoragesLoading or {}
+PYRITION.PlayerStoragePlayers = PYRITION.PlayerStoragePlayers or {}
 
 --pyrition functions
 function PYRITION:PlayerStorageLoad(ply, key, tracker)
 	local database_name = PYRITION.SQLDatabaseName
-	local player_data = player_storage_players[ply]
+	local player_data = self.PlayerStoragePlayers[ply]
 	local player_datum = player_data[key]
-	local storage_data = player_storages[key]
+	local storage_data = self.PlayerStorages[key]
 	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or "pyrition_" .. storage_data.TableName
 	
 	self:SQLQuery("select * from `" .. table_name .. "` where steam_id = '" .. player_data._ShortSteamID .. "';", function(result)
-		if not IsValid(ply) then return end
+		--give up on disconnected and invalid players
+		if not ply:IsValid() or not ply:IsConnected() then return end
 		
 		if not player_datum then
 			player_datum = {}
 			player_data[key] = player_datum
+			
+			print("create datum")
 		end
 		
 		if result then
@@ -116,12 +118,19 @@ function PYRITION:PlayerStorageLoad(ply, key, tracker)
 			result = table.remove(result)
 			result.steam_id = nil
 			
-			for index, field_key in ipairs(storage_data.Values) do player_datum[field_key] = type_name_conversion_functions[type_names[index]](result[field_key]) end
+			print("got result")
+			
+			for index, field_key in ipairs(storage_data.Values) do
+				print(index, field_key)
+				
+				player_datum[field_key] = type_name_conversion_functions[type_names[index]](result[field_key])
+			end
 		end
-		
+		--_ply, key, player_data, _success, tracker
 		self:PlayerStorageLoaded(ply, key, player_datum, true, tracker)
 	end, function()
-		if not IsValid(ply) then return end
+		--give up on disconnected and invalid players
+		if not ply:IsValid() or not ply:IsConnected() then return end
 		
 		if not player_datum then
 			player_datum = {}
@@ -132,16 +141,34 @@ function PYRITION:PlayerStorageLoad(ply, key, tracker)
 	end)
 end
 
+function PYRITION:PlayerStorageLoadAll(ply)
+	local tracker = {}
+	self.PlayerStoragePlayers[ply] = {_ShortSteamID = short_steam_id(ply)}
+	
+	self:SQLBegin()
+	
+	--queue all those load queries
+	for key, storage_data in pairs(self.PlayerStorages) do
+		tracker[key] = true
+		
+		self:PlayerStorageLoad(ply, key, tracker)
+	end
+	
+	self.PlayerStoragesLoading[ply] = self:SQLCommit()
+end
+
 function PYRITION:PlayerStorageSave(ply, key)
 	if read_only or ply:IsBot() then return end
 	
 	local database_name = PYRITION.SQLDatabaseName
-	local player_data = player_storage_players[ply]
+	local player_data = self.PlayerStoragePlayers[ply]
 	local player_datum = player_data[key]
+	
+	if not player_datum then print("failed to save", ply, key) return end
 	
 	hook.Call("PyritionPlayerStorageSave" .. key, self, ply, player_datum)
 	
-	local storage_data = player_storages[key]
+	local storage_data = self.PlayerStorages[key]
 	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or "pyrition_" .. storage_data.TableName
 	local type_names = storage_data.TypeNames
 	local values_placed = {"'" .. player_data._ShortSteamID .. "'"}
@@ -151,24 +178,62 @@ function PYRITION:PlayerStorageSave(ply, key)
 	self:SQLQuery("replace into `" .. table_name .. "` (" .. storage_data.ValuesString .. ") values(" .. table.concat(values_placed, ", ") .. ");")
 end
 
+function PYRITION:PlayerStorageSaveAll(ply)
+	self:SQLBegin()
+		
+	for key, storage_data in pairs(self.PlayerStorages) do self:PlayerStorageSave(ply, key) end
+	
+	self:SQLCommit()
+end
+
+function PYRITION:PlayerStorageSaveEveryone()
+	local players = player.GetAll()
+	
+	self:SQLBegin()
+	
+	for key, storage_data in pairs(self.PlayerStorages) do
+		--save all players, including bots!
+		for index, ply in ipairs(players) do self:PlayerStorageSave(ply, key) end
+	end
+	
+	self:SQLCommit()
+end
+
 --pyrition hooks
-function PYRITION:PyritionPlayerStorageLoaded(_ply, key, player_data, _success, tracker)
+function PYRITION:PyritionPlayerStorageLoadDiscard(ply)
+	local load_coroutine = self.PlayerStoragesLoading[ply]
+	
+	if load_coroutine then
+		self:SQLDiscard(load_coroutine)
+		
+		self.PlayerStoragesLoading[ply] = nil
+		
+		return true
+	end
+	
+	return false
+end
+
+function PYRITION:PyritionPlayerStorageLoaded(ply, key, player_datum, success, tracker)
+	hook.Call("PyritionPlayerStorageLoaded" .. key, self, ply, player_datum, success)
+	
 	if tracker then
 		tracker[key] = nil
 		
-		if table.IsEmpty(tracker) then PYRITION:PlayerStorageLoadFinished(ply, player_data) end
+		if table.IsEmpty(tracker) then PYRITION:PlayerStorageLoadFinished(ply, self.PlayerStoragePlayers[ply]) end
 	end
 end
 
 function PYRITION:PyritionPlayerStorageLoadFinished(ply, player_data)
 	local chronology = player_data.Time
 	local identity = player_data.Identity
-	local name = identity.name
-	local previous_name = identity.PreviousName
+	local name = identity and identity.name
+	local previous_name = identity and identity.PreviousName
 	
-	debug.Trace()
+	print("identity")
+	PrintTable(istable(identity) and identity or {[type(identity)] = identity})
 	
-	if previous_name then
+	if previous_name and previous_name ~= name then
 		local visit = chronology.visit or os.time()
 		local visit_text = tostring(os.time() - visit)
 		
@@ -213,7 +278,7 @@ function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
 		else ErrorNoHalt("ID10T-13: Invalid TypeName value '" .. tostring(type_name) .. "' for player storage registration.") end
 	end
 	
-	player_storages[key] = {
+	self.PlayerStorages[key] = {
 		Fields = field_instructions,
 		TableName = table_name,
 		TypeNames = type_names_builder,
@@ -223,43 +288,25 @@ function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
 end
 
 function PYRITION:PyritionPlayerStorageRegistration(database_name)
-	for key, meta_data in pairs(player_storages) do
+	for key, meta_data in pairs(self.PlayerStorages) do
 		local fields = table.Copy(meta_data.Fields)
 		local table_name = database_name and database_name .. "`.`" .. meta_data.TableName or "pyrition_" .. meta_data.TableName
 		
 		table.insert(fields, 1, "`steam_id` varchar(12) not null")
-		self:SQLQuery("create table if not exists `" .. table_name .. "` (" .. table.concat(fields, ", ") .. ", primary key (steam_id));",
-			function(...) print("success", ...) end,
-			function(...) print("failure", ...) end
-		)
+		self:SQLQuery("create table if not exists `" .. table_name .. "` (" .. table.concat(fields, ", ") .. ", primary key (steam_id));")
 	end
 end
 
 --hooks
 hook.Add("PlayerDisconnected", "PyritionPlayerStorage", function(ply)
-	PYRITION:SQLBegin()
-	for key, storage_data in pairs(player_storages) do PYRITION:PlayerStorageSave(ply, key) end
-	PYRITION:SQLCommit()
+	--save the storage if we were not loading their storage
+	if not PYRITION:PlayerStorageLoadDiscard(ply) then PYRITION:PlayerStorageSaveAll(ply) end
 	
-	player_storage_players[ply] = nil
+	PYRITION.PlayerStoragePlayers[ply] = nil
 end)
 
+hook.Add("PyritionNetPlayerInitialized", "PyritionPlayerStorage", function(ply) PYRITION:PlayerStorageLoadAll(ply) end)
 hook.Add("PyritionSQLCreateTables", "PyritionPlayerStorage", function(database_name) PYRITION:PlayerStorageRegistration(database_name) end)
-
-hook.Add("PyritionNetPlayerInitialized", "PyritionPlayerStorage", function(ply, _eumlated)
-	player_storage_players[ply] = {_ShortSteamID = short_steam_id(ply)}
-	local tracker = {}
-	
-	PYRITION:SQLBegin()
-	
-	for key, storage_data in pairs(player_storages) do
-		tracker[key] = true
-		
-		PYRITION:PlayerStorageLoad(ply, key, true, tracker)
-	end
-	
-	PYRITION:SQLCommit()
-end)
 
 --post
 PYRITION:GlobalHookCreate("PlayerStorageRegister")

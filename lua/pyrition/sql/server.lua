@@ -1,10 +1,13 @@
 --locals
 local safety_flags = bit.bor(FCVAR_ARCHIVE, FCVAR_DONTRECORD, FCVAR_PROTECTED)
-local settings = PYRITION.SQLSettings or {}
 
 --localized functions
 local escape
 local query
+
+--globals
+PYRITION.SQLCoroutines = PYRITION.SQLCoroutines or {}
+PYRITION.SQLSettings = PYRITION.SQLSettings or {}
 
 --local functions
 local function associate_convar(name, key, default, flags, type_key, callback)
@@ -13,6 +16,7 @@ local function associate_convar(name, key, default, flags, type_key, callback)
 	local convar = CreateConVar(name, tostring(default), flags, language.GetPhrase("pyrition.convars." .. name))
 	local convar_get = convar["Get" .. type_key]
 	local convar_set = convar["Set" .. type_key]
+	local settings = PYRITION.SQLSettings
 	
 	settings[key] = convar_get(convar)
 	
@@ -28,36 +32,104 @@ local function associate_convar(name, key, default, flags, type_key, callback)
 	cvars.AddChangeCallback(name, function(_convar_name, ...) return callback(convar, ...) end, "PyritionSQL")
 end
 
+local function commit_queued(queued, completion_callback) --creates a coroutine for committing multiple queries in a queue
+	local routine
+	
+	--we seperate the declaration and assignment so the coroutine is self-aware
+	routine = coroutine.create(function()
+		local active = true
+		local entry = table.remove(queued, 1)
+		
+		repeat --process every queued query
+			local instruction, callback, error_callback = unpack(entry)
+			
+			query(instruction, function(...)
+				if callback then callback(...) end
+				
+				coroutine.resume(routine)
+			end, function(...)
+				if error_callback then error_callback(...) end
+				
+				coroutine.resume(routine)
+			end)
+			
+			--wait until a callback is called
+			coroutine.yield()
+			
+			--don't start the next iteration if we were discarded
+			if not PYRITION.SQLCoroutines[routine] then
+				active = false
+				
+				break
+			end
+			
+			--prepare for next iteration
+			entry = table.remove(queued, 1)
+		until not entry
+		
+		if active then
+			--final yield
+			coroutine.yield()
+			
+			--discard
+			PYRITION.SQLCoroutines[routine] = nil
+		end
+		
+		--let the server hibernate again
+		PYRITION:Hibernate(routine)
+		
+		--run our callback
+		if completion_callback then completion_callback(active) end
+	end)
+	
+	coroutine.resume(routine) --start the coroutine immediately
+	PYRITION:HibernateWake(routine) --if the server is hibernating, the callback may not run
+	
+	--setup the global
+	PYRITION.SQLCoroutines[routine] = queued
+	
+	return routine
+end
+
 --pyrition functions
-function PYRITION:SQLBegin()
-	queue = {}
-	self.SQLQueued = queue
+function PYRITION:SQLBegin(queue) --Starts queuing all SQLQuery calls
+	--returns the queue discarded, or false if no queue was started
+	local queued = self.SQLQueued
+	
+	--if we already did SQLBegin, discard the queue
+	--calling the method to allow hooking
+	if queued then self:SQLDiscard() end
+	
+	self.SQLQueued = queue or {}
+	
+	return queued or false
 end
 
-function PYRITION:SQLCommit(local_queue, index)
-	local local_queue
+function PYRITION:SQLCommit(completion_callback) --Stop queuing SQLQuery calls, and start them asynchronously
+	--completion_callback is called when the coroutine made all queries or the queue was discarded
+	--the parameter passed to completion_callback is true if we sent all queries, or false if the queue was dicarded
+	local queued = self.SQLQueued
 	
-	if local_queue then
-		index = index or 1
-		values = local_queue[index]
-		
-		query(unpack(values))
-		
+	if queued then return commit_queued(queued, completion_callback)
 	else self:SQLDiscard() end
-	
-	
 end
 
-function PYRITION:SQLDiscard()
-	queue = nil
+function PYRITION:SQLDiscard(routine) --Stop queuing SQLQuery calls and discard all calls queued since the last SQLBegin
+	--give a coroutine to stop the coroutine given
+	if routine then
+		self.SQLCoroutines[routine] = nil
+		
+		return
+	end
+	
 	self.SQLQueued = nil
-end
+end 
 
-function PYRITION:SQLEscape(text) return escape(text) end
+function PYRITION:SQLEscape(text) return escape(text) end --Convert a string into an sql safe string to prevent sql injection
 
-function PYRITION:SQLQuery(instruction, callback, error_callback)
-	if queue then
-		table.insert(queue, {instruction, callback, error_callback})
+function PYRITION:SQLQuery(instruction, callback, error_callback) --Perform or queue an sql query, optionally with callbacks
+	if self.SQLQueued then
+		table.insert(self.SQLQueued, {instruction, callback, error_callback})
 		
 		return
 	end
@@ -66,10 +138,17 @@ function PYRITION:SQLQuery(instruction, callback, error_callback)
 end
 
 --pyrition hooks
-function PYRITION:PyritionSQLInitialize()
+function PYRITION:PyritionSQLCreateTables(_database_name) --Setup your tables in here
+	--database_name is nil if we are using SQLite, meaning you should prefix the table name with pyrition_
+	--if database_name is a string, then use that as the database in which the table is a member of
+	self:SQLCommit()
+end
+
+function PYRITION:PyritionSQLInitialize() --Called before PyritionSQLInitialized from InitPostEntity, attemtps to connect to the MySQL server
 	if self.SQLInitializing then return false end
 	
 	local connect
+	local settings = self.SQLSettings
 	local enabled = settings.MySQLEnabled
 	
 	self.SQLInitializing = true
@@ -97,15 +176,12 @@ function PYRITION:PyritionSQLInitialize()
 	return true
 end
 
-function PYRITION:PyritionSQLCreateTables() self:SQLCommit() end
-
-function PYRITION:PyritionSQLInitialized(_database, database_name)
+function PYRITION:PyritionSQLInitialized(_database, database_name) --Called when MySQL connects, or immediately from PyritionSQLInitialized if MySQL is unavailable
 	self.SQLDatabaseName = database_name or nil
 	self.SQLInitializing = false
 	
 	self:Hibernate("MySQL")
 	self:LanguageDisplay("sql_init", database_name and "pyrition.mysql.initialized" or "pyrition.sql.initialized")
-	
 	self:SQLBegin()
 	self:SQLCreateTables(database_name or false)
 end
@@ -125,6 +201,7 @@ associate_convar("pyrition_mysql_username", "MySQLUsername", "pyrition_server", 
 
 associate_convar("pyrition_mysql_enabled", "MySQLEnabled", 0, safety_flags, "Bool", function(convar, old, new)
 	local new = convar:GetBool()
+	local settings = PYRITION.SQLSettings
 	
 	if new ~= settings.MySQLEnabled then
 		if new then

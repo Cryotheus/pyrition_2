@@ -1,3 +1,4 @@
+--locals
 local BADGE = {
 	Tiers = {
 		{100, "icon16/user_orange.png"},
@@ -67,12 +68,10 @@ end
 
 --hooks
 hook.Add("PlayerDeath", "PyritionPlayerBadgesKiller", function(victim, inflictor, attacker)
-	print(attacker, victim)
-	print(IsValid(attacker), IsValid(victim))
-	
 	if IsValid(victim) and IsValid(attacker) then
-		if attempt_increments(victim, attacker) then return end
-		if attempt_increments(victim, inflictor) then return end
+		--if victim:IsPlayer() and victim:IsBot() then return end --don't allow bot kills to count
+		if attempt_increments(victim, attacker) then return end --attempt to award the attacker
+		if attempt_increments(victim, inflictor) then return end --attempt to award the inflictor
 	end
 end)
 

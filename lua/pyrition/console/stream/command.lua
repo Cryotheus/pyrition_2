@@ -23,16 +23,34 @@ function MODEL:Read(ply)
 			local argument_count = self:ReadByte()
 			local command_arguments = command.Arguments
 			
+			print("yes arg", argument_count)
+			
 			for index = 1, argument_count do
 				local command_argument = command_arguments[index]
 				local command_argument_object = command_argument_classes[command_argument.Class]
 				
-				if command_argument_object.Read then arguments[index] = command_argument_object:Read(self, command_argument)
-				else arguments[index] = self:MaybeRead("ReadString") end
+				print("#" .. index, command_argument, command_argument_object)
+				PrintTable(istable(command_argument) and command_argument or {type(command_argument)})
+				
+				if command_argument_object.Read then
+					local what = command_argument_object:Read(self, command_argument)
+					
+					print("read using obj", what)
+					
+					arguments[index] = what
+				else
+					local what = self:MaybeRead("ReadString")
+					
+					print("read using maybe", what)
+					
+					arguments[index] = what
+				end
 			end
+			
+			PrintTable(arguments)
+			
+			PYRITION:ConsoleExecute(ply, command, arguments)
 		end
-		
-		PYRITION:ConsoleExecute(ply, command, arguments)
 	until self:ReadBoolNot()
 end
 

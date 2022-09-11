@@ -335,9 +335,11 @@ local function find_chat() --welcome to egypt
 				
 				do --frame
 					local header_color = Color(141, 141, 141, 128)
+					local fade_duration = 0.25
 					local frame = vgui.Create("DFrame", self)
 					local frame_think = frame.Think
 					frame.ChatHackDragging = false
+					frame.CreatedFadeTime = RealTime() + fade_duration
 					self.Frame = frame
 					
 					local hud_chat_width, hud_chat_height = hud_chat:GetSize()
@@ -359,10 +361,16 @@ local function find_chat() --welcome to egypt
 					end
 					
 					function frame:Paint(width)
+						local restore_alpha = surface.GetAlphaMultiplier()
+						local real_time = RealTime()
+						
+						surface.SetAlphaMultiplier(1 - (frame.CreatedFadeTime - real_time) / fade_duration)
 						draw.RoundedBox(8, 0, 0, width, 24, header_color)
 						
 						surface.SetDrawColor(0, 0, 0, 128)
 						surface.DrawLine(5, 23, width - 5, 23)
+						
+						surface.SetAlphaMultiplier(restore_alpha)
 					end
 					
 					function frame:Think()

@@ -20,9 +20,9 @@ local badge_tier_meta = {TierFunctionsInstalled = true}
 PYRITION.PlayerBadgeTieredMeta = badge_tier_meta
 _R.PyritionBadge = badge_public
 
---meta functions
-function badge_public:__add(alpha, bravo)
-	print(self, alpha, bravo)
+--badge meta functions
+function badge_public:__add(alpha)
+	print(self, alpha)
 	
 	return self or alpha
 end
@@ -64,7 +64,7 @@ end
 
 function badge_meta:ShouldDisplay() if self.Level > 0 then return true end end
 
---tier meta functions
+--badge tier meta functions
 function badge_tier_meta:BakeTier(_tier, level, material_path)
 	table.insert(self.TierLevels, level)
 	table.insert(self.TierMaterials, Material(material_path))
