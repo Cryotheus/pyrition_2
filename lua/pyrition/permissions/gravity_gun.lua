@@ -1,0 +1,1 @@
+--GetInternalVariable m_bFirstCollisionAfterLaunch

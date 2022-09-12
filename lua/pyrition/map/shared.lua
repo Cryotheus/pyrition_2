@@ -17,3 +17,6 @@ PYRITION.MapList = maps
 PYRITION.MapStatus = map_status
 PYRITION.MapVotes = map_votes
 PYRITION._DefixMap = defix
+
+--post
+PYRITION:LanguageRegisterColor("misc", "map")

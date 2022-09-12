@@ -105,7 +105,10 @@ function PYRITION:SQLCommit(completion_callback) --Stop queuing SQLQuery calls, 
 	--the parameter passed to completion_callback is true if we sent all queries, or false if the queue was dicarded
 	local queued = self.SQLQueued
 	
-	if queued then return commit_queued(queued, completion_callback)
+	if queued then
+		self.SQLQueued = nil
+		
+		return commit_queued(queued, completion_callback)
 	else self:SQLDiscard() end
 end
 

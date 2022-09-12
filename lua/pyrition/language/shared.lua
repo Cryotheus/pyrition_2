@@ -216,9 +216,16 @@ local function replace_tags(self, text, phrases, colored)
 end
 
 --kieve functions
-local function kieve_executor(_index, text, _text_data, _texts, key_values, _phrases)
+local function kieve_player(_index, text, _text_data, _texts, key_values, _phrases)
 	if text == local_player then return key_values.you, color_self
 	elseif text == game.GetWorld() then return key_values.console, color_console end
+	
+	if key_values.possessive then
+		if IsEntity(text) then text = text:Name() end
+		if string.Right(text, 1) == "s" then return text .. "'" end
+		
+		return text .. "'s"
+	end
 end
 
 local function kieve_targets(_index, text, text_data, _texts, key_values, phrases)
@@ -296,7 +303,19 @@ function PYRITION:LanguageListPlayers(players)
 	})
 end
 
-function PYRITION:PyritionLanguageRegisterColor(color, ...) for index, tag in ipairs{...} do language_colors[tag] = color end end
+function PYRITION:PyritionLanguageRegisterColor(color, ...)
+	if isstring(color) then color = colors[color] end
+	if not color then return end
+	
+	for index, tag in ipairs{...} do language_colors[tag] = color end
+end
+
+function PYRITION:PyritionLanguageRegisterKieve(kieve_function, ...)
+	if isstring(kieve_function) then kieve_function = language_kieves[kieve_function] end --copy an existing kieve
+	if not kieve_function then return end
+	
+	for index, tag in ipairs{...} do language_kieves[tag] = kieve_function end
+end
 
 function PYRITION:PyritionLanguageRegisterOption(option, operation, colored) --options are the media of message delivery
 	language_options[option] = operation
@@ -307,8 +326,12 @@ function PYRITION:PyritionLanguageRegisterOption(option, operation, colored) --o
 	self:NetAddEnumeratedString("language_options", option)
 end
 
-function PYRITION:PyritionLanguageRegisterKieve(kieve_function, ...) for index, tag in ipairs{...} do language_kieves[tag] = kieve_function end end
-function PYRITION:PyritionLanguageRegisterTieve(tieve_function, ...) for index, tag in ipairs{...} do language_tieves[tag] = tieve_function end end
+function PYRITION:PyritionLanguageRegisterTieve(tieve_function, ...)
+	if isstring(tieve_function) then tieve_function = language_tieves[tieve_function] end --copy an existing tieve
+	if not tieve_function then return end
+	
+	for index, tag in ipairs{...} do language_tieves[tag] = tieve_function end
+end
 
 --hooks
 hook.Add("InitPostEntity", "PyritionLanguage", function() local_player = SERVER and game.GetWorld() or LocalPlayer() end)
@@ -319,11 +342,10 @@ PYRITION:GlobalHookCreate("LanguageRegisterOption")
 PYRITION:GlobalHookCreate("LanguageRegisterKieve")
 PYRITION:GlobalHookCreate("LanguageRegisterTieve")
 
-PYRITION:LanguageRegisterColor(color_command, "command")
-PYRITION:LanguageRegisterColor(color_misc, "attempts", "class", "count", "duration", "index", "map", "message", "reason", "thread", "time", "visit")
-PYRITION:LanguageRegisterColor(color_player, "executor", "name", "player", "target", "targets")
+PYRITION:LanguageRegisterColor(color_misc, "amount", "attempts", "class", "count", "duration", "index", "message", "quantity", "reason", "time")
+PYRITION:LanguageRegisterColor(color_player, "name", "player", "target", "targets")
 
-PYRITION:LanguageRegisterKieve(kieve_executor, "executor")
+PYRITION:LanguageRegisterKieve(kieve_player, "player")
 PYRITION:LanguageRegisterKieve(kieve_targets, "target", "targets")
 
 PYRITION:LanguageRegisterOption("center", function(formatted, _key, _phrases) local_player:PrintMessage(HUD_PRINTCENTER, formatted) end)
@@ -334,4 +356,4 @@ PYRITION:LanguageRegisterOption("console", function(formatted_table)
 	MsgC(unpack(formatted_table))
 end)
 
-PYRITION:LanguageRegisterTieve(tieve_time, "time", "visit")
+PYRITION:LanguageRegisterTieve(tieve_time, "time")

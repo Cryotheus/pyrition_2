@@ -54,7 +54,7 @@ function BADGE:OnLevelChanged(_old_level, level)
 	
 	if next_level then
 		PYRITION:LanguageQueue(self.Player, "[:level] / [:next_level] kills", {
-			next_level = next_level,
+			next_level = tostring(next_level),
 			level = tostring(level)
 		}, "killer_badge")
 		
@@ -65,6 +65,8 @@ function BADGE:OnLevelChanged(_old_level, level)
 	
 	return true
 end
+
+function BADGE:OnReloaded() self:BakeTiers() end
 
 --hooks
 hook.Add("PlayerDeath", "PyritionPlayerBadgesKiller", function(victim, inflictor, attacker)

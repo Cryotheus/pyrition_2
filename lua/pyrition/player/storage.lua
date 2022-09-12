@@ -134,7 +134,38 @@ function PYRITION:PlayerStorageLoad(ply, key, tracker)
 	end)
 end
 
-function PYRITION:PlayerStorageLoadAll(ply)
+function PYRITION:PlayerStorageGetSavablePlayers()
+	local players = {}
+	
+	for index, ply in ipairs(player.GetAll()) do
+		--wait... doesn't player.GetAll() only give connected players?
+		if ply:IsConnected() then table.insert(players, ply) end
+	end
+end
+
+function PYRITION:PlayerStorageSave(ply, key)
+	if read_only or ply:IsBot() then return end
+	
+	local database_name = PYRITION.SQLDatabaseName
+	local player_data = self.PlayerStoragePlayers[ply]
+	local player_datum = player_data[key]
+	
+	if not player_datum then return end
+	
+	hook.Call("PyritionPlayerStorageSave" .. key, self, ply, player_datum)
+	
+	local storage_data = self.PlayerStorages[key]
+	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or "pyrition_" .. storage_data.TableName
+	local type_names = storage_data.TypeNames
+	local values_placed = {"'" .. player_data._ShortSteamID .. "'"}
+	
+	for index, field_key in ipairs(storage_data.Values) do table.insert(values_placed, type_name_instruction_functions[type_names[index]](player_datum[field_key])) end
+	
+	self:SQLQuery("replace into `" .. table_name .. "` (" .. storage_data.ValuesString .. ") values(" .. table.concat(values_placed, ", ") .. ");")
+end
+
+--pyrition hooks
+function PYRITION:PyritionPlayerStorageLoadAll(ply)
 	local tracker = {}
 	self.PlayerStoragePlayers[ply] = {_ShortSteamID = short_steam_id(ply)}
 	
@@ -150,49 +181,6 @@ function PYRITION:PlayerStorageLoadAll(ply)
 	self.PlayerStoragesLoading[ply] = self:SQLCommit()
 end
 
-function PYRITION:PlayerStorageSave(ply, key)
-	if read_only or ply:IsBot() then return end
-	
-	local database_name = PYRITION.SQLDatabaseName
-	local player_data = self.PlayerStoragePlayers[ply]
-	local player_datum = player_data[key]
-	
-	if not player_datum then print("failed to save", ply, key) return end
-	
-	hook.Call("PyritionPlayerStorageSave" .. key, self, ply, player_datum)
-	
-	local storage_data = self.PlayerStorages[key]
-	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or "pyrition_" .. storage_data.TableName
-	local type_names = storage_data.TypeNames
-	local values_placed = {"'" .. player_data._ShortSteamID .. "'"}
-	
-	for index, field_key in ipairs(storage_data.Values) do table.insert(values_placed, type_name_instruction_functions[type_names[index]](player_datum[field_key])) end
-	
-	self:SQLQuery("replace into `" .. table_name .. "` (" .. storage_data.ValuesString .. ") values(" .. table.concat(values_placed, ", ") .. ");")
-end
-
-function PYRITION:PlayerStorageSaveAll(ply)
-	self:SQLBegin()
-		
-	for key, storage_data in pairs(self.PlayerStorages) do self:PlayerStorageSave(ply, key) end
-	
-	self:SQLCommit()
-end
-
-function PYRITION:PlayerStorageSaveEveryone()
-	local players = player.GetAll()
-	
-	self:SQLBegin()
-	
-	for key, storage_data in pairs(self.PlayerStorages) do
-		--save all players, including bots!
-		for index, ply in ipairs(players) do self:PlayerStorageSave(ply, key) end
-	end
-	
-	self:SQLCommit()
-end
-
---pyrition hooks
 function PYRITION:PyritionPlayerStorageLoadDiscard(ply)
 	local load_coroutine = self.PlayerStoragesLoading[ply]
 	
@@ -290,10 +278,29 @@ function PYRITION:PyritionPlayerStorageRegistration(database_name)
 	end
 end
 
+function PYRITION:PyritionPlayerStorageSaveAll(ply)
+	self:SQLBegin()
+		
+	for key, storage_data in pairs(self.PlayerStorages) do self:PlayerStorageSave(ply, key) end
+	
+	self:SQLCommit()
+end
+
+function PYRITION:PyritionPlayerStorageSaveEveryone(everyone)
+	self:SQLBegin()
+	
+	for key, storage_data in pairs(self.PlayerStorages) do
+		--save all players, including bots!
+		for index, ply in ipairs(everyone) do self:PlayerStorageSave(ply, key) end
+	end
+	
+	self:SQLCommit()
+end
+
 --hooks
 hook.Add("PlayerDisconnected", "PyritionPlayerStorage", function(ply)
 	--save the storage if we were not loading their storage
-	if not PYRITION:PlayerStorageLoadDiscard(ply) then PYRITION:PlayerStorageSaveAll(ply) end
+	if not PYRITION:PlayerStorageLoadDiscard(ply) then PYRITION:PlayerStorageSaveAll(ply, true) end
 	
 	PYRITION.PlayerStoragePlayers[ply] = nil
 	PYRITION.PlayerStoragesLoadFinished[ply] = nil

@@ -13,7 +13,7 @@ local function escape_targetting(target)
 end
 
 --command argument methods
-function ARGUMENT:Complete(ply, settings, argument)
+function ARGUMENT:Complete(ply, settings, argument) --Called to get a list of completions to add to the command autocomplete
 	local argument = string.lower(argument)
 	local completions = {} --needle, supplicant, single, exclude_supplicant, allow_empty
 	local targets = PYRITION:PlayerFind(argument, ply, false, settings.Selfless, true)
@@ -46,7 +46,7 @@ function ARGUMENT:Complete(ply, settings, argument)
 	return completions, language.GetPhrase(settings.Single and "pyrition.command.argument.player" or "pyrition.command.argument.players")
 end
 
-function ARGUMENT:Filter(ply, settings, argument)
+function ARGUMENT:Filter(ply, settings, argument) --Converts the argument of the command to this argument type, or returns false if it's invalid
 	if settings.Manual then return true, argument end
 	
 	if istable(argument) then --validate a player lsit
@@ -81,14 +81,14 @@ function ARGUMENT:Filter(ply, settings, argument)
 	return false
 end
 
-function ARGUMENT:Read(stream, settings)
+function ARGUMENT:Read(stream, settings) --Called when we are reading a command argument from a stream
 	if settings.Manual then return stream:ReadString() end
 	if settings.Single then return stream:ReadPlayer(argument) end
 	
 	return stream:ReadList(max_players_bits, stream.ReadPlayer)
 end
 
-function ARGUMENT:ReadSettings(stream, settings)
+function ARGUMENT:ReadSettings(stream, settings) --Called when we are reading a settings table from a stream
 	if stream:ReadBool() then
 		settings.Manual = true
 		
@@ -100,14 +100,14 @@ function ARGUMENT:ReadSettings(stream, settings)
 	settings.Single = stream:ReadBool()
 end
 
-function ARGUMENT:Write(stream, settings, argument)
+function ARGUMENT:Write(stream, settings, argument) --Called when we are writing a command argument to a stream
 	if settings.Manual then return stream:WriteString(argument) end
 	if settings.Single then return stream:WritePlayer(argument) end
 	
 	stream:WriteList(argument, max_players_bits, stream.WritePlayer)
 end
 
-function ARGUMENT:WriteSettings(stream, settings)
+function ARGUMENT:WriteSettings(stream, settings) --Called when we are writing a settings table to a stream
 	if settings.Manual then return self:WriteBool(true) end
 	
 	stream:WriteBool(false)

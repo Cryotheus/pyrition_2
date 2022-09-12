@@ -24,3 +24,4 @@ end
 
 --registration
 PYRITION:ConsoleCommandRegister("sql list queued", COMMAND_LIST_QUEUED)
+PYRITION:LanguageRegisterColor(color_misc, "thread")

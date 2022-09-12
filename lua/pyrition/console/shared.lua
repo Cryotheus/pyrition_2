@@ -264,3 +264,7 @@ else
 	--hee hee hee haw |\/\/|
 	create_master_command("ulx", "pyrition.command.help.ulx")
 end
+
+PYRITION:LanguageRegisterColor("command", "command")
+PYRITION:LanguageRegisterColor("player", "executor")
+PYRITION:LanguageRegisterKieve("player", "executor")

@@ -3,12 +3,8 @@ local badge_registry = PYRITION.PlayerBadgeRegistry or {}
 local badges = PYRITION.PlayerBadges or {}
 local _R = debug.getregistry()
 
---globals
-PYRITION.PlayerBadges = badges
-PYRITION.PlayerBadgeRegistry = badge_registry
-
 --local tables
-local badge_meta = {
+local badge_meta = PYRITION.PlayerBadgeMeta or {
 	IsPyritionBadge = true,
 	Level = 0
 }
@@ -16,8 +12,16 @@ local badge_meta = {
 local badge_public = {__index = badge_meta, __name = "PyritionBadge"}
 local badge_tier_meta = {TierFunctionsInstalled = true}
 
+--local functions
+local function kieve_badge(_index, _text, _text_data, _texts, _key_values, _phrases)
+	--TODO: this!
+end
+
 --globals
+PYRITION.PlayerBadgeRegistry = badge_registry
+PYRITION.PlayerBadges = badges
 PYRITION.PlayerBadgeTieredMeta = badge_tier_meta
+PYRITION.PlayerBadgeMeta = badge_meta
 _R.PyritionBadge = badge_public
 
 --badge meta functions
@@ -27,10 +31,8 @@ function badge_meta:BakeTiers()
 	self:InstallTierFunctions()
 	
 	local materials = {}
-	local tier = self:CalculateTier()
-	
-	self.Tier = tier
 	self.TierLevels = {}
+	self.Tier = self:CalculateTier()
 	self.TierMaterials = materials
 	
 	for tier, arguments in ipairs(self.Tiers) do self:BakeTier(tier, unpack(arguments)) end
@@ -59,9 +61,9 @@ end
 function badge_meta:ShouldDisplay() if self.Level > 0 then return true end end
 
 --badge tier meta functions
-function badge_tier_meta:BakeTier(_tier, level, material_path)
-	table.insert(self.TierLevels, level)
-	table.insert(self.TierMaterials, Material(material_path))
+function badge_tier_meta:BakeTier(tier, level, material_path)
+	self.TierLevels[tier] = level
+	self.TierMaterials[tier] = Material(material_path)
 end
 
 function badge_tier_meta:CalculateTier(level)
@@ -78,6 +80,8 @@ end
 
 function badge_tier_meta:CalculateTierFrom(start_tier, level)
 	--same as CalculateTier but skips over all tiers before start_tier in the calculation
+	if start_tier < 1 then return self:CalculateTier(level) end
+	
 	local level = level or self.Level
 	local tier_levels = self.TierLevels
 	
@@ -88,27 +92,31 @@ end
 
 function badge_tier_meta:Name() return language.GetPhrase("pyrition.badges." .. self.Class .. ".tier_" .. self.Tier) end
 
-function badge_tier_meta:SetLevel(level)
+function badge_tier_meta:SetLevel(level, initial)
 	local old_level = self.Level
+	local old_tier = self.Tier or 1
 	local tier = level > old_level and self:CalculateTierFrom(self.Tier, level) or self:CalculateTier(level)
 	
 	self.Level = level
 	self.Material = self.TierMaterials[tier]
 	self.Tier = tier
 	
+	--initial is true if the badge is being loaded off the database
+	if initial then return end
+	
 	--call override function
 	if self.OnLevelChanged and self:OnLevelChanged(old_level, level) then return end
 	
-	PYRITION:PlayerBadgeLevelChanged(self.Player, self, old_level, level)
+	PYRITION:PlayerBadgeLevelChanged(self.Player, self, old_level, level, old_tier, tier)
 end
 
 --pyrition functions
 function PYRITION:PlayerBadgeExists(class) return badge_registry[class] and true or false end
 
 function PYRITION:PlayerBadgeGet(ply, class)
-	local players_badges = badges[ply]
+	local players_badges = self.PlayerBadges[ply]
 	
-	return players_badges[class]
+	return players_badges and players_badges[class]
 end
 
 function PYRITION:PlayerBadgeGive(ply, class, level) return self:PlayerBadgeGet(ply, class) or self:PlayerBadgeSet(ply, class, level) end
@@ -121,6 +129,12 @@ function PYRITION:PlayerBadgeIncrement(ply, class, increment)
 	return badge
 end
 
+function PYRITION:PlayerBadgeRemove(ply, class)
+	local players_badges = badges[ply]
+	
+	if players_badges then players_badges[class] = nil end
+end
+
 function PYRITION:PlayerBadgeSet(ply, class, level, initial)
 	local badge = setmetatable(
 		table.Merge(
@@ -131,16 +145,18 @@ function PYRITION:PlayerBadgeSet(ply, class, level, initial)
 		badge_public
 	)
 	
-	local players_badges = badges[ply]
+	local players_badges = self.PlayerBadges[ply]
 	
 	if players_badges then players_badges[class] = badge
-	else badges = {[ply] = badge} end
+	else self.PlayerBadges[ply] = {[class] = badge} end
 	
 	if badge.Initialize then badge:Initialize(level) end
 	if level then badge:SetLevel(level, initial) end
 	
 	return badge
 end
+
+function PYRITION:PlayerBadgesGet(ply) return self.PlayerBadges[ply] end
 
 --pyrition hooks
 function PYRITION:PyritionPlayerBadgeRegister(class, badge, base_class)
@@ -155,18 +171,41 @@ function PYRITION:PyritionPlayerBadgeRegister(class, badge, base_class)
 	
 	badge_registry[class] = setmetatable(badge, badge_public)
 	
+	for ply, player_badges in pairs(self.PlayerBadges) do
+		local this_badge = player_badges[class]
+		
+		if this_badge and this_badge.OnReloaded then
+			--update functions
+			for key, value in pairs(badge) do if isfunction(value) then this_badge[key] = value end end
+			
+			this_badge:OnReloaded()
+		end
+	end
+	
 	return badge
 end
 
-function PYRITION:PyritionPlayerBadgeLevelChanged(ply, badge, old_level, level)
-	if level <= old_level then return end
-	
-	self:LanguageQueue(ply, "[:player:you=Your:possesive=en] [:badge] badge has levelled up to level [:level].", {
-		badge = badge.Class,
-		level = tostring(level),
-		player = ply,
-	})
+function PYRITION:PyritionPlayerBadgeLevelChanged(ply, badge, old_level, level, old_tier, tier)
+	if old_tier then
+		if tier < 1 or tier <= old_tier then return end
+		
+		self:LanguageQueue(ply, "[:player:you=Your:possessive=en] [:badge] badge has tiered up to tier [:tier].", {
+			badge = badge.Class,
+			tier = tostring(tier),
+			player = ply,
+		})
+	else
+		if level < 1 or level <= old_level then return end
+		
+		self:LanguageQueue(ply, "[:player:you=Your:possessive=en] [:badge] badge has levelled up to level [:level].", {
+			badge = badge.Class,
+			level = tostring(level),
+			player = ply,
+		})
+	end
 end
 
 --post
 PYRITION:GlobalHookCreate("PlayerBadgeRegister")
+PYRITION:LanguageRegisterColor("misc", "badge", "level", "tier")
+PYRITION:LanguageRegisterKieve(kieve_badge, "badge")

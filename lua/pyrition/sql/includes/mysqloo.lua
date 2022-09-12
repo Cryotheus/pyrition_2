@@ -32,7 +32,6 @@ local function escape(unsafe) return "\"" .. database:escape(tostring(unsafe)) .
 local function query(instruction, callback, error_callback)
 	local query_object = database:query(instruction)
 	
-	--when an entry is received
 	function query_object:onError(error_code)
 		if database:status() == mysqloo.DATABASE_NOT_CONNECTED then
 			if reconnecting then
@@ -62,11 +61,7 @@ local function query(instruction, callback, error_callback)
 	if callback then
 		function query_object:onSuccess(result)
 			if table.IsEmpty(result) then callback(nil) 
-			else
-				MsgC(Color(128, 64, 255), "result table\n")
-				PrintTable(result)
-				callback(result)
-			end
+			else callback(result) end
 		end
 	end
 	

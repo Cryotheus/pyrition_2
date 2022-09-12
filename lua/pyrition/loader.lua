@@ -118,14 +118,14 @@ local config = {
 		time = 66,		--1000 010
 		
 		badge = {
-			server = 26,	--11 010
-			shared = 23,	--10 111
+			server = 74,	--1001 010
+			shared = 71,	--1000 111
 		},
 		
 		badges = {
-			killer = 55,				--110 111
-			pyrition_developer = 55,	--110 111
-			rosette = 55,				--110 111
+			killer = 87,				--1010 111
+			pyrition_developer = 87,	--1010 111
+			rosette = 87,				--1010 111
 		},
 		
 		identity = {

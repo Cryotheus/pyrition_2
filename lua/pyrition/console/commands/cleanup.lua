@@ -1,6 +1,12 @@
 --locals
 local COMMAND = {
-	Arguments = {"Player"},
+	Arguments = {
+		{
+			Class = "Player",
+			Default = true
+		}
+	},
+	
 	Console = true
 }
 
@@ -10,8 +16,14 @@ local COMMAND_MAP = {
 }
 
 --command functions
-function COMMAND:Execute(_ply, targets)
-	for index, target in ipairs(targets) do cleanup.CC_Cleanup(target) end
+function COMMAND:Execute(ply, targets)
+	targets = targets or {ply}
+	
+	if #targets == 1 and targets[1] == ply then
+		cleanup.CC_Cleanup(ply, nil, {})
+		
+		return true, false
+	else for index, target in ipairs(targets) do cleanup.CC_Cleanup(target, nil, {}) end end
 	
 	return true, nil, {targets = targets}
 end
@@ -23,5 +35,5 @@ function COMMAND_MAP:Execute(_ply)
 end
 
 --post
-PYRITION:ConsoleCommandRegister("cleanup", COMMAND_MAP)
+PYRITION:ConsoleCommandRegister("cleanup", COMMAND)
 PYRITION:ConsoleCommandRegister("cleanup map", COMMAND_MAP)

@@ -131,7 +131,7 @@ end
 function PYRITION:NetThinkServer()
 	for ply, time_spawned in pairs(loading_players) do
 		if time_spawned and ply:TimeConnected() - time_spawned > load_time then
-			PYRITION:LanguageDisplay("prodigal", "pyrition.net.load.late", {
+			self:LanguageDisplay("prodigal", "pyrition.net.load.late", {
 				duration = math.Round(ply:TimeConnected() - time_spawned, 2),
 				player = ply,
 				time = load_time,
@@ -139,14 +139,14 @@ function PYRITION:NetThinkServer()
 			
 			loading_players[ply] = false
 			
-			PYRITION:NetPlayerInitialized(ply, true)
+			self:NetPlayerInitialized(ply, true)
 		end
 	end
 	
 	if next(net_enumeration_updates) then
 		for index, ply in ipairs(player.GetAll()) do
 			if not loading_players[ply] then --no need to sync people who have yet to load in
-				local model = PYRITION:NetStreamModelCreate("enumeration_bits", ply)
+				local model = self:NetStreamModelCreate("enumeration_bits", ply)
 				
 				model.Bits = net_enumeration_updates
 			end
@@ -252,7 +252,11 @@ hook.Add("PlayerDisconnected", "PyritionNet", function(ply)
 	for namespace, tracker in pairs(net_enumeration_players) do tracker[ply] = nil end
 end)
 
-hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply) loading_players[ply] = ply:TimeConnected() end)
+hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply)
+	loading_players[ply] = ply:TimeConnected()
+	
+	if ply:IsBot() then timer.Simple(math.min(1, load_time - 0.1), function() PYRITION:NetPlayerInitialized(ply) end) end
+end)
 
 --net
 net.Receive("pyrition", function(_length, ply)
