@@ -1,3 +1,4 @@
+--locals
 local COMMAND = {
 	Arguments = {
 		Required = 1,
@@ -32,13 +33,13 @@ local COMMAND_MULTI = {
 }
 
 --command function
-function COMMAND:Execute(ply, target, reason)
+function COMMAND:Execute(_ply, target, reason)
 	PYRITION:PlayerKick(target, reason)
 	
 	return true, reason and "pyrition.commands.kick.explicable" or "pyrition.commands.kick.inexplicable", {target = target, reason = reason}
 end
 
-function COMMAND_MULTI:Execute(ply, targets, reason)
+function COMMAND_MULTI:Execute(_ply, targets, reason)
 	for index, target in ipairs(targets) do PYRITION:PlayerKick(target, reason) end
 	
 	return true, reason and "pyrition.commands.kick.multiple.explicable" or "pyrition.commands.kick.multiple.inexplicable", {targets = targets, reason = reason}

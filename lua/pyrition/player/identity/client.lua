@@ -1,3 +1,4 @@
+--locals
 local chat_filter = {
 	chat = false, --(Obsolete?) Player chat? Seems to trigger when server console uses the say command
 	joinleave = true, --Player join and leave messages

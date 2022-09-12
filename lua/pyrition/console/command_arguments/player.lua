@@ -82,13 +82,8 @@ function ARGUMENT:Filter(ply, settings, argument)
 end
 
 function ARGUMENT:Read(stream, settings)
-	print("READ!", stream)
-	PrintTable(settings)
-	
 	if settings.Manual then return stream:ReadString() end
 	if settings.Single then return stream:ReadPlayer(argument) end
-	
-	print("read list", max_players_bits, stream.ReadPlayer)
 	
 	return stream:ReadList(max_players_bits, stream.ReadPlayer)
 end

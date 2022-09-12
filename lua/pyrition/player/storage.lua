@@ -109,8 +109,6 @@ function PYRITION:PlayerStorageLoad(ply, key, tracker)
 		if not player_datum then
 			player_datum = {}
 			player_data[key] = player_datum
-			
-			print("create datum")
 		end
 		
 		if result then
@@ -118,13 +116,7 @@ function PYRITION:PlayerStorageLoad(ply, key, tracker)
 			result = table.remove(result)
 			result.steam_id = nil
 			
-			print("got result")
-			
-			for index, field_key in ipairs(storage_data.Values) do
-				print(index, field_key)
-				
-				player_datum[field_key] = type_name_conversion_functions[type_names[index]](result[field_key])
-			end
+			for index, field_key in ipairs(storage_data.Values) do player_datum[field_key] = type_name_conversion_functions[type_names[index]](result[field_key]) end
 		end
 		--_ply, key, player_data, _success, tracker
 		self:PlayerStorageLoaded(ply, key, player_datum, true, tracker)
@@ -166,6 +158,7 @@ function PYRITION:PlayerStorageSave(ply, key)
 	
 	if not player_datum then print("failed to save", ply, key) return end
 	
+	print("do the save thing")
 	hook.Call("PyritionPlayerStorageSave" .. key, self, ply, player_datum)
 	
 	local storage_data = self.PlayerStorages[key]
@@ -227,13 +220,10 @@ end
 function PYRITION:PyritionPlayerStorageLoadFinished(ply, player_data)
 	local chronology = player_data.Time
 	local identity = player_data.Identity
-	local name = identity and identity.name
-	local previous_name = identity and identity.PreviousName
+	local name = identity.name
+	local previous_name = identity.PreviousName
 	
-	print("identity")
-	PrintTable(istable(identity) and identity or {[type(identity)] = identity})
-	
-	if previous_name and previous_name ~= name then
+	if previous_name then
 		local visit = chronology.visit or os.time()
 		local visit_text = tostring(os.time() - visit)
 		

@@ -21,12 +21,6 @@ PYRITION.PlayerBadgeTieredMeta = badge_tier_meta
 _R.PyritionBadge = badge_public
 
 --badge meta functions
-function badge_public:__add(alpha)
-	print(self, alpha)
-	
-	return self or alpha
-end
-
 function badge_public:__tostring() return "PyritionBadge [" .. self.Class .. "]" end
 
 function badge_meta:BakeTiers()
@@ -92,7 +86,7 @@ function badge_tier_meta:CalculateTierFrom(start_tier, level)
 	return 0
 end
 
-function badge_meta:Name() return language.GetPhrase("pyrition.badges." .. self.Class .. ".tier_" .. self.Tier) end
+function badge_tier_meta:Name() return language.GetPhrase("pyrition.badges." .. self.Class .. ".tier_" .. self.Tier) end
 
 function badge_tier_meta:SetLevel(level)
 	local old_level = self.Level

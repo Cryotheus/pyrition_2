@@ -67,13 +67,8 @@ local function commit_queued(queued, completion_callback) --creates a coroutine 
 			entry = table.remove(queued, 1)
 		until not entry
 		
-		if active then
-			--final yield
-			coroutine.yield()
-			
-			--discard
-			PYRITION.SQLCoroutines[routine] = nil
-		end
+		--remove the coroutine from our registry
+		PYRITION.SQLCoroutines[routine] = nil
 		
 		--let the server hibernate again
 		PYRITION:Hibernate(routine)
@@ -85,7 +80,7 @@ local function commit_queued(queued, completion_callback) --creates a coroutine 
 	coroutine.resume(routine) --start the coroutine immediately
 	PYRITION:HibernateWake(routine) --if the server is hibernating, the callback may not run
 	
-	--setup the global
+	--register the coroutine
 	PYRITION.SQLCoroutines[routine] = queued
 	
 	return routine

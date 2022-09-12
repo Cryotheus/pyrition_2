@@ -1,3 +1,4 @@
+--locals
 local COMMAND = {
 	Arguments = {
 		Required = 1,
@@ -41,25 +42,24 @@ local COMMAND_VOTE_RETRACT = {
 	Console = true
 }
 
---locals
 local maps = PYRITION.MapList
 
 --command functions
-function COMMAND:Execute(ply, map_name, delay)
+function COMMAND:Execute(_ply, map_name, delay)
 	if maps[map_name] then
 		PYRITION:MapChange(map_name, delay)
 		
-		return true, "pyrition.commands.map.success", {map = map_name}
+		return true, nil, {map = map_name}
 	end
 	
 	return false, "pyrition.commands.map.fail"
 end
 
-function COMMAND_CANCEL:Execute(ply)
+function COMMAND_CANCEL:Execute(_ply)
 	if PYRITION.MapChanging then
 		PYRITION:MapCancel()
 		
-		return true, "pyrition.commands.map.cancel.success"
+		return true, nil
 	end
 	
 	return false, "pyrition.commands.map.cancel.fail"
@@ -69,19 +69,19 @@ function COMMAND_VOTE:Execute(ply, map_name)
 	if maps[map_name] then
 		local success, message = PYRITION:MapVote(ply, map_name)
 		
-		return success, message or "pyrition.commands.map.vote.success", {map = map_name}
+		return success, message or nil, {map = map_name}
 	end
 	
 	return false, "pyrition.commands.map.fail"
 end
 
-function COMMAND_VOTE_ANNUL:Execute(ply, map_name)
+function COMMAND_VOTE_ANNUL:Execute(_ply, map_name)
 	if maps[map_name] then
 		local victims = PYRITION:MapVoteAnnul(map_name)
 		
 		if #victims == 0 then return false, "pyrition.commands.map.vote.annul.missed" end
 		
-		return true, "pyrition.commands.map.vote.annul.success", {map = map_name, victims = victims}
+		return true, nil, {map = map_name, victims = victims}
 	end
 	
 	return false, "pyrition.commands.map.fail"
@@ -101,7 +101,7 @@ function COMMAND_VOTE_RETRACT:Execute(ply, targetting)
 		
 		for index, target in ipairs(targets) do if PYRITION:MapVoteRetract(target) then table.insert(victims, target) end end
 		
-		return true, "pyrition.commands.map.vote.retract.success", {targets = victims}
+		return true, nil, {targets = victims}
 	end
 	
 	return false, "pyrition.player.find.invalid"

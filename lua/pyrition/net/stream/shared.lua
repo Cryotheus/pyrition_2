@@ -618,7 +618,7 @@ function stream_meta:WriteByte(byte)
 	self.Byte = wordless(bit_lshift(byte, 8 - bits_written))
 end
 
-function stream_meta:WriteCharacter(character) self:WriteByte(string_char(character)) end
+function stream_meta:WriteCharacter(character) self:WriteByte(string_byte(character)) end
 
 function stream_meta:WriteEndBits() --write 0 for the remaining bits, completing the current byte
 	if self.BitsWritten == 0 then return end

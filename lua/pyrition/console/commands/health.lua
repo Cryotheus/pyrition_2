@@ -1,3 +1,4 @@
+--locals
 local COMMAND = {
 	Arguments = {
 		Required = 1,
@@ -26,7 +27,7 @@ local player_meta = FindMetaTable("Player")
 COMMAND.SetFunction = entity_meta.SetHealth
 
 --command functions
-function COMMAND:Execute(ply, targets, amount)
+function COMMAND:Execute(_ply, targets, amount)
 	local modified = {IsPlayerList = true}
 	local set_function = self.SetFunction
 	
@@ -39,7 +40,7 @@ function COMMAND:Execute(ply, targets, amount)
 	
 	if table.IsEmpty(modified) then return false, "pyrition.commands.health.missed" end
 	
-	return true, "pyrition.commands.health.success", {targets = modified}
+	return true, nil, {amount = tostring(amount), targets = modified}
 end
 
 --post

@@ -1,3 +1,4 @@
+--locals
 local COMMAND = {
 	Arguments = {
 		{

@@ -1,3 +1,4 @@
+--locals
 local COMMAND = {
 	Arguments = {
 		Required = 1,
@@ -6,9 +7,7 @@ local COMMAND = {
 			Selfless = true,
 			Class = "Player"
 		}
-	},
-	
-	Force = false
+	}
 }
 
 --command function
@@ -18,6 +17,7 @@ function COMMAND:Execute(ply, targets)
 	if landing_count == #targets then
 		for index, target in ipairs(targets) do PYRITION:PlayerTeleport(target, landings[index], "bring", ply) end
 		
+		--since we also register bring force with this method, we must specify that it uses the bring command's success phrase instead
 		return true, "pyrition.commands.bring.success", {targets = targets}
 	else return false, "pyrition.player.landing.insufficient" end
 	

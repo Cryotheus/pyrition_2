@@ -1,3 +1,4 @@
+--locals
 local COMMAND = {
 	Arguments = {"Player"},
 	Console = true
@@ -10,7 +11,7 @@ function COMMAND:Execute(ply, targetting)
 	if targets then
 		for index, target in ipairs(targets) do target:Spawn() end
 		
-		return true, "pyrition.commands.respawn.success", {targets = targets}
+		return true, nil, {targets = targets}
 	end
 	
 	return false, message

@@ -320,7 +320,7 @@ PYRITION:GlobalHookCreate("LanguageRegisterKieve")
 PYRITION:GlobalHookCreate("LanguageRegisterTieve")
 
 PYRITION:LanguageRegisterColor(color_command, "command")
-PYRITION:LanguageRegisterColor(color_misc, "attempts", "class", "duration", "index", "map", "message", "reason", "time", "visit")
+PYRITION:LanguageRegisterColor(color_misc, "attempts", "class", "count", "duration", "index", "map", "message", "reason", "thread", "time", "visit")
 PYRITION:LanguageRegisterColor(color_player, "executor", "name", "player", "target", "targets")
 
 PYRITION:LanguageRegisterKieve(kieve_executor, "executor")

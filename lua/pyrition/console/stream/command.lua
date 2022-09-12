@@ -23,28 +23,13 @@ function MODEL:Read(ply)
 			local argument_count = self:ReadByte()
 			local command_arguments = command.Arguments
 			
-			print("yes arg", argument_count)
-			
 			for index = 1, argument_count do
 				local command_argument = command_arguments[index]
 				local command_argument_object = command_argument_classes[command_argument.Class]
 				
-				print("#" .. index, command_argument, command_argument_object)
-				PrintTable(istable(command_argument) and command_argument or {type(command_argument)})
-				
-				if command_argument_object.Read then
-					local what = command_argument_object:Read(self, command_argument)
-					
-					print("read using obj", what)
-					
-					arguments[index] = what
-				else
-					local what = self:MaybeRead("ReadString")
-					
-					print("read using maybe", what)
-					
-					arguments[index] = what
-				end
+				--if we have a custom read method, use it, otherwise we default to a nullable ReadString
+				if command_argument_object.Read then arguments[index] = command_argument_object:Read(self, command_argument)
+				else arguments[index] = self:MaybeRead("ReadString") end
 			end
 			
 			PrintTable(arguments)
@@ -64,7 +49,7 @@ function MODEL:Write(_ply, command, arguments)
 	
 	local command_arguments = command.Arguments
 	local passed = false
-	local valid, argument_count = PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments)
+	local valid, argument_count, message = PYRITION:ConsoleCommandArgumentValidate(ply, command, arguments)
 	
 	for index, name in ipairs(command.Parents) do
 		if passed then self:WriteBool(true)
@@ -86,7 +71,13 @@ function MODEL:Write(_ply, command, arguments)
 			if command_argument_object.Write then command_argument_object:Write(self, command_argument, arguments[index])
 			else self:MaybeWrite("WriteString", arguments[index]) end
 		end
-	else self:WriteBool(false) end
+		
+		return true
+	else
+		self:WriteBool(false)
+		
+		return false, argument_count, message
+	end
 end
 
 --post

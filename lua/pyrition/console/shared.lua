@@ -7,6 +7,8 @@ local phrase_exists = PYRITION._LanguagePhraseExists
 
 --local functions
 local function command_callback(ply, arguments, no_fail_response)
+	if ply:IsValid() and SERVER then return end --disable the usage of the cmd console command
+	
 	local arguments_count = #arguments
 	local command, depth = PYRITION:ConsoleCommandGet(arguments, true)
 	local ply = ply:IsValid() and ply or game.GetWorld()
@@ -81,22 +83,36 @@ function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 		return false
 	end
 	
-	--if we don't have the command send it to the server for execution
+	--if the command is server side, send it to the server for execution
 	if CLIENT and command.Downloaded then
-		PYRITION:ConsoleCommandSend(command, arguments, ply)
+		local sending, fail_index, fail_message = self:ConsoleCommandSend(command, arguments, ply)
 		
-		return true
+		if sending then return true end
+		
+		self:LanguageQueue(ply, fail_message and "pyrition.command.failed.argument.detailed" or "pyrition.command.failed.argument", {
+			class = (command_arguments[fail_index] or {Class = "nil"}).Class,
+			command = command_localization(command),
+			index = "#" .. tostring(fail_index or -1),
+			message = "#" .. tostring(fail_message or "nil")
+		})
+		
+		return false
 	else filter_success, fail_index, fail_message = self:ConsoleCommandArgumentValidate(ply, command, arguments) end
 	
-	if filter_success then
+	if filter_success then --if the filter passed, execute!
 		local success, message, phrases = self:ConsoleCommandExecute(ply, command, arguments)
+		
+		--if message is set to false, that means the command doesn't want any message sent
+		if message == false then return success end
 		
 		--if we failed and we have failed execution response disabled, stop here
 		if not success and no_fail_response then return false end
 		
+		--ply if the response is silent or the execution failed
+		--otherwise, everyone if it's a success
 		local success_targets = command.SilentResponse and ply or success or ply
 		
-		if message then
+		if message then --send the custom message
 			self:LanguageQueue(
 				success_targets,
 				message,
@@ -105,7 +121,7 @@ function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 					phrases or {}
 				)
 			)
-		elseif success then
+		elseif success then --send associated success message, or fallback to a generic success message
 			--we don't send a message for downloaded commands
 			if command.Downloaded then return success end
 			
@@ -114,10 +130,10 @@ function PYRITION:ConsoleExecute(ply, command, arguments, no_fail_response)
 			if phrase_exists(language_key) then return self:LanguageQueue(success_targets, language_key, table.Merge({executor = ply}, phrases or {})) end
 			
 			self:LanguageQueue(success_targets, "pyrition.command.success", {command = command_localization(command)})
-		else self:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end
+		else self:LanguageQueue(ply, "pyrition.command.failed", {command = command_localization(command)}) end --send generic failure message
 		
 		return success
-	elseif not no_fail_response then
+	elseif not no_fail_response then --give a fail message unless we are ignoring them
 		self:LanguageQueue(ply, fail_message and "pyrition.command.failed.argument.detailed" or "pyrition.command.failed.argument", {
 			class = (command_arguments[fail_index] or {Class = "nil"}).Class,
 			command = command_localization(command),

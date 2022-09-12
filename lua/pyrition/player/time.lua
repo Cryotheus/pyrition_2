@@ -57,6 +57,8 @@ function PYRITION:PyritionPlayerStorageSaveTime(ply, player_data)
 	local time_connected = ply:TimeConnected()
 	local time_difference = time_connected - last_connected_time
 	
+	print("save the time!")
+	
 	player_data.LastSessionTime = time_connected
 	player_data.record = math.max(time_connected, player_data.record or 0)
 	player_data.total = player_data.total + time_difference

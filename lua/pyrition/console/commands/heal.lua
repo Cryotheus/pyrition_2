@@ -1,10 +1,11 @@
+--locals
 local COMMAND = {
 	Arguments = {"Player"},
 	Console = true
 }
 
 --command function
-function COMMAND:Execute(ply, targets)
+function COMMAND:Execute(_ply, targets)
 	for index, target in ipairs(targets) do
 		target:Extinguish()
 		
@@ -22,7 +23,7 @@ function COMMAND:Execute(ply, targets)
 		else target:Spawn() end
 	end
 	
-	return true, "pyrition.commands.heal.success", {targets = targets}
+	return true, nil, {targets = targets}
 end
 
 --registration

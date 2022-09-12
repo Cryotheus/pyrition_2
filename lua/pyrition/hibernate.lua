@@ -1,7 +1,6 @@
 --locals
 local pyrition_hibernate_think = CreateConVar("pyrition_hibernate_think", "0", bit.bor(FCVAR_ARCHIVE, FCVAR_NEVER_AS_STRING), language.GetPhrase("pyrition.convars.pyrition_hibernate_think"))
 local hibernation_registry = PYRITION.HibernateRegistry or {}
---local sv_hibernate_think = GetConVar("sv_hibernate_think") --we used to check this before we updated it, but GetBool/GetInt was returning the wrong values
 
 --local functions
 local function update_hibernate_think()

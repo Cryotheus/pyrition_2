@@ -1,3 +1,4 @@
+--locals
 local COMMAND = {
 	Arguments = {
 		Required = 0,
@@ -19,7 +20,7 @@ function COMMAND:Execute(ply, targetting, damage)
 	local targets, message = PYRITION:PlayerFindWithFallback(targetting, ply, ply)
 	
 	if targets then
-		local damage = tonumber(damage)
+		damage = tonumber(damage)
 		local slapped = {IsPlayerList = true}
 		
 		if damage then
@@ -30,13 +31,13 @@ function COMMAND:Execute(ply, targetting, damage)
 		
 		for index, target in ipairs(targets) do
 			--you can slap dead people :)))
-			--correction: that's on the POST list, you WILL be able to slap people once I make shared player ragdolls
+			--correction: that's on the POST list, you WILL be able to slap people once I make a server ragdolls implementation
 			if PYRITION:PlayerSlap(target, true, damage or false, true) then table.insert(slapped, target) end
 		end
 		
 		if #slapped == 0 then return false, "pyrition.commands.slap.missed" end
 		
-		return true, "pyrition.commands.slap.success", {targets = slapped}
+		return true, nil, {targets = slapped}
 	end
 	
 	return false, message

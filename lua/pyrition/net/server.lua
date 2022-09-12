@@ -256,8 +256,6 @@ hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply) loading_players[ply]
 
 --net
 net.Receive("pyrition", function(_length, ply)
-	print("got init message", ply)
-	
 	if loading_players[ply] == nil and false then --RELEASE: remove "and false" once done debugging
 		if sv_allowcslua:GetBool() then return end
 		

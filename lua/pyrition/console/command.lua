@@ -149,8 +149,9 @@ function PYRITION:ConsoleCommandGetList(subject) return build_command_list(subje
 function PYRITION:ConsoleCommandGetTree(maximum_depth) return grow_command_tree(commands, maximum_depth or 4, 0) end
 
 function PYRITION:ConsoleCommandSend(command, arguments, ply) --run a command on the other realm
-	--
-	self:NetStreamModelGet("command", ply)(command, arguments)
+	--more?
+	--basically, create model and send!
+	return self:NetStreamModelGet("command", ply)(command, arguments)
 end
 
 --pyrition hooks
