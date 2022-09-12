@@ -91,6 +91,7 @@ local type_name_instruction_functions = {
 
 --globals
 PYRITION.PlayerStorages = PYRITION.PlayerStorages or {}
+PYRITION.PlayerStoragesLoadFinished = PYRITION.PlayerStoragesLoadFinished or {}
 PYRITION.PlayerStoragesLoading = PYRITION.PlayerStoragesLoading or {}
 PYRITION.PlayerStoragePlayers = PYRITION.PlayerStoragePlayers or {}
 
@@ -158,7 +159,6 @@ function PYRITION:PlayerStorageSave(ply, key)
 	
 	if not player_datum then print("failed to save", ply, key) return end
 	
-	print("do the save thing")
 	hook.Call("PyritionPlayerStorageSave" .. key, self, ply, player_datum)
 	
 	local storage_data = self.PlayerStorages[key]
@@ -222,6 +222,9 @@ function PYRITION:PyritionPlayerStorageLoadFinished(ply, player_data)
 	local identity = player_data.Identity
 	local name = identity.name
 	local previous_name = identity.PreviousName
+	
+	self.PlayerStoragesLoading[ply] = nil
+	self.PlayerStoragesLoadFinished[ply] = true
 	
 	if previous_name then
 		local visit = chronology.visit or os.time()
@@ -293,6 +296,8 @@ hook.Add("PlayerDisconnected", "PyritionPlayerStorage", function(ply)
 	if not PYRITION:PlayerStorageLoadDiscard(ply) then PYRITION:PlayerStorageSaveAll(ply) end
 	
 	PYRITION.PlayerStoragePlayers[ply] = nil
+	PYRITION.PlayerStoragesLoadFinished[ply] = nil
+	PYRITION.PlayerStoragesLoading[ply] = nil
 end)
 
 hook.Add("PyritionNetPlayerInitialized", "PyritionPlayerStorage", function(ply) PYRITION:PlayerStorageLoadAll(ply) end)
