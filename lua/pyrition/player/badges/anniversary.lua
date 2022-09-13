@@ -1,7 +1,8 @@
 --locals
 local BADGE = {
 	DontSave = true,
-	Material = "icon16/cake.png"
+	Material = "icon16/cake.png",
+	Removable = false
 }
 
 language.Add("pyrition.badges.anniversary", "Anniversary")

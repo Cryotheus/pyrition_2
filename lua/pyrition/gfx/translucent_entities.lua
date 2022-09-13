@@ -2,7 +2,7 @@
 
 --settings
 --change this to something unique to prevent texture and material collisions
-local namespace = "cryotheum/"
+local namespace = "pyrition/"
 
 --locals
 local draw_target --properly scoped local function

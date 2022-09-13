@@ -1,7 +1,8 @@
 --locals
 local BADGE = {
 	DontSave = true,
-	Material = "icon16/cog.png"
+	Material = "icon16/cog.png",
+	Removable = false
 }
 
 language.Add("pyrition.badges.bot", "Bot")

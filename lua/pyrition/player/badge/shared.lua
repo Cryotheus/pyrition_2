@@ -40,7 +40,15 @@ function badge_meta:BakeTiers()
 	self.Tier = self:CalculateTier()
 	self.TierMaterials = materials
 	
-	for tier, arguments in ipairs(self.Tiers) do self:BakeTier(tier, unpack(arguments)) end
+	for tier, arguments in ipairs(self.Tiers) do
+		local level, material_path
+		
+		--for tiers that match their levels
+		if isstring(arguments) then level, material_path = tier, arguments
+		else level, material_path = arguments[1], arguments[2] end
+		
+		self:BakeTier(tier, level, material_path)
+	end
 	
 	self.Material = materials[1]
 end
@@ -198,6 +206,27 @@ function PYRITION:PlayerBadgeSet(ply, class, level, initial) --Set the level of 
 end
 
 function PYRITION:PlayerBadgesGet(ply) return self.PlayerBadges[ply] end --Returns a table of all badges the player owns
+
+function PYRITION:PlayerBadgesGetGlint(ply)
+	local badges = self:PlayerBadgesGet(ply)
+	
+	if not badges then return end
+	
+	local record_glint
+	local record_weight = -1
+	
+	for class, badge in pairs(badges) do
+		local glint = badge.PlayerGlint
+		local glint_weight = badge.PlayerGlintWeight or 0
+		
+		if glint and glint_weight > record_weight then
+			record_glint = glint
+			record_weight = glint_weight
+		end
+	end
+	
+	return record_glint
+end
 
 --pyrition hooks
 function PYRITION:PyritionPlayerBadgeRegister(class, badge, base_class)

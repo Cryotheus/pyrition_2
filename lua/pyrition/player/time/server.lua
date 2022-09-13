@@ -22,7 +22,13 @@ local function week_lapse(time, player_data)
 end
 
 --pyrition functions
-function PYRITION:PyritionPlayerTimeGetTotal(ply)
+function PYRITION:PlayerTimeGetFirst(ply)
+	local player_data = player_storage_players[ply]
+	
+	if player_data then return player_data.Time.first * 86400 end
+end
+
+function PYRITION:PlayerTimeGetTotal(ply)
 	local player_data = player_storage_players[ply]
 	
 	if player_data then
@@ -32,7 +38,7 @@ function PYRITION:PyritionPlayerTimeGetTotal(ply)
 	end
 end
 
-function PYRITION:PyritionPlayerTimeGetSession(ply)
+function PYRITION:PlayerTimeGetSession(ply)
 	--todo: make sessions persist between maps
 	--also use these sessions for the time storage's record column
 	return ply:TimeConnected()
