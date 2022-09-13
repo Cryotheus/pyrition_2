@@ -1,3 +1,4 @@
+--locals
 local prefix_functions = {
 	["@"] = function(_needle, _supplicant) --player you're looking at
 		--POST: this!
@@ -43,6 +44,7 @@ function PYRITION:PlayerFindBySteamID(needle, _supplicant)
 	local all_players = player.GetAll()
 	local players = false
 	
+	if string.lower(needle) == "bot" then return player.GetBots() end --$BOT
 	if string.StartWith(needle, "STEAM_0:") then for index, ply in ipairs(all_players) do if ply:SteamID() == needle then return {ply} end end --STEAM_0 ID
 	elseif tonumber(needle) then for index, ply in ipairs(all_players) do if ply:SteamID64() == needle then return {ply} end end --steam ID 64
 	else --STEAM_0 ID without STEAM_0:

@@ -2,12 +2,14 @@
 local safety_flags = bit.bor(FCVAR_ARCHIVE, FCVAR_DONTRECORD, FCVAR_PROTECTED)
 
 --localized functions
-local escape
-local query
+local escape = PYRITION.SQLFunctionEscape
+local query = PYRITION.SQLFunctionQuery
 
 --globals
 PYRITION.SQLCoroutines = PYRITION.SQLCoroutines or {}
 PYRITION.SQLSettings = PYRITION.SQLSettings or {}
+PYRITION.SQLFunctionEscape = escape
+PYRITION.SQLFunctionQuery = query
 
 --local functions
 local function associate_convar(name, key, default, flags, type_key, callback)
@@ -32,8 +34,45 @@ local function associate_convar(name, key, default, flags, type_key, callback)
 	cvars.AddChangeCallback(name, function(_convar_name, ...) return callback(convar, ...) end, "PyritionSQL")
 end
 
+local function commit_continue(routine)
+	local success, more = coroutine.resume(routine)
+	
+	if success then return end
+	
+	local queued = PYRITION.SQLCoroutines[routine]
+	local completion_callback = queued.Callback
+	
+	if queued then
+		--remove the bad queued event
+		table.remove(queued)
+		
+		if queued[1] then
+			MsgC(Color(255, 0, 0), "[Pyrition ERROR] Critical error! Received an error inside a transaction thread!\nThis likely means data failed to save or load. Attempting to restart coroutine.\n")
+			ErrorNoHaltWithStack(more)
+			
+			--restart the queue now that we removed the erring query
+			commit_queued(queued, completion_callback)
+			
+			return
+		else
+			MsgC(Color(255, 0, 0), "[Pyrition ERROR] Critical error! Received an error inside a transaction thread!\nThis likely means data failed to save or load. Dropping thread as no more queries remain.\n")
+			ErrorNoHaltWithStack(more)
+		end
+	end
+	
+	--perform the proper cleanup
+	PYRITION.SQLCoroutines[routine] = nil
+	
+	PYRITION:Hibernate(routine)
+	
+	--might as well still call the callback, but with no value instead of a bool
+	if completion_callback then completion_callback() end
+end
+
 local function commit_queued(queued, completion_callback) --creates a coroutine for committing multiple queries in a queue
 	local routine
+	
+	queued.Callback = completion_callback
 	
 	--we seperate the declaration and assignment so the coroutine is self-aware
 	routine = coroutine.create(function()
@@ -46,11 +85,11 @@ local function commit_queued(queued, completion_callback) --creates a coroutine 
 			query(instruction, function(...)
 				if callback then callback(...) end
 				
-				coroutine.resume(routine)
+				commit_continue(routine)
 			end, function(...)
 				if error_callback then error_callback(...) end
 				
-				coroutine.resume(routine)
+				commit_continue(routine)
 			end)
 			
 			--wait until a callback is called
@@ -77,7 +116,7 @@ local function commit_queued(queued, completion_callback) --creates a coroutine 
 		if completion_callback then completion_callback(active) end
 	end)
 	
-	coroutine.resume(routine) --start the coroutine immediately
+	commit_continue(routine) --start the coroutine immediately
 	PYRITION:HibernateWake(routine) --if the server is hibernating, the callback may not run
 	
 	--register the coroutine
@@ -108,8 +147,23 @@ function PYRITION:SQLCommit(completion_callback) --Stop queuing SQLQuery calls, 
 	if queued then
 		self.SQLQueued = nil
 		
-		return commit_queued(queued, completion_callback)
+		--only queue if we have something to queue
+		if queued[1] then return commit_queued(queued, completion_callback) end
+		
+		--otherwise call the developer an idiot and discard the queue
+		ErrorNoHaltWithStack("ID10T-22: Blocking attempt to start an empty SQL transaction.")
+		self:SQLDiscard()
+		
+		return false
 	else self:SQLDiscard() end
+end
+
+function PYRITION:SQLCommitOrDiscard(completion_callback) --Calls SQLCommit only if SQLQuery was called, otherwise calls SQLDiscard
+	local queued = self.SQLQueued
+	
+	if queued and queued[1] then return self:SQLCommit(completion_callback) end
+	
+	return self:SQLDiscard()
 end
 
 function PYRITION:SQLDiscard(routine) --Stop queuing SQLQuery calls and discard all calls queued since the last SQLBegin
@@ -162,6 +216,9 @@ function PYRITION:PyritionSQLInitialize() --Called before PyritionSQLInitialized
 		
 		if enabled then PYRITION:LanguageDisplay("mysql_fail", "pyrition.mysql.fail") end
 	end
+	
+	self.SQLFunctionEscape = escape
+	self.SQLFunctionQuery = query
 	
 	if connect then
 		connect(settings)

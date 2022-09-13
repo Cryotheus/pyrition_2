@@ -40,7 +40,7 @@ function PYRITION:NetStreamThink()
 end
 
 --hooks
-hook.Add("PlayerDisconnected", "NetStream", function(ply)
+hook.Add("PlayerDisconnected", "PyritionNetStream", function(ply)
 	active_streams[ply] = nil
 	stream_send_queue[ply] = nil
 end)

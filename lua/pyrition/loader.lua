@@ -115,7 +115,6 @@ local config = {
 		meta = 23,		--0010 111
 		slap = 26,		--0011 010
 		storage = 58,	--0111 010
-		time = 66,		--1000 010
 		
 		badge = {
 			server = 74,	--1001 010
@@ -123,6 +122,7 @@ local config = {
 		},
 		
 		badges = {
+			bot = 87,					--1010 111
 			killer = 87,				--1010 111
 			pyrition_developer = 87,	--1010 111
 			rosette = 87,				--1010 111
@@ -143,7 +143,13 @@ local config = {
 			server = 58,	--111 010
 			shared = 55,	--110 111
 			stream = 63,	--111 111
-		}
+		},
+		
+		time = {
+			server = 66,	--1000 010
+			shared = 71,	--1000 111
+		},
+		
 	},
 	
 	spawnmenu = {

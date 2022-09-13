@@ -1,5 +1,7 @@
 --locals
 local BADGE = {
+	Level = 0,
+	
 	Tiers = {
 		{100, "icon16/user_orange.png"},
 		{500, "icon16/user_red.png"},
@@ -23,6 +25,9 @@ local function attempt_increment(victim, attacker)
 	if victim == attacker then return end --no suicides
 	
 	if attacker:IsPlayer() then
+		--don't allow players to farm bots
+		--if victim:IsBot() and not attacker:IsBot() then return false end --RELEASE: re-enable this
+		
 		PYRITION:PlayerBadgeIncrement(attacker, "killer")
 		
 		return true
@@ -71,7 +76,6 @@ function BADGE:OnReloaded() self:BakeTiers() end
 --hooks
 hook.Add("PlayerDeath", "PyritionPlayerBadgesKiller", function(victim, inflictor, attacker)
 	if IsValid(victim) and IsValid(attacker) then
-		--if victim:IsPlayer() and victim:IsBot() then return end --don't allow bot kills to count
 		if attempt_increments(victim, attacker) then return end --attempt to award the attacker
 		if attempt_increments(victim, inflictor) then return end --attempt to award the inflictor
 	end

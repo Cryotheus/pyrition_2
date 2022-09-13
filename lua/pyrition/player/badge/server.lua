@@ -10,19 +10,16 @@ function PYRITION:PlayerBadgeLoaded(ply, class, level) return self:PlayerBadgeEx
 
 function PYRITION:PlayerBadgeSave(ply, class)
 	local badge = self:PlayerBadgeGet(ply, class)
-	local database_name = self.SQLDatabaseName
-	local table_name = database_name and "`" .. database_name .. "`.badges" or "pyrition_badges"
 	
-	if badge then
-		local level = badge.Level
-		
-		self:SQLQuery("insert into " .. table_name .. " (steam_id, class, level) values (" .. short_steam_id(ply) .. ", " .. self:SQLEscape(class) .. ", " .. level .. ") on duplicate key update level = " .. level .. ";")
-	else
-		self:SQLQuery("delete from " .. table_name .. " where steam_id = " .. short_steam_id(ply) .. " and class = " .. self:SQLEscape(class), function(result)
-			--no more
-			print("removed badge from db", result)
-		end, function(...) print("failed to remove badge from db", ...) end)
-	end
+	if badge.DontSave then return end
+	
+	local database_name = self.SQLDatabaseName
+	local level = badge.Level
+	local table_name = database_name and "`" .. database_name .. "`.`badges`" or "pyrition_badges"
+	
+	--update the badge, if the levels is less than 1 we remove it instead
+	if level > 0 then self:SQLQuery("insert into " .. table_name .. " (steam_id, class, level) values ('" .. short_steam_id(ply) .. "', " .. self:SQLEscape(class) .. ", " .. level .. ") on duplicate key update level = " .. level .. ";")
+	else self:SQLQuery("delete from " .. table_name .. " where steam_id = '" .. short_steam_id(ply) .. "' and class = " .. self:SQLEscape(class)) end
 end
 
 function PYRITION:PlayerBadgesLoad(ply)
@@ -38,16 +35,20 @@ function PYRITION:PlayerBadgesLoad(ply)
 		end
 		
 		self.PlayerBadgeLoading[ply] = nil
+		
+		hook.Call("PyritionPlayerBadgesLoaded", self, ply)
 	end, function() self.PlayerBadgeLoading[ply] = nil end)
 end
 
 function PYRITION:PlayerBadgesSave(ply, transaction)
-	if not self.PlayerBadges then return end
+	local player_badges = self.PlayerBadges[ply]
+	
+	if not player_badges then return end
 	if not transaction then self:SQLBegin() end
 	
-	for class, level in pairs(self.PlayerBadges[ply]) do self:PlayerBadgeSave(ply, class, true) end
+	for class, level in pairs(player_badges) do self:PlayerBadgeSave(ply, class, true) end
 	
-	if not transaction then self:SQLCommit() end
+	if not transaction then self:SQLCommitOrDiscard() end
 end
 
 --hooks
@@ -65,10 +66,9 @@ hook.Add("PyritionPlayerStorageSaveAll", "PyritionPlayerBadge", function(ply, di
 end)
 
 hook.Add("PyritionPlayerStorageSaveEveryone", "PyritionPlayerBadge", function(everyone)
-	--TODO: implement the everyone list!
-	PYRITION:SQLBegin()
+	local transaction = PYRITION:SQLBegin()
 	
-	for index, ply in ipairs(everyone) do PYRITION:PlayerBadgesSave(ply, true) end
+	for index, ply in ipairs(everyone) do PYRITION:PlayerBadgesSave(ply, transaction) end
 	
-	PYRITION:SQLCommit()
+	PYRITION:SQLCommitOrDiscard()
 end)

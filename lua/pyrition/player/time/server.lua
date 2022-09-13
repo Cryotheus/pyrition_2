@@ -76,8 +76,6 @@ function PYRITION:PyritionPlayerTimePassedWeek(_ply, week_time)
 end
 
 --post
-PYRITION:LanguageRegisterColor("misc", "visit")
-PYRITION:LanguageRegisterTieve("time", "visit")
 PYRITION:PlayerStorageRegister("Time", "time", 
 	{ --the unix (day) of when the player first visited
 		Key = "first",

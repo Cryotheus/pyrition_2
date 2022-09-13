@@ -1,3 +1,4 @@
+--locals
 local BADGE = {Material = "icon16/rosette.png"}
 
 language.Add("pyrition.badges.rosette", "Rosette")

@@ -280,10 +280,10 @@ end
 
 function PYRITION:PyritionPlayerStorageSaveAll(ply)
 	self:SQLBegin()
-		
+	
 	for key, storage_data in pairs(self.PlayerStorages) do self:PlayerStorageSave(ply, key) end
 	
-	self:SQLCommit()
+	self:SQLCommitOrDiscard()
 end
 
 function PYRITION:PyritionPlayerStorageSaveEveryone(everyone)
@@ -294,7 +294,7 @@ function PYRITION:PyritionPlayerStorageSaveEveryone(everyone)
 		for index, ply in ipairs(everyone) do self:PlayerStorageSave(ply, key) end
 	end
 	
-	self:SQLCommit()
+	self:SQLCommitOrDiscard()
 end
 
 --hooks

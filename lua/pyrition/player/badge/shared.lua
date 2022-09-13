@@ -1,25 +1,26 @@
 --locals
-local badge_registry = PYRITION.PlayerBadgeRegistry or {}
-local badges = PYRITION.PlayerBadges or {}
 local _R = debug.getregistry()
 
 --local tables
-local badge_meta = PYRITION.PlayerBadgeMeta or {
-	IsPyritionBadge = true,
-	Level = 0
-}
+local badge_meta = PYRITION.PlayerBadgeMeta or {}
 
 local badge_public = {__index = badge_meta, __name = "PyritionBadge"}
 local badge_tier_meta = {TierFunctionsInstalled = true}
 
 --local functions
-local function kieve_badge(_index, _text, _text_data, _texts, _key_values, _phrases)
-	--TODO: this!
+local function kieve_badge(_index, text, _text_data, _texts, _key_values, phrases)
+	local ply = phrases.player
+	
+	if ply then
+		local badge = PYRITION:PlayerBadgeGet(ply, text)
+		
+		if badge then return badge:Name() end
+	end
 end
 
 --globals
-PYRITION.PlayerBadgeRegistry = badge_registry
-PYRITION.PlayerBadges = badges
+PYRITION.PlayerBadgeRegistry = PYRITION.PlayerBadgeRegistry or {}
+PYRITION.PlayerBadges = PYRITION.PlayerBadges or {}
 PYRITION.PlayerBadgeTieredMeta = badge_tier_meta
 PYRITION.PlayerBadgeMeta = badge_meta
 _R.PyritionBadge = badge_public
@@ -111,7 +112,7 @@ function badge_tier_meta:SetLevel(level, initial)
 end
 
 --pyrition functions
-function PYRITION:PlayerBadgeExists(class) return badge_registry[class] and true or false end
+function PYRITION:PlayerBadgeExists(class) return self.PlayerBadgeRegistry[class] and true or false end
 
 function PYRITION:PlayerBadgeGet(ply, class)
 	local players_badges = self.PlayerBadges[ply]
@@ -119,7 +120,21 @@ function PYRITION:PlayerBadgeGet(ply, class)
 	return players_badges and players_badges[class]
 end
 
-function PYRITION:PlayerBadgeGive(ply, class, level) return self:PlayerBadgeGet(ply, class) or self:PlayerBadgeSet(ply, class, level) end
+function PYRITION:PlayerBadgeGetTable(class) return self.PlayerBadgeRegistry[class] end
+
+function PYRITION:PlayerBadgeGive(ply, class, level, initial)
+	local current_badge = self:PlayerBadgeGet(ply, class)
+	
+	if current_badge then
+		if current_badge.Level > 0 then return current_badge end
+		
+		self:PlayerBadgeRemove(ply, class)
+		
+		return self:PlayerBadgeSet(ply, class, level, initial)
+	end
+	
+	return false
+end
 
 function PYRITION:PlayerBadgeIncrement(ply, class, increment)
 	local badge = self:PlayerBadgeGive(ply, class)
@@ -129,21 +144,32 @@ function PYRITION:PlayerBadgeIncrement(ply, class, increment)
 	return badge
 end
 
-function PYRITION:PlayerBadgeRemove(ply, class)
-	local players_badges = badges[ply]
+function PYRITION:PlayerBadgeRemove(ply, class) --Use PlayerBadgeRevoke instead, unless you know what you are doing
+	local players_badges = self.PlayerBadges[ply]
 	
 	if players_badges then players_badges[class] = nil end
 end
 
-function PYRITION:PlayerBadgeSet(ply, class, level, initial)
-	local badge = setmetatable(
-		table.Merge(
-			{Player = ply},
-			badge_registry[class]
-		),
+function PYRITION:PlayerBadgeRevoke(ply, class)
+	local badge = self:PlayerBadgeGet(ply, class)
+	
+	if badge then
+		table.Empty(badge)
 		
-		badge_public
-	)
+		badge.Class = class
+		badge.Player = ply
+		badge.Level = 0 --we mark this badge for removal
+	end
+end
+
+function PYRITION:PlayerBadgeSet(ply, class, level, initial)
+	if level and level < 1 then return self:PlayerBadgeRevoke(ply, class) end
+	
+	local badge = setmetatable(table.Merge({
+		IsPyritionBadge = true,
+		Level = level or 1,
+		Player = ply
+	}, self.PlayerBadgeRegistry[class]), badge_public)
 	
 	local players_badges = self.PlayerBadges[ply]
 	
@@ -160,7 +186,7 @@ function PYRITION:PlayerBadgesGet(ply) return self.PlayerBadges[ply] end
 
 --pyrition hooks
 function PYRITION:PyritionPlayerBadgeRegister(class, badge, base_class)
-	local base = badge_registry[base_class]
+	local base = self.PlayerBadgeRegistry[base_class]
 	local material = badge.Material or "icon16/error.png"
 	
 	badge.Class = class
@@ -169,7 +195,7 @@ function PYRITION:PyritionPlayerBadgeRegister(class, badge, base_class)
 	--POST: nest Initialize functions like other meta tables?
 	if base then badge = table.Merge(table.Copy(base), badge) end
 	
-	badge_registry[class] = setmetatable(badge, badge_public)
+	self.PlayerBadgeRegistry[class] = badge
 	
 	for ply, player_badges in pairs(self.PlayerBadges) do
 		local this_badge = player_badges[class]
