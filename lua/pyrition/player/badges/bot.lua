@@ -11,13 +11,11 @@ language.Add("pyrition.badges.bot.description", "This player is a bot.")
 function BADGE:Initialize()
 	local ply = self.Player
 	
+	--only bots should have this badge
 	if ply:IsBot() then return end
 	
 	PYRITION:PlayerBadgeRemove(ply, "bot")
 end
-
---hooks
-hook.Add("PyritionPlayerBadgesLoaded", "PyritionPlayerBadgeBot", function(ply) if ply:IsBot() then PYRITION:PlayerBadgeGive(ply, "bot", nil, true) end end)
 
 --post
 PYRITION:PlayerBadgeRegister("bot", BADGE)

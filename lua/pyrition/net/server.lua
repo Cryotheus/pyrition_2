@@ -4,24 +4,16 @@ util.AddNetworkString("pyrition_teach")
 --locals
 local bits = PYRITION._Bits
 local duplex_insert = PYRITION._DuplexInsert
-local hacking_players = {}
-local loading_players = {} --dictionary[ply] = ply:TimeConnected false if message emulated
+local duplex_remove = PYRITION._DuplexRemove
 local load_time = 30
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
 local net_enumeration_players = PYRITION.NetEnumerationPlayers or {} --dictionary[ply] = dictionary[namespace] = report[string]
 local net_enumeration_updates = PYRITION.NetEnumerationUpdates or {}
 local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] = duplex[string]
+local sv_allowcslua = GetConVar("sv_allowcslua")
 local teaching_queue = {}
 
 --local functions
-local function loaded_players()
-	local players = {}
-	
-	for index, ply in ipairs(player.GetAll()) do if not loading_players[ply] then table.insert(players) end end
-	
-	return players
-end
-
 local function read_enumerated_string(namespace, ply, text, enumeration)
 	local enumerations = net_enumerations[namespace]
 	
@@ -104,9 +96,11 @@ local function write_enumerated_string(namespace, text, recipients)
 end
 
 --globals
+PYRITION.NetHackingPlayers = PYRITION.NetHackingPlayers or {}
+PYRITION.NetLoadedPlayers = PYRITION.NetLoadedPlayers or {} --duplex of players
+PYRITION.NetLoadingPlayers = PYRITION.NetLoadingPlayers or {} --dictionary[ply] = ply:TimeConnected false if message emulated
 PYRITION.NetEnumerationPlayers = net_enumeration_players
 PYRITION.NetEnumerationUpdates = net_enumeration_updates
-PYRITION._GetLoadedPlayers = loaded_players
 PYRITION._ReadEnumeratedString = read_enumerated_string
 PYRITION._RecipientIterable = recipient_iterable --internal
 PYRITION._RecipientPairs = recipient_pairs --internal
@@ -129,6 +123,8 @@ function PYRITION:NetReadEnumeratedString(namespace, ply)
 end
 
 function PYRITION:NetThinkServer()
+	local loading_players = self.NetLoadingPlayers
+	
 	for ply, time_spawned in pairs(loading_players) do
 		if time_spawned and ply:TimeConnected() - time_spawned > load_time then
 			self:LanguageDisplay("prodigal", "pyrition.net.load.late", {
@@ -139,17 +135,16 @@ function PYRITION:NetThinkServer()
 			
 			loading_players[ply] = false
 			
+			duplex_insert(self.NetLoadedPlayers, ply)
 			self:NetPlayerInitialized(ply, true)
 		end
 	end
 	
 	if next(net_enumeration_updates) then
-		for index, ply in ipairs(player.GetAll()) do
-			if not loading_players[ply] then --no need to sync people who have yet to load in
-				local model = self:NetStreamModelCreate("enumeration_bits", ply)
-				
-				model.Bits = net_enumeration_updates
-			end
+		for index, ply in ipairs(self.NetLoadedPlayers) do
+			local model = self:NetStreamModelCreate("enumeration_bits", ply)
+			
+			model.Bits = net_enumeration_updates
 		end
 		
 		table.Empty(net_enumeration_updates)
@@ -202,8 +197,6 @@ function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetPlayerInitialized(ply, _emulated) PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply}) end
-
 function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 	local duplex = net_enumerations[namespace]
 	local last_bits = 0
@@ -245,35 +238,54 @@ function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 	if last_bits ~= new_bits and player.GetCount() > 0 then net_enumeration_updates[namespace] = new_bits end
 end
 
+function PYRITION:PyritionNetPlayerInitialized(ply, _emulated) PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply}) end
+
 --hooks
 hook.Add("PlayerDisconnected", "PyritionNet", function(ply)
-	loading_players[ply] = nil
+	PYRITION.NetHackingPlayers[ply] = nil
+	PYRITION.NetLoadingPlayers[ply] = nil
+	
+	duplex_remove(PYRITION.NetLoadedPlayers, ply)
 	
 	for namespace, tracker in pairs(net_enumeration_players) do tracker[ply] = nil end
 end)
 
 hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply)
-	loading_players[ply] = ply:TimeConnected()
+	PYRITION.NetLoadingPlayers[ply] = ply:TimeConnected()
 	
-	if ply:IsBot() then timer.Simple(math.min(1, load_time - 0.1), function() PYRITION:NetPlayerInitialized(ply) end) end
+	if ply:IsBot() then
+		timer.Simple(0, function()
+			duplex_insert(PYRITION.NetLoadedPlayers, ply)
+			PYRITION:NetPlayerInitialized(ply)
+		end)
+	end
 end)
 
 --net
 net.Receive("pyrition", function(_length, ply)
-	if loading_players[ply] == nil and false then --RELEASE: remove "and false" once done debugging
-		if sv_allowcslua:GetBool() then return end
+	local loading_players = PYRITION.NetLoadingPlayers
+	
+	if loading_players[ply] == nil then
+		if sv_allowcslua:GetBool() then
+			PYRITION.NetHackingPlayers[ply] = nil
+			
+			return
+		end
 		
-		if hacking_players[ply] then ply:Kick("#HLX_KILL_ENEMIES_WITHMANHACK_NAME")
+		if PYRITION.NetHackingPlayers[ply] then ply:Kick("#HLX_KILL_ENEMIES_WITHMANHACK_NAME")
 		else
 			PYRITION:LanguageDisplay("hacker", "pyrition.net.load.hacker", {player = ply})
 			
-			hacking_players[ply] = true
+			PYRITION.NetHackingPlayers[ply] = true
 		end
 	else
 		if loading_players[ply] == false then
 			PYRITION:LanguageDisplay("prodigal", "pyrition.net.load.delayed", {player = ply})
 			PYRITION:NetPlayerInitialized(ply, true)
-		else PYRITION:NetPlayerInitialized(ply, false) end
+		else
+			duplex_insert(PYRITION.NetLoadedPlayers, ply)
+			PYRITION:NetPlayerInitialized(ply, false)
+		end
 		
 		loading_players[ply] = nil
 	end

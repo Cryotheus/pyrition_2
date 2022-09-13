@@ -3,8 +3,7 @@ local _R = debug.getregistry()
 
 --local tables
 local badge_meta = PYRITION.PlayerBadgeMeta or {}
-
-local badge_public = {__index = badge_meta, __name = "PyritionBadge"}
+local badge_public = _R.PyritionBadge or {__index = badge_meta, __name = "PyritionBadge"}
 local badge_tier_meta = {TierFunctionsInstalled = true}
 
 --local functions
@@ -26,7 +25,12 @@ PYRITION.PlayerBadgeMeta = badge_meta
 _R.PyritionBadge = badge_public
 
 --badge meta functions
-function badge_public:__tostring() return "PyritionBadge [" .. self.Class .. "]" end
+function badge_public:__tostring()
+	local level = self.Level
+	local ply = self.Player
+	
+	return "PyritionBadge [" .. self.Class .. (level and ":" .. level .. "]" or "]") .. (IsValid(ply) and "[" .. ply:Name() .. "<" .. ply:SteamID() .. ">]")
+end
 
 function badge_meta:BakeTiers()
 	self:InstallTierFunctions()
@@ -41,13 +45,17 @@ function badge_meta:BakeTiers()
 	self.Material = materials[1]
 end
 
+function badge_meta:GetMaterial() return self.Material end
 function badge_meta:IncrementLevel(increment) self:SetLevel(self.Level + increment) end
 function badge_meta:InstallTierFunctions() table.Merge(self, table.Copy(badge_tier_meta)) end
-function badge_meta:GetMaterial(_level) return self.Material end
 function badge_meta:Name() return language.GetPhrase("pyrition.badges." .. self.Class) end
 
 function badge_meta:SetLevel(level, initial)
+	if level and level < 1 then return self:PlayerBadgeRevoke(self.Player, class) end
+	
 	self.Level = level
+	
+	self:Sync()
 	
 	--initial is true if the badge is being loaded off the database
 	if initial then return end
@@ -60,6 +68,8 @@ function badge_meta:SetLevel(level, initial)
 end
 
 function badge_meta:ShouldDisplay() if self.Level > 0 then return true end end
+function badge_meta:Sync(who) if SERVER then PYRITION:PlayerBadgeSync(who or true, self) end end
+function badge_meta:UpdateLevel(level) return self.Level ~= level and self:SetLevel(level) end
 
 --badge tier meta functions
 function badge_tier_meta:BakeTier(tier, level, material_path)
@@ -94,6 +104,8 @@ end
 function badge_tier_meta:Name() return language.GetPhrase("pyrition.badges." .. self.Class .. ".tier_" .. self.Tier) end
 
 function badge_tier_meta:SetLevel(level, initial)
+	if level and level < 1 then return self:PlayerBadgeRevoke(self.Player, class) end
+	
 	local old_level = self.Level
 	local old_tier = self.Tier or 1
 	local tier = level > old_level and self:CalculateTierFrom(self.Tier, level) or self:CalculateTier(level)
@@ -102,67 +114,28 @@ function badge_tier_meta:SetLevel(level, initial)
 	self.Material = self.TierMaterials[tier]
 	self.Tier = tier
 	
-	--initial is true if the badge is being loaded off the database
-	if initial then return end
+	self:Sync()
 	
-	--call override function
-	if self.OnLevelChanged and self:OnLevelChanged(old_level, level) then return end
+	if initial then return level end --initial is true if the badge is being loaded off the database
+	if self.OnLevelChanged and self:OnLevelChanged(old_level, level) then return level end --call override function
 	
 	PYRITION:PlayerBadgeLevelChanged(self.Player, self, old_level, level, old_tier, tier)
+	
+	return level
 end
 
 --pyrition functions
 function PYRITION:PlayerBadgeExists(class) return self.PlayerBadgeRegistry[class] and true or false end
 
-function PYRITION:PlayerBadgeGet(ply, class)
+function PYRITION:PlayerBadgeGet(ply, class) --Returns the player's badge (if they have it)
 	local players_badges = self.PlayerBadges[ply]
 	
 	return players_badges and players_badges[class]
 end
 
-function PYRITION:PlayerBadgeGetTable(class) return self.PlayerBadgeRegistry[class] end
+function PYRITION:PlayerBadgeGetTable(class) return self.PlayerBadgeRegistry[class] end --Returns the method table of the badge
 
-function PYRITION:PlayerBadgeGive(ply, class, level, initial)
-	local current_badge = self:PlayerBadgeGet(ply, class)
-	
-	if current_badge then
-		if current_badge.Level > 0 then return current_badge end
-		
-		self:PlayerBadgeRemove(ply, class)
-		
-		return self:PlayerBadgeSet(ply, class, level, initial)
-	end
-	
-	return false
-end
-
-function PYRITION:PlayerBadgeIncrement(ply, class, increment)
-	local badge = self:PlayerBadgeGive(ply, class)
-	
-	badge:IncrementLevel(increment or 1)
-	
-	return badge
-end
-
-function PYRITION:PlayerBadgeRemove(ply, class) --Use PlayerBadgeRevoke instead, unless you know what you are doing
-	local players_badges = self.PlayerBadges[ply]
-	
-	if players_badges then players_badges[class] = nil end
-end
-
-function PYRITION:PlayerBadgeRevoke(ply, class)
-	local badge = self:PlayerBadgeGet(ply, class)
-	
-	if badge then
-		table.Empty(badge)
-		
-		badge.Class = class
-		badge.Player = ply
-		badge.Level = 0 --we mark this badge for removal
-	end
-end
-
-function PYRITION:PlayerBadgeSet(ply, class, level, initial)
+function PYRITION:PlayerBadgeGive(ply, class, level, initial) --Used to give the player their badge
 	if level and level < 1 then return self:PlayerBadgeRevoke(ply, class) end
 	
 	local badge = setmetatable(table.Merge({
@@ -176,13 +149,49 @@ function PYRITION:PlayerBadgeSet(ply, class, level, initial)
 	if players_badges then players_badges[class] = badge
 	else self.PlayerBadges[ply] = {[class] = badge} end
 	
-	if badge.Initialize then badge:Initialize(level) end
-	if level then badge:SetLevel(level, initial) end
+	if badge.Initialize then badge:Initialize(level) end --call Initialize method
+	
+	if level then badge:SetLevel(level, initial) --update level
+	else badge:Sync() end --if we don't update the level, make sure we sync
 	
 	return badge
 end
 
-function PYRITION:PlayerBadgesGet(ply) return self.PlayerBadges[ply] end
+function PYRITION:PlayerBadgeIncrement(ply, class, increment) --Increase the level of the player's badge, giving them the badge if they don't have it
+	local badge = self:PlayerBadgeSet(ply, class)
+	
+	badge:IncrementLevel(increment or 1)
+	
+	return badge
+end
+
+function PYRITION:PlayerBadgeRemove(ply, class) --Use PlayerBadgeRevoke instead, unless you know what you're doing
+	local players_badges = self.PlayerBadges[ply]
+	
+	if players_badges then
+		players_badges[class] = nil
+		
+		--clean up the badges table
+		if table.IsEmpty(players_badges) then self.PlayerBadges[ply] = nil end
+	end
+end
+
+function PYRITION:PlayerBadgeSet(ply, class, level, initial) --Set the level of a player's badge, or give it to them if they don't have it
+	local current_badge = self:PlayerBadgeGet(ply, class)
+	local removing = level and level <= 0
+	
+	if current_badge then
+		if current_badge.Level > 0 and not removing then return current_badge end
+		
+		--we need to recreate badge if it was removed
+		self:PlayerBadgeRemove(ply, class)
+	end
+	
+	if removing then return current_badge
+	else return self:PlayerBadgeGive(ply, class, level, initial) end
+end
+
+function PYRITION:PlayerBadgesGet(ply) return self.PlayerBadges[ply] end --Returns a table of all badges the player owns
 
 --pyrition hooks
 function PYRITION:PyritionPlayerBadgeRegister(class, badge, base_class)
@@ -208,27 +217,10 @@ function PYRITION:PyritionPlayerBadgeRegister(class, badge, base_class)
 		end
 	end
 	
+	--server side task
+	if SERVER then self:NetAddEnumeratedString("badge", class) end
+	
 	return badge
-end
-
-function PYRITION:PyritionPlayerBadgeLevelChanged(ply, badge, old_level, level, old_tier, tier)
-	if old_tier then
-		if tier < 1 or tier <= old_tier then return end
-		
-		self:LanguageQueue(ply, "[:player:you=Your:possessive=en] [:badge] badge has tiered up to tier [:tier].", {
-			badge = badge.Class,
-			tier = tostring(tier),
-			player = ply,
-		})
-	else
-		if level < 1 or level <= old_level then return end
-		
-		self:LanguageQueue(ply, "[:player:you=Your:possessive=en] [:badge] badge has levelled up to level [:level].", {
-			badge = badge.Class,
-			level = tostring(level),
-			player = ply,
-		})
-	end
 end
 
 --post

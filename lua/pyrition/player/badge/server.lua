@@ -6,7 +6,7 @@ local short_steam_id = PYRITION._SignificantDigitSteamID
 PYRITION.PlayerBadgeLoading = PYRITION.PlayerBadgeLoading or {}
 
 --pyrition functions
-function PYRITION:PlayerBadgeLoaded(ply, class, level) return self:PlayerBadgeExists(class) and self:PlayerBadgeSet(ply, class, level, true) end
+function PYRITION:PlayerBadgeLoaded(ply, class, level) return self:PlayerBadgeExists(class) and self:PlayerBadgeGive(ply, class, level, true) end
 
 function PYRITION:PlayerBadgeSave(ply, class)
 	local badge = self:PlayerBadgeGet(ply, class)
@@ -40,6 +40,30 @@ function PYRITION:PlayerBadgesLoad(ply)
 	end, function() self.PlayerBadgeLoading[ply] = nil end)
 end
 
+function PYRITION:PlayerBadgeRevoke(ply, class)
+	local badge = self:PlayerBadgeGet(ply, class)
+	
+	if badge then
+		table.Empty(badge)
+		
+		badge.Class = class
+		badge.Player = ply
+		badge.Level = 0 --we mark this badge for removal
+		
+		badge:Sync()
+	end
+end
+
+function PYRITION:PlayerBadgeSync(ply, badge)
+	if ply == true then --true means send to everyone
+		for index, ply in ipairs(self.NetLoadedPlayers) do self:PlayerBadgeSync(ply, badge) end
+		
+		return true
+	end
+	
+	return self:NetStreamModelGet("badge", ply)(badge)
+end
+
 function PYRITION:PlayerBadgesSave(ply, transaction)
 	local player_badges = self.PlayerBadges[ply]
 	
@@ -49,6 +73,27 @@ function PYRITION:PlayerBadgesSave(ply, transaction)
 	for class, level in pairs(player_badges) do self:PlayerBadgeSave(ply, class, true) end
 	
 	if not transaction then self:SQLCommitOrDiscard() end
+end
+
+--pyrition hooks
+function PYRITION:PyritionPlayerBadgeLevelChanged(ply, badge, old_level, level, old_tier, tier)
+	if old_tier then
+		if tier < 1 or tier <= old_tier then return end
+		
+		self:LanguageQueue(ply, "[:player:you=Your:possessive=en] [:badge] badge has tiered up to tier [:tier].", {
+			badge = badge.Class,
+			tier = tostring(tier),
+			player = ply,
+		})
+	else
+		if level < 1 or level <= old_level then return end
+		
+		self:LanguageQueue(ply, "[:player:you=Your:possessive=en] [:badge] badge has levelled up to level [:level].", {
+			badge = badge.Class,
+			level = tostring(level),
+			player = ply,
+		})
+	end
 end
 
 --hooks

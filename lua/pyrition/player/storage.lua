@@ -144,7 +144,7 @@ function PYRITION:PlayerStorageGetSavablePlayers()
 end
 
 function PYRITION:PlayerStorageSave(ply, key)
-	if read_only or ply:IsBot() then return end
+	if read_only then return end
 	
 	local database_name = PYRITION.SQLDatabaseName
 	local player_data = self.PlayerStoragePlayers[ply]

@@ -109,6 +109,7 @@ local config = {
 	},
 	
 	player = {
+		credation = 31,	--0011 111
 		find = 31,		--0011 111
 		kick = 26,		--0011 010
 		landing = 26,	--0011 010
@@ -117,15 +118,19 @@ local config = {
 		storage = 58,	--0111 010
 		
 		badge = {
+			client = 77,	--1001 101
 			server = 74,	--1001 010
 			shared = 71,	--1000 111
+			stream = 71,	--1000 111
 		},
 		
 		badges = {
+			anniversary = 87,			--1010 111
 			bot = 87,					--1010 111
 			killer = 87,				--1010 111
 			pyrition_developer = 87,	--1010 111
 			rosette = 87,				--1010 111
+			victim = 87,				--1010 111
 		},
 		
 		identity = {

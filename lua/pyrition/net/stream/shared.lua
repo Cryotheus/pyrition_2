@@ -1075,7 +1075,11 @@ net.Receive("pyrition_stream", function(_length, ply)
 		if stream then table_insert(streams_completed, stream) end
 	until not net_ReadBool()
 	
-	for index, stream in ipairs(streams_completed) do stream:Read(ply) end
+	for index, stream in ipairs(streams_completed) do
+		if stream.OnComplete then stream:OnComplete(ply) end
+		
+		stream:Read(ply)
+	end
 end)
 
 --post

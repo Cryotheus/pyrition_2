@@ -32,8 +32,6 @@ function MODEL:Read(ply)
 				else arguments[index] = self:MaybeRead("ReadString") end
 			end
 			
-			PrintTable(arguments)
-			
 			PYRITION:ConsoleExecute(ply, command, arguments)
 		end
 	until self:ReadBoolNot()

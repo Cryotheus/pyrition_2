@@ -5,7 +5,7 @@ local BADGE = {
 	Tiers = {
 		{100, "icon16/user_orange.png"},
 		{500, "icon16/user_red.png"},
-		{1000, "icon16/user_gray"},
+		{1000, "icon16/user_gray.png"},
 		{5000, "icon16/gun.png"},
 		{10000, "icon16/world_delete.png"}
 	}
@@ -29,6 +29,7 @@ local function attempt_increment(victim, attacker)
 		--if victim:IsBot() and not attacker:IsBot() then return false end --RELEASE: re-enable this
 		
 		PYRITION:PlayerBadgeIncrement(attacker, "killer")
+		PYRITION:PlayerBadgeIncrement(victim, "victim")
 		
 		return true
 	end
@@ -52,34 +53,35 @@ end
 
 --badge functions
 function BADGE:Initialize() self:BakeTiers() end
-
-function BADGE:OnLevelChanged(_old_level, level)
-	local tier = self.Tier
-	local next_level = self.TierLevels[tier + 1]
-	
-	if next_level then
-		PYRITION:LanguageQueue(self.Player, "[:level] / [:next_level] kills", {
-			next_level = tostring(next_level),
-			level = tostring(level)
-		}, "killer_badge")
-		
-		return
-	end
-	
-	PYRITION:LanguageQueue(self.Player, "[:level] total kills", {level = tostring(level)}, "killer_badge")
-	
-	return true
-end
-
 function BADGE:OnReloaded() self:BakeTiers() end
 
---hooks
-hook.Add("PlayerDeath", "PyritionPlayerBadgesKiller", function(victim, inflictor, attacker)
-	if IsValid(victim) and IsValid(attacker) then
-		if attempt_increments(victim, attacker) then return end --attempt to award the attacker
-		if attempt_increments(victim, inflictor) then return end --attempt to award the inflictor
+if SERVER then --we should only have these two server side
+	function BADGE:OnLevelChanged(_old_level, level)
+		local tier = self.Tier
+		local next_level = self.TierLevels[tier + 1]
+		
+		if next_level then
+			PYRITION:LanguageQueue(self.Player, "[:level] / [:next_level] kills", {
+				next_level = tostring(next_level),
+				level = tostring(level)
+			}, "killer_badge")
+			
+			return
+		end
+		
+		PYRITION:LanguageQueue(self.Player, "[:level] total kills", {level = tostring(level)}, "killer_badge")
+		
+		return true
 	end
-end)
+	
+	--hooks
+	hook.Add("PlayerDeath", "PyritionPlayerBadgesKiller", function(victim, inflictor, attacker)
+		if IsValid(victim) and IsValid(attacker) then
+			if attempt_increments(victim, attacker) then return end --attempt to award the attacker
+			if attempt_increments(victim, inflictor) then return end --attempt to award the inflictor
+		end
+	end)
+end
 
 --post
 PYRITION:LanguageRegisterOption("killer_badge", function(formatted, _key, _phrases)
