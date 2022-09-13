@@ -11,7 +11,7 @@ local function kieve_badge(_index, text, _text_data, _texts, _key_values, phrase
 	local ply = phrases.player
 	
 	if ply then
-		local badge = PYRITION:PlayerBadgeGet(ply, text)
+		local badge = PYRITION:PlayerBadgeGetInternal(ply, text) or PYRITION:PlayerBadgeGetTable(text)
 		
 		if badge then return badge:Name() end
 	end
@@ -127,7 +127,13 @@ end
 --pyrition functions
 function PYRITION:PlayerBadgeExists(class) return self.PlayerBadgeRegistry[class] and true or false end
 
-function PYRITION:PlayerBadgeGet(ply, class) --Returns the player's badge (if they have it)
+function PYRITION:PlayerBadgeGet(ply, class) --Returns the player's badge (if they have it, returns false for revoked badges)
+	local badge = self:PlayerBadgeGetInternal(ply, class)
+	
+	if badge then return badge.Level > 0 and badge or false end
+end
+
+function PYRITION:PlayerBadgeGetInternal(ply, class) --Returns the player's badge (including revoked badges)
 	local players_badges = self.PlayerBadges[ply]
 	
 	return players_badges and players_badges[class]
@@ -177,7 +183,7 @@ function PYRITION:PlayerBadgeRemove(ply, class) --Use PlayerBadgeRevoke instead,
 end
 
 function PYRITION:PlayerBadgeSet(ply, class, level, initial) --Set the level of a player's badge, or give it to them if they don't have it
-	local current_badge = self:PlayerBadgeGet(ply, class)
+	local current_badge = self:PlayerBadgeGetInternal(ply, class)
 	local removing = level and level <= 0
 	
 	if current_badge then
