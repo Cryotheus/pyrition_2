@@ -1,9 +1,3 @@
---questions? contact: Cryotheum#4096 on discord
-
---settings
---change this to something unique to prevent texture and material collisions
-local namespace = "pyrition/"
-
 --locals
 local draw_target --properly scoped local function
 local redraw_entities = {} --set the player as the key in this table like redraw_entities[player_entity] = true
@@ -11,12 +5,13 @@ local redraw_entities_opaque = {} --table of the redraw_entities's opaque entiti
 local redraw_entities_translucent = {} --table of the redraw_entities's translucent entities
 local rendering_target = false --true if we are rendering from inside of the draw_entities functions
 local render_target --texture created by the create_screen_target function
+local set_entity_redraw
 local update_translucency --properly scoped local function
 local translucent_render = false --if the current render is in the translucent phase
 
 --materials
 --same as pp/copy but shouldn't error and it doesn't get touched by screenspace effects
-local material_copy = CreateMaterial(namespace .. "render_materials/copy", "UnlitGeneric", {
+local material_copy = CreateMaterial("pyrition/render_materials/copy", "UnlitGeneric", {
 	["$basetexture"] = "color", --shuts up errors
 	["$fbtexture"] = "_rt_FullFrameFB",
 	["$ignorez"] = 1,
@@ -25,7 +20,7 @@ local material_copy = CreateMaterial(namespace .. "render_materials/copy", "Unli
 })
 
 --the material for our render target texture
-local render_material = CreateMaterial(namespace .. "render_materials/translucent_players", "UnlitGeneric", {
+local render_material = CreateMaterial("pyrition/render_materials/translucent_entities", "UnlitGeneric", {
 	["$basetexture"] = "color", --shuts up errors
 	["$translucent"] = 1,
 	["$vertexalpha"] = 1,
@@ -40,7 +35,7 @@ local function create_screen_target()
 	--256: no mips flag (we don't need to downscale)
 	--32768: render target flag
 	render_target = GetRenderTargetEx(
-		namespace .. "render_targets/translucent_players_" .. width .. "_" .. height,
+		"pyrition/render_targets/translucent_entities_" .. width .. "_" .. height,
 		width, height,
 		RT_SIZE_FULL_FRAME_BUFFER, --kinda important
 		MATERIAL_RT_DEPTH_SHARED, --very important
@@ -192,12 +187,12 @@ local function render_override(self, flags)
 	else update_translucency(self) end
 end
 
-local function set_entity_redraw(entity, enabled)
+function set_entity_redraw(entity, enabled)
 	enabled = enabled or nil
 	redraw_entities[entity] = enabled
 	
 	if enabled then update_translucency(entity) --until it gets updated
-	else
+	else --remove from tables
 		redraw_entities_opaque[entity] = nil
 		redraw_entities_translucent[entity] = nil
 	end
@@ -212,25 +207,25 @@ end
 PYRITION._GFXRedrawInTranslucentLayer = set_entity_redraw
 
 --hooks
-hook.Add("InitPostEntity", "CryotheumsWorkspace", create_screen_target) --recreate render targets to prevent lots of issues
-hook.Add("OnScreenSizeChanged", "CryotheumsWorkspace", create_screen_target) --recreate render targets to prevent AA issues
+hook.Add("InitPostEntity", "PyritionGFXTranslucentEntities", create_screen_target) --recreate render targets to prevent lots of issues
+hook.Add("OnScreenSizeChanged", "PyritionGFXTranslucentEntities", create_screen_target) --recreate render targets to prevent AA issues
 
-hook.Add("PostDrawOpaqueRenderables", "CryotheumsWorkspace", function(_depth, sky)
+hook.Add("PostDrawOpaqueRenderables", "PyritionGFXTranslucentEntities", function(_depth, sky)
 	if sky then return end
 	
 	draw_entities(redraw_entities_opaque)
 end)
 
-hook.Add("PostDrawTranslucentRenderables", "CryotheumsWorkspace", function(_depth, sky)
+hook.Add("PostDrawTranslucentRenderables", "PyritionGFXTranslucentEntities", function(_depth, sky)
 	if sky then return end
 	
 	draw_entities(redraw_entities_translucent)
 end)
 
-hook.Add("PreDrawOpaqueRenderables", "CryotheumsWorkspace", function() translucent_render = false end)
-hook.Add("PreDrawTranslucentRenderables", "CryotheumsWorkspace", function() translucent_render = true end)
+hook.Add("PreDrawOpaqueRenderables", "PyritionGFXTranslucentEntities", function() translucent_render = false end)
+hook.Add("PreDrawTranslucentRenderables", "PyritionGFXTranslucentEntities", function() translucent_render = true end)
 
-hook.Add("PrePlayerDraw", "CryotheumsWorkspace", function(ply)
+hook.Add("PrePlayerDraw", "PyritionGFXTranslucentEntities", function(ply)
 	if rendering_target then return false end
 	
 	--suppress drawing and update translucency record
@@ -243,6 +238,3 @@ end)
 
 --post
 create_screen_target()
-
---example of enabling it on all players
---for k, v in ipairs(player.GetAll()) do set_entity_redraw(v, true) end
