@@ -23,19 +23,7 @@ end
 
 function MODEL:Read() while self:ReadBool() do PYRITION:PlayerBadgeSet(self:ReadPlayer(), self:ReadEnumeratedString("badge"), self:ReadULong()) end end
 
-function MODEL:Write(target_player, badge)
-	if self.IsInitialSync then --if this is the initial sync, write every single players' badges
-		self.IsInitialSync = false
-		
-		for index, ply in ipairs(PYRITION.NetLoadedPlayers) do
-			local badges = PYRITION:PlayerBadgesGet(ply)
-			
-			if badges then for class, badge in pairs(badges) do self:Write(target_player, badge) end end
-		end
-		
-		return
-	end
-	
+function MODEL:Write(_ply, badge)
 	--POST: look into rewriting unsent data
 	--[[do
 		local badges = self.Badges
@@ -52,6 +40,14 @@ function MODEL:Write(target_player, badge)
 	self:WritePlayer(badge.Player) --the owner
 	self:WriteEnumeratedString("badge", badge.Class) --the badge
 	self:WriteULong(badge.Level) --the level
+end
+
+function MODEL:WriteInitialSync(target_player)
+	for index, ply in ipairs(PYRITION.NetLoadedPlayers) do
+		local badges = PYRITION:PlayerBadgesGet(ply)
+		
+		if badges then for class, badge in pairs(badges) do self:Write(target_player, badge) end end
+	end
 end
 
 --post

@@ -63,8 +63,10 @@ function PYRITION:NetStreamModelThink() --only called if model_queue has values
 			
 			dequeue_model(source_model, unpack(model_arguments))
 			
+			--essentially ctrl+c this first model
 			local source_data = source_model.Data
 			
+			--then ctrl+v it on all the other models
 			for index, ply in ipairs(players) do
 				local model = self:NetStreamModelCreate(class, target)
 				model.Data = source_data

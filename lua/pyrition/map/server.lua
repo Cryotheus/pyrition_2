@@ -61,18 +61,9 @@ function PYRITION:MapChange(map_name, delay)
 	self:MapSync(map_name)
 end
 
-function PYRITION:MapDisable(map_name) --coming soon!
-	
-end
-
-function PYRITION:MapDisableGame(game_root) --coming soon!
-	
-end
-
-function PYRITION:MapEnable(map_name) --coming soon!
-	
-end
-
+function PYRITION:MapDisable(map_name) end --coming soon!
+function PYRITION:MapDisableGame(game_root) end --coming soon!
+function PYRITION:MapEnable(map_name) end --coming soon!
 function PYRITION:MapSync(map_name) duplex_inherit_entry(self:NetStreamModelQueue("map", true, {}), maps, map_name) end
 
 function PYRITION:MapThink()

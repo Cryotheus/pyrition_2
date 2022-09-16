@@ -149,8 +149,10 @@ hook.Add("PyritionNetPlayerInitialized", "PyritionNetStreamModel", function(ply,
 			local model = PYRITION:NetStreamModelCreate(class, ply)
 			model.IsInitialSync = true
 			
-			model()
+			if model.WriteInitialSync then model:WriteInitialSync(ply)
+			else model() end
 			
+			--make sure the model is being sent
 			if not model.Sending then model:Send() end
 		end
 	end

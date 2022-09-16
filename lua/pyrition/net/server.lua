@@ -142,6 +142,7 @@ function PYRITION:NetThinkServer()
 	
 	if next(net_enumeration_updates) then
 		for index, ply in ipairs(self.NetLoadedPlayers) do
+			--TODO: try using PYRITION:NetStreamModelQueue
 			local model = self:NetStreamModelCreate("enumeration_bits", ply)
 			
 			model.Bits = net_enumeration_updates
@@ -229,10 +230,8 @@ function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 	end
 	
 	--update bits
-	local new_bits = bits(#duplex)
-	
-	if new_bits < 1 then net_enumeration_bits[namespace] = 1
-	else net_enumeration_bits[namespace] = new_bits end
+	local new_bits = math.max(bits(#duplex), 1)
+	net_enumeration_bits[namespace] = new_bits
 	
 	--update the enumeration bits for clients if it changed
 	if last_bits ~= new_bits and player.GetCount() > 0 then net_enumeration_updates[namespace] = new_bits end

@@ -3,13 +3,13 @@ local short_steam_id = PYRITION._SignificantDigitSteamID
 
 --globals
 PYRITION.Credation = {
-	["BOT"] = {Badges = {"bot"}}, --bots for just being amazing, thank you for making testers almost irrelevant
+	BOT = {Badges = {"bot"}}, --bots for just being amazing, thank you for making testers almost irrelevant
 	["172956761"] = {Badges = {"pyrition_developer"}}, --me (Cryotheum) the developer of Pyrition
-	["155182203"] = {Badges = {"pyrition_contributor"}}, --Dagaz for concepts and motivation, and design input
-	["054851650"] = {Badges = {{"pyrition_contributor", 2}}}, --Sprice for concepts and motivation, and code input
-	["091921853"] = {Badges = {"pyrition_contributor"}}, --PCrafterZ previous server dev, gave input on code
+	["166057978"] = {Badges = {{"pyrition_contributor", 9}}}, --Yogpod for giving me sources to resolve many issues
 	["1100559239"] = {Badges = {{"pyrition_contributor", 7}}}, --Gin for lots of localizations
-	["099494345"] = {Badges = {{"pyrition_contributor", 3}}}, --Double Shrekt for reporting a localization typo
+	["054851650"] = {Badges = {{"pyrition_contributor", 2}}}, --Sprice for concepts and motivation, and code input
+	["155182203"] = {Badges = {"pyrition_contributor"}}, --Dagaz for concepts and motivation, and design input
+	["091921853"] = {Badges = {"pyrition_contributor"}}, --PCrafterZ previous server dev, gave input on code
 }
 
 --Color(243, 105, 23) --orange! orange

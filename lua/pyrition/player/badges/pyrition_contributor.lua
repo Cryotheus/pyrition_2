@@ -6,17 +6,17 @@ local BADGE = {
 	Removable = false,
 	
 	Tiers = {
-		"icon16/asterisk_yellow.png", --motivation
-		"icon16/asterisk_orange.png", --gave input
-		"icon16/award_star_bronze_1.png", --minor correction (typo)
-		"icon16/award_star_bronze_3.png", --tested
-		"icon16/award_star_bronze_2.png", --tested a lot
-		"icon16/award_star_silver_3.png", --localizations
-		"icon16/award_star_silver_2.png", --lots of localizations
-		"icon16/award_star_silver_1.png", --assisted in creating code
-		"icon16/award_star_gold_3.png", --made a pr, gave a code sample, etc.
-		"icon16/award_star_gold_2.png", --made a valuable pr
-		"icon16/award_star_gold_1.png" --made several valuable prs
+		"icon16/asterisk_yellow.png", --1 motivation
+		"icon16/asterisk_orange.png", --2 gave input
+		"icon16/award_star_bronze_1.png", --3 minor correction (typo)
+		"icon16/award_star_bronze_3.png", --4 tested
+		"icon16/award_star_bronze_2.png", --5 tested a lot
+		"icon16/award_star_silver_3.png", --6 localizations
+		"icon16/award_star_silver_2.png", --7 lots of localizations
+		"icon16/award_star_silver_1.png", --8 assisted in creating code
+		"icon16/award_star_gold_3.png", --9 made a pr, gave a code sample, etc.
+		"icon16/award_star_gold_2.png", --10 made a valuable pr
+		"icon16/award_star_gold_1.png" --11 made several valuable prs
 	}
 }
 

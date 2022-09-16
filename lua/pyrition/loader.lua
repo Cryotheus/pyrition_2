@@ -113,9 +113,7 @@ local config = {
 		find = 31,		--0011 111
 		kick = 26,		--0011 010
 		landing = 26,	--0011 010
-		meta = 23,		--0010 111
 		slap = 26,		--0011 010
-		storage = 58,	--0111 010
 		
 		badge = {
 			client = 77,	--1001 101
@@ -143,6 +141,19 @@ local config = {
 			server = 26,	--11 010
 		},
 		
+		meta = {
+			client = 21,	--0010 101
+			server = 18,	--0010 111
+			shared = 23,	--0010 111
+		},
+		
+		storage = {
+			client = 61,	--111 101
+			server = 58,	--111 010
+			shared = 63,	--111 111
+			stream = 63,	--111 111
+		},
+		
 		teleport = {
 			client = 61,	--111 101
 			server = 58,	--111 010
@@ -153,8 +164,7 @@ local config = {
 		time = {
 			server = 66,	--1000 010
 			shared = 71,	--1000 111
-		},
-		
+		}
 	},
 	
 	spawnmenu = {

@@ -55,7 +55,8 @@ function PYRITION:PlayerBadgeRevoke(ply, class)
 end
 
 function PYRITION:PlayerBadgeSync(ply, badge)
-	if ply == true then --true means send to everyone
+	--POST: use the more optimal NetStreamModelQueue
+	if ply == true then
 		for index, ply in ipairs(self.NetLoadedPlayers) do self:PlayerBadgeSync(ply, badge) end
 		
 		return true

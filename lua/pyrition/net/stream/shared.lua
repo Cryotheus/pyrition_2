@@ -12,6 +12,7 @@ local write_enumerated_string = PYRITION._WriteEnumeratedString
 --local globals
 local active_streams = PYRITION.NetStreamsActive or {} --table[ply][class][uid] = stream, but on CLIENT its table[class][uid]
 local max_players_bits = PYRITION.NetMaxPlayerBits
+local max_clients_bits = PYRITION.NetMaxClientBits
 local net_enumeration_bits = PYRITION.NetEnumerationBits
 local stream_classes = PYRITION.NetStreamClasses or {} --table[class] = bool: should we recieve it?
 local stream_counters = PYRITION.NetStreamCounters or {} --table[class] = uid
@@ -415,6 +416,7 @@ function stream_meta:ReadByte()
 end
 
 function stream_meta:ReadCharacter() return string_char(self:ReadByte()) end
+function stream_meta:ReadClient() return Entity(self:ReadUInt(max_clients_bits) + 1) end
 
 function stream_meta:ReadEnumeratedString(namespace, ply)
 	return read_enumerated_string(
@@ -570,7 +572,7 @@ function stream_meta:ReadUShort()
 		second = wordless(bit_lshift(bravo, read_bit)) + bit_rshift(charlie, remaining_bits)
 	end
 	
-	return bit_lshift(first, 8) + second
+	return second and bit_lshift(first, 8) + second or 0
 end
 
 function stream_meta:ReadVector() return Vector(self:ReadFloat(), self:ReadFloat(), self:ReadFloat()) end
@@ -619,6 +621,7 @@ function stream_meta:WriteByte(byte)
 end
 
 function stream_meta:WriteCharacter(character) self:WriteByte(string_byte(character)) end
+function stream_meta:WriteClient(ply) self:WriteUInt(ply:EntIndex() - 1, max_clients_bits) end
 
 function stream_meta:WriteEndBits() --write 0 for the remaining bits, completing the current byte
 	if self.BitsWritten == 0 then return end

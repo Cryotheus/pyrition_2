@@ -1,4 +1,6 @@
 --locals
+local bits = PYRITION._Bits
+local duplex_insert = PYRITION._DuplexInsert
 local read_only = false --RELEASE: convar this
 local short_steam_id = PYRITION._SignificantDigitSteamID
 
@@ -93,7 +95,6 @@ local type_name_instruction_functions = {
 PYRITION.PlayerStorages = PYRITION.PlayerStorages or {}
 PYRITION.PlayerStoragesLoadFinished = PYRITION.PlayerStoragesLoadFinished or {}
 PYRITION.PlayerStoragesLoading = PYRITION.PlayerStoragesLoading or {}
-PYRITION.PlayerStoragePlayers = PYRITION.PlayerStoragePlayers or {}
 
 --pyrition functions
 function PYRITION:PlayerStorageLoad(ply, key, tracker)
@@ -162,6 +163,46 @@ function PYRITION:PlayerStorageSave(ply, key)
 	for index, field_key in ipairs(storage_data.Values) do table.insert(values_placed, type_name_instruction_functions[type_names[index]](player_datum[field_key])) end
 	
 	self:SQLQuery("replace into `" .. table_name .. "` (" .. storage_data.ValuesString .. ") values(" .. table.concat(values_placed, ", ") .. ");")
+end
+
+function PYRITION:PlayerStorageSync(who, ply, key, ...)
+	--data is the third argument of NetStreamModelQueue if we don't have this model queued
+	--if this model is queued, then it's the third argument of the first NetStreamModelQueue called this Think
+	local data = self:NetStreamModelQueue("storage", who, {})
+	local player_storages = data[ply]
+	local fields
+	
+	if not player_storages then --setup missing player_storages and fields table
+		fields = {}
+		player_storages = {[key] = fields}
+		data[ply] = player_storages
+	elseif not fields then --or just setup missing fields table
+		fields = {}
+		player_storages[key] = fields
+	end
+	
+	for index, field in ipairs{...} do duplex_insert(fields, field) end
+end
+
+function PYRITION:PlayerStorageSyncRemove(who, ply) self:NetStreamModelQueue("storage", who, {})[ply] = false end
+
+function PYRITION:PlayerStorageWrite(stream, ply, key, fields)
+	local stream_methods = self.PlayerStorageStreamMethods[key]
+	
+	assert(stream_methods, "ID10T-23/S: Missing stream methods for syncing storage " .. tostring(key))
+	
+	if fields == true then fields = stream_methods._Fields end
+	
+	local field_count = #fields
+	local player_storage = self.PlayerStoragePlayers[ply][key]
+	
+	stream:WriteUInt(field_count - 1, stream_methods._CountBits)
+	
+	--write the value of each field now
+	for index, field in ipairs(fields) do
+		stream:WriteEnumeratedString("storage_field", field)
+		stream[stream_methods[field]](stream, player_storage[field])
+	end
 end
 
 --pyrition hooks
@@ -268,6 +309,30 @@ function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
 	}
 end
 
+function PYRITION:PyritionPlayerStorageRegisterSyncs(key, stream_methods)
+	local count = 0
+	local fields = {}
+	
+	--we only need to enumerate storages that are synced
+	self:NetAddEnumeratedString("storage", key)
+	
+	--prefix the methods with write
+	--and create the enumerated string for the field
+	for field, method in pairs(stream_methods) do
+		count = count + 1
+		
+		self:NetAddEnumeratedString("storage_field", field)
+		table.insert(fields, field)
+		
+		if isstring(method) then stream_methods[field] = "Write" .. method end
+	end
+	
+	self.PlayerStorageStreamMethods[key] = stream_methods
+	stream_methods._Count = count
+	stream_methods._CountBits = bits(count)
+	stream_methods._Fields = fields
+end
+
 function PYRITION:PyritionPlayerStorageRegistration(database_name)
 	for key, meta_data in pairs(self.PlayerStorages) do
 		local fields = table.Copy(meta_data.Fields)
@@ -300,7 +365,10 @@ end
 --hooks
 hook.Add("PlayerDisconnected", "PyritionPlayerStorage", function(ply)
 	--save the storage if we were not loading their storage
-	if not PYRITION:PlayerStorageLoadDiscard(ply) then PYRITION:PlayerStorageSaveAll(ply, true) end
+	if not PYRITION:PlayerStorageLoadDiscard(ply) then
+		PYRITION:PlayerStorageSaveAll(ply)
+		PYRITION:PlayerStorageSyncRemove(true, ply)
+	end
 	
 	PYRITION.PlayerStoragePlayers[ply] = nil
 	PYRITION.PlayerStoragesLoadFinished[ply] = nil
@@ -312,3 +380,4 @@ hook.Add("PyritionSQLCreateTables", "PyritionPlayerStorage", function(database_n
 
 --post
 PYRITION:GlobalHookCreate("PlayerStorageRegister")
+PYRITION:GlobalHookCreate("PlayerStorageRegisterSyncs")

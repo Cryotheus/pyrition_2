@@ -1,6 +1,3 @@
---locals
-local player_storage_players = PYRITION.PlayerStoragePlayers or {}
-
 --local functions
 local function week_lapse(time, player_data)
 	local this_week = math.floor(time / 604800) --weeks
@@ -23,13 +20,13 @@ end
 
 --pyrition functions
 function PYRITION:PlayerTimeGetFirst(ply)
-	local player_data = player_storage_players[ply]
+	local player_data = self.PlayerStoragePlayers[ply]
 	
 	if player_data then return player_data.Time.first * 86400 end
 end
 
 function PYRITION:PlayerTimeGetTotal(ply)
-	local player_data = player_storage_players[ply]
+	local player_data = self.PlayerStoragePlayers[ply]
 	
 	if player_data then
 		local time_data = player_data.Time
@@ -45,26 +42,37 @@ function PYRITION:PlayerTimeGetSession(ply)
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerStorageLoadedTime(_ply, player_data, _success)
+function PYRITION:PyritionPlayerStorageLoadedTime(ply, player_data)
 	local time = os.time()
 	
+	--setup custom fields
+	if not player_data.LastSessionTime then
+		player_data.LastSessionTime = 0
+		player_data.SessionStart = time
+		
+		--send these two fields to the clients
+		self:PlayerStorageSync(true, ply, "Time", "LastSessionTime", "SessionStart")
+	end
+	
+	--setup table for first time players
 	if not player_data.first then
-		player_data.first = math.floor(os.time() / 86400) --days
+		player_data.first = math.floor(time / 86400) --days
 		player_data.record = 0
 		player_data.total = 0
 	end
 	
 	week_lapse(time, player_data)
+	self:PlayerStorageSync(true, ply, "Time", "first", "record", "streak", "total", "week")
 end
 
 function PYRITION:PyritionPlayerStorageSaveTime(ply, player_data)
-	local last_connected_time = player_data.LastSessionTime or 0
+	local last_session_time = player_data.LastSessionTime
+	local session_time = ply:TimeConnected()
 	local time = os.time()
-	local time_connected = ply:TimeConnected()
-	local time_difference = time_connected - last_connected_time
+	local time_difference = session_time - last_session_time
 	
-	player_data.LastSessionTime = time_connected
-	player_data.record = math.max(time_connected, player_data.record or 0)
+	player_data.LastSessionTime = session_time
+	player_data.record = math.max(session_time, player_data.record or 0)
 	player_data.total = player_data.total + time_difference
 	player_data.visit = time
 	player_data.week = player_data.week + time_difference
@@ -76,9 +84,7 @@ function PYRITION:PyritionPlayerTimePassedWeek(_ply, week_time)
 	--how much time the player spent in the previous week
 	--used to determine if a player is a regular
 	--we return true if the streak should continue
-	if week_time / 3600 > 2.5 then return true end
-	
-	return false
+	return week_time / 3600 > 2.5
 end
 
 --post

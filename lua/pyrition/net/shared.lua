@@ -14,8 +14,10 @@ local function maybe_write(net_function, value, ...)
 	net_function(value, ...)
 end
 
+local function read_client() return Entity(net.ReadUInt(max_clients_bits) + 1) end
 local function read_player() return Entity(net.ReadUInt(max_players_bits)) end
-local function write_player(ply) net.WriteUInt(ply:EntIndex(), max_players_bits) end
+local function write_client(ply) net.WriteUInt(ply:EntIndex() - 1, max_clients_bits) end --just writes players
+local function write_player(ply) net.WriteUInt(ply:EntIndex(), max_players_bits) end --also writes the world entity to represent the server/console
 
 --post function setup
 max_clients_bits = bits(max_clients_bits)
@@ -29,7 +31,9 @@ PYRITION.NetMaxPlayerBits = max_players_bits
 PYRITION._Bits = bits --internal
 PYRITION._MaybeRead = maybe_read
 PYRITION._MaybeWrite = maybe_write
+PYRITION._ReadClient = read_client
 PYRITION._ReadPlayer = read_player
+PYRITION._WriteClient = write_client
 PYRITION._WritePlayer = write_player
 
 --pyrition functions
