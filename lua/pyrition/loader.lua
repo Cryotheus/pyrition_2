@@ -11,8 +11,10 @@ local config = {
 	hibernate = 26,		--0011 010
 	ip = 18,			--0010 010
 	loader = 4,			--0000 100
+	math = 23,			--0010 111
 	string = 31,		--0011 111
 	time = 23,			--0010 111
+	vector = 31,		--0011 111
 	
 	console = {
 		chat = {
