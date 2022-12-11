@@ -1,3 +1,7 @@
+--convars
+local pyrition_hud_declutter_crosshair = CreateClientConVar("pyrition_hud_declutter_crosshair", "1", true, false, language.GetPhrase("pyrition.convars.pyrition_hud_declutter_crosshair"))
+local pyrition_hud_declutter_crosshair_delay = CreateClientConVar("pyrition_hud_declutter_crosshair_delay", "2.5", true, false, language.GetPhrase("pyrition.convars.pyrition_hud_declutter_crosshair_delay"), 0.1, 60)
+
 --locals
 local last_angle = angle_zero
 local last_changed = 0
@@ -5,26 +9,24 @@ local last_position = vector_origin
 local local_player = LocalPlayer()
 local hud_blocks = {CHudCrosshair = false}
 local update_blocks
-
---convars
-local pyrition_hud_declutter_crosshair = CreateClientConVar("pyrition_hud_declutter_crosshair", "1", true, false, language.GetPhrase("pyrition.convars.pyrition_hud_declutter_crosshair"))
+local update_delay = pyrition_hud_declutter_crosshair_delay:GetFloat()
 
 --local functions
 local function disable_declutter()
 	hook.Remove("HUDShouldDraw", "PyritionHUDDeclutterCrosshair")
-	hook.Remove("PostRender", "PyritionHUDDeclutterCrosshair")
+	hook.Remove("PostDrawTranslucentRenderables", "PyritionHUDDeclutterCrosshair")
 end
 
 local function do_declutter(name) if hud_blocks[name] then return false end end
 
 local function enable_declutter()
 	hook.Add("HUDShouldDraw", "PyritionHUDDeclutterCrosshair", do_declutter)
-	hook.Add("PostRender", "PyritionHUDDeclutterCrosshair", update_blocks)
+	hook.Add("PostDrawTranslucentRenderables", "PyritionHUDDeclutterCrosshair", update_blocks)
 end
 
 function update_blocks()
-	local angle = EyeAngles()
-	local position = EyePos()
+	local angle = local_player:EyeAngles()
+	local position = local_player:EyePos()
 	local real_time = RealTime()
 	local update = false
 	
@@ -38,7 +40,7 @@ function update_blocks()
 		update = true
 	end
 	
-	if update then last_changed = real_time + 5 end
+	if update then last_changed = real_time + update_delay end
 	
 	hud_blocks.CHudCrosshair = real_time > last_changed
 end
@@ -49,6 +51,8 @@ cvars.AddChangeCallback("pyrition_hud_declutter_crosshair", function()
 	
 	disable_declutter()
 end, "PyritionHUDDeclutterCrosshair")
+
+cvars.AddChangeCallback("pyrition_hud_declutter_crosshair_delay", function() update_delay = pyrition_hud_declutter_crosshair_delay:GetFloat() end, "PyritionHUDDeclutterCrosshair")
 
 --hooks
 hook.Add("PyritionNetClientInitialized", "PyritionHUDDeclutterCrosshair", function(ply)
