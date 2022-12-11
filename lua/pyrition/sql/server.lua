@@ -2,6 +2,7 @@
 local safety_flags = bit.bor(FCVAR_ARCHIVE, FCVAR_DONTRECORD, FCVAR_PROTECTED)
 
 --localized functions
+local commit_queued
 local escape = PYRITION.SQLFunctionEscape
 local query = PYRITION.SQLFunctionQuery
 
@@ -69,7 +70,7 @@ local function commit_continue(routine)
 	if completion_callback then completion_callback() end
 end
 
-local function commit_queued(queued, completion_callback) --creates a coroutine for committing multiple queries in a queue
+function commit_queued(queued, completion_callback) --creates a coroutine for committing multiple queries in a queue
 	local routine
 	
 	queued.Callback = completion_callback
@@ -116,11 +117,11 @@ local function commit_queued(queued, completion_callback) --creates a coroutine 
 		if completion_callback then completion_callback(active) end
 	end)
 	
-	commit_continue(routine) --start the coroutine immediately
-	PYRITION:HibernateWake(routine) --if the server is hibernating, the callback may not run
-	
 	--register the coroutine
 	PYRITION.SQLCoroutines[routine] = queued
+	
+	commit_continue(routine) --start the coroutine immediately
+	PYRITION:HibernateWake(routine) --if the server is hibernating, the callback may not run
 	
 	return routine
 end

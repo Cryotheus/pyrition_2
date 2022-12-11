@@ -13,7 +13,7 @@ PYRITION.Credation = {
 }
 
 --Color(243, 105, 23) --orange! orange
---Color(76, 254, 83) --"you should kill yourself, NOW" lime scout green
+--Color(76, 254, 83) --lime scout green
 --Color(252, 42, 55) --dishonorable red
 
 --pyrition functions
