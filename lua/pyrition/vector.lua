@@ -202,6 +202,14 @@ end
 function vector_meta:SetLength(magnitude) return self:Mul(magnitude / self:Length()) end --!sets the vector's length
 function vector_meta:SetZeroes(zero) for axis = 1, 3 do if self[axis] == 0 then self[axis] = zero end end end --!sets all components of zero to the sepcified amount
 
+function vector_meta:TriangleNormal(second, third) --given two additional points, returns the normal of the triangle
+	local normal = (second - self):Cross(third - self)
+	
+	normal:Normalize()
+	
+	return normal
+end
+
 function vector_meta:Truncate(digits) --!round componenets towards zero
 	digits = digits or 0
 	
