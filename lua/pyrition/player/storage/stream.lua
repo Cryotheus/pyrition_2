@@ -2,15 +2,16 @@
 local MODEL = {CopyOptimization = true}
 
 --stream model functions
-function MODEL:InitialSync() return true end
+function MODEL:InitialSync() return false end --TODO: fix this stream model before enabling this
 
 function MODEL:Read()
-	print(self, "rec!")
+	--seems we received but don't have anything to read
+	--print(self, "rec!")
 	
 	while self:ReadBool() do
 		local ply = self:ReadClient()
 		
-		print(self, "read", ply)
+		--print(self, "read", ply)
 		
 		if self:ReadBool() then --false if we are deleting the player's storage
 			local player_storage = PYRITION.PlayerStoragePlayers[ply]

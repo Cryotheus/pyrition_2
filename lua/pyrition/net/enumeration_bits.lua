@@ -5,7 +5,6 @@ local MODEL = {
 }
 
 --stream model functions
-function MODEL:Initialize() self:Send() end
 function MODEL:InitialSync() return true end
 
 function MODEL:Read()
@@ -19,7 +18,7 @@ function MODEL:Read()
 		if not net_enumerations[namespace] then net_enumerations[namespace] = {} end
 	end
 	
-	--[[]
+	--[[
 	repeat
 		local namespace = self:ReadString()
 		enumeration_bits[namespace] = self:ReadUInt(5) + 1
@@ -35,7 +34,7 @@ function MODEL:Write()
 		self:WriteUInt(bits - 1, 5)
 	end
 	
-	--[[]
+	--[[
 	local passed = false
 	
 	for namespace, bits in pairs(self.Bits or PYRITION.NetEnumerationBits) do

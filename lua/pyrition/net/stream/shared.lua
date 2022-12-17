@@ -306,10 +306,12 @@ function stream_meta:NetWrite(length)
 	local segment = string_sub(self.Data, bytes_sent + 1)
 	local segment_length = #segment
 	
-	if self.EnumerateClass and false then
+	if self.EnumerateClass and false then --TODO: remove this debug false
 		net_WriteBool(true)
-		PYRITION:NetWriteEnumeratedString("stream", self.Class, self.Player)
+		PYRITION:NetWriteEnumeratedString("stream", self, self.Class, self.Player)
 	else
+		print("writing that stream class", self, self.Class, self.Player)
+		
 		net_WriteBool(false)
 		net_WriteString(self.Class)
 	end
