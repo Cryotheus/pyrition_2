@@ -126,15 +126,16 @@ local function xhtml_parse(body, callback, limit)
 end
 
 --pyrition functions
-function PYRITION:HTMLParseAsync(body, callback)
+function PYRITION:HTMLParseAsync(body, callback, budget)
+	local budget = budget or 0.001
 	local proxy = {IsValid = function(self) return coroutine.status(self.Thread) ~= "dead" end}
 	proxy.Thread = coroutine.create(function() xhtml_parse(body, callback) end)
 	
 	hook.Add("Think", proxy, function()
-		local budget = SysTime() + 0.001
+		local finish = SysTime() + budget
 		local thread = proxy.Thread
 		
-		while SysTime() < budget do
+		while SysTime() < finish do
 			local alive, message = coroutine.resume(thread)
 			
 			if not alive then return error("thread error: " .. message) end
