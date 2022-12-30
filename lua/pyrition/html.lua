@@ -114,6 +114,8 @@ local function xhtml_parse(body, callback, limit)
 			tag_table.Closer = true
 			in_scope = scope[scope_depth - 1] or deserialized
 			scope[scope_depth] = nil
+			
+			if in_scope ~= deserialized then in_scope.Content = in_scope.Content .. tag_content end
 		else
 			table.insert(in_scope, tag_table)
 			
