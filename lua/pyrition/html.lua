@@ -96,7 +96,7 @@ local function xhtml_parse(body, callback, limit)
 	
 	for index, tag in ipairs(tags) do
 		local scope_depth = #scope
-		local tag_content = tag_contents[index]
+		local tag_content = tag_contents[index + 1] or ""
 		local tag_type = get_tag_type(tag)
 		
 		local tag_table = {
