@@ -9,6 +9,7 @@ local config = {
 	duplex = 23,		--0010 111
 	gradient = 23,		--0010 111
 	hibernate = 26,		--0011 010
+	html = 23,			--0010 111
 	ip = 18,			--0010 010
 	loader = 4,			--0000 100
 	math = 23,			--0010 111
@@ -63,10 +64,11 @@ local config = {
 	},
 	
 	global = {
-		client = 13,	--001 101
-		hook = 15,		--001 111
-		server = 10,	--001 010
-		shared = 7		--000 111
+		client = 13,		--001 101
+		hook = 15,			--001 111
+		server = 10,		--001 010
+		shared = 7,			--000 111
+		texture_flags = 7	--000 111
 	},
 	
 	hud_declutter = {
