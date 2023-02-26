@@ -71,7 +71,7 @@ local function duplex_remove(duplex, index)
 		else value, index = index, duplex[index] end
 	else index = #duplex end
 	
-	if value then
+	if index and value then
 		table.remove(duplex, index)
 		
 		duplex[value] = nil

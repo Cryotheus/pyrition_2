@@ -364,8 +364,8 @@ end
 
 --hooks
 hook.Add("PlayerDisconnected", "PyritionPlayerStorage", function(ply)
-	--save the storage if we were not loading their storage
-	if not PYRITION:PlayerStorageLoadDiscard(ply) then
+	--save the storage if we were not loading their storage (and we previously loaded it)
+	if not PYRITION:PlayerStorageLoadDiscard(ply) and PYRITION.PlayerStoragesLoadFinished[ply] then
 		PYRITION:PlayerStorageSaveAll(ply)
 		PYRITION:PlayerStorageSyncRemove(true, ply)
 	end

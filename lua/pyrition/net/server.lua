@@ -241,6 +241,8 @@ function PYRITION:PyritionNetPlayerInitialized(ply, _emulated) PYRITION:Language
 
 --hooks
 hook.Add("PlayerDisconnected", "PyritionNet", function(ply)
+	if ply == nil then return end
+	
 	PYRITION.NetHackingPlayers[ply] = nil
 	PYRITION.NetLoadingPlayers[ply] = nil
 	
@@ -253,7 +255,9 @@ hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply)
 	PYRITION.NetLoadingPlayers[ply] = ply:TimeConnected()
 	
 	if ply:IsBot() then
-		timer.Simple(0, function()
+		timer.Simple(0.5, function()
+			if not ply:IsValid() then return end
+			
 			duplex_insert(PYRITION.NetLoadedPlayers, ply)
 			PYRITION:NetPlayerInitialized(ply)
 		end)

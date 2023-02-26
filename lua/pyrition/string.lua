@@ -1,11 +1,10 @@
 --locals
-local blacklisted_characters = "\a\b\f\t\n\r\x01\x02\x03\x04\x05\x06\x07\x08\x09"
-
 local blacklisted_bytes = {}
+local blacklisted_characters = "\a\b\f\t\n\r\x01\x02\x03\x04\x05\x06\x07\x08\x09"
 local sequence = "[" .. blacklisted_characters .. "]"
 
 --localized functions
-local unpack = unpack
+local unpack = unpack or table.unpack
 local string_find = string.find
 local table_insert = table.insert
 local utf8_char = utf8.char
