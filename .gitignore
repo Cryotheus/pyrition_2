@@ -6,5 +6,6 @@
 *.sublime-project
 *.sublime-workspace
 *.tar.gz
+*.wip.lua
 *.zip
 lua/pyrition/scoreboard*
