@@ -7,7 +7,7 @@ Use the specified style as described below. If it's not perfect, the maintainers
 # Code Style
 Expect these to change as the project grows.
 -	Don't use `some_function "text"` use `some_function("text")` instead (`ipairs{...}` and the like is acceptable)
--	EoLS must be CRLF
+-	EoLS (End of Line Sequence) must be CRLF
 -	If applicable, make your text support localization and provide english localization phrases
 -	Modules should avoid `package.seeall` unless the localizations are excessive or global access is frequently needed
 -	Pure Lua only (no `!`, `!=`, `&&`, `||`, etc. unless there is no operation alternative eg. `%`)
