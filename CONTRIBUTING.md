@@ -66,6 +66,10 @@ The order is as follows:
 | `--debug`                                          | Should be removed in production                                                                                  |
 | `--returns`                                        | For scripts that need to return lots of values or large (using a lot of characters) table                        |
 
+## Spacing
+Don't worry too much about spacing rules. I tend to add more space around larger function and table declarations, and shrink space around one lines. I also try to group code that is similar together.  
+It's generally based off how readable it is to me (Cryotheum) when by vision gets blurry from overdosing on caffeine.
+
 Example of a file (this file would be of the path `lua/cool_addon/rude.lua` or `lua/cool_addon/rude/server.lua`)
 ```lua
 include("includes/entity_proxy.lua")
