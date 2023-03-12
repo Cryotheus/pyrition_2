@@ -8,7 +8,7 @@ local TIME_WEEK = 604800
 local TIME_YEAR = 31556926 --365.2422 days rounded up
 
 --locals
-local duplex_make_fooplex = PYRITION._DuplexMakeFooplex
+local duplex_make_fooplex = duplex.MakeFooplex
 local time_thresholds = PYRITION.TimeThresholds or {}
 
 local time_unit_shorthand = PYRITION.TimeUnitShorthand or {

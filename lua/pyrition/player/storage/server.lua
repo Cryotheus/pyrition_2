@@ -1,6 +1,6 @@
 --locals
 local bits = PYRITION._Bits
-local duplex_insert = PYRITION._DuplexInsert
+local duplex_insert = duplex.Insert
 local read_only = false --RELEASE: convar this
 local short_steam_id = PYRITION._SignificantDigitSteamID
 

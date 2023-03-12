@@ -1,8 +1,8 @@
 util.AddNetworkString("pyrition_map")
 
 --locals
-local duplex_inherit_entry = PYRITION._DuplexInheritEntry
-local duplex_insert = PYRITION._DuplexInsert
+local duplex_inherit_entry = duplex.InheritEntry
+local duplex_insert = duplex.Insert
 local map_vote_percentage = 0.5 --RELEASE: ConVar this!
 local map_vote_threshold = 3 --RELEASE: ConVar this!
 local map_votes = PYRITION.MapVotes

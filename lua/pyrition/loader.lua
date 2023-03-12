@@ -6,7 +6,6 @@
 
 local config = {
 	convention = 23,	--0010 111
-	duplex = 23,		--0010 111
 	gradient = 23,		--0010 111
 	hibernate = 26,		--0011 010
 	html = 23,			--0010 111
@@ -90,6 +89,10 @@ local config = {
 		shared = 63,	--0111 111
 		server = 66,	--1000 010
 		stream = 71,	--1000 111
+	},
+	
+	modules = {
+		duplex = 23,	--0010 111
 	},
 	
 	net = {

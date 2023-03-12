@@ -1,6 +1,5 @@
 --locals
-local duplex_insert = PYRITION._DuplexInsert
-local duplex_set = PYRITION._DuplexSet
+local duplex_insert = duplex.Insert
 local kick_queue --duplex of players
 local kick_queue_reasons = {} --patchy table of reasons
 

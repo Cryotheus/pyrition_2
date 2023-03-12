@@ -3,8 +3,8 @@ util.AddNetworkString("pyrition_teach")
 
 --locals
 local bits = PYRITION._Bits
-local duplex_insert = PYRITION._DuplexInsert
-local duplex_remove = PYRITION._DuplexRemove
+local duplex_insert = duplex.Insert
+local duplex_remove = duplex.Remove
 local load_time = 30
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
 local net_enumeration_players = PYRITION.NetEnumerationPlayers or {} --dictionary[ply] = dictionary[namespace] = report[string]

@@ -1,5 +1,5 @@
 --locals
-local duplex_set = PYRITION._DuplexSet
+local duplex_set = duplex.Set
 local map_status = PYRITION.MapStatus
 local map_votes = PYRITION.MapVotes
 local max_players_bits = PYRITION.NetMaxPlayerBits
