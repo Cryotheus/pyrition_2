@@ -7,7 +7,11 @@ local phrase_exists = PYRITION._LanguagePhraseExists
 
 --local functions
 local function command_callback(ply, arguments, no_fail_response)
-	if ply:IsValid() and SERVER then return end --disable the usage of the cmd console command
+	--disable the usage of the cmd console command
+	if ply:IsValid() and SERVER then
+		if ply:IsListenServerHost() then ply = game.GetWorld()
+		else return end
+	end
 	
 	local arguments_count = #arguments
 	local command, depth = PYRITION:ConsoleCommandGet(arguments, true)
@@ -263,6 +267,11 @@ else
 	
 	--hee hee hee haw |\/\/|
 	create_master_command("ulx", "pyrition.command.help.ulx")
+end
+
+if CLIENT then
+	create_master_command("cl_pyrition")
+	create_master_command("cl_pyrition_nfr", "pyrition.command.help.nfr", true)
 end
 
 PYRITION:LanguageRegisterColor("command", "command")

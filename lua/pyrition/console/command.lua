@@ -175,7 +175,6 @@ function PYRITION:PyritionConsoleCommandDownload(parents, arguments)
 end
 
 function PYRITION:PyritionConsoleCommandExecute(ply, command, arguments)
-	print("PyritionConsoleCommandExecute", ply, command, arguments)
 	local success, message, phrases = command(ply, unpack(arguments))
 	
 	--nil = script error

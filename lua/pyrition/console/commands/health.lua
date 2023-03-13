@@ -28,8 +28,6 @@ COMMAND.SetFunction = entity_meta.SetHealth
 
 --command functions
 function COMMAND:Execute(_ply, targets, amount)
-	print("hi!", _ply, targets)
-	
 	local modified = {IsPlayerList = true}
 	local set_function = self.SetFunction
 	
