@@ -36,11 +36,13 @@ function ARGUMENT:Complete(ply, settings, argument) --Called to get a list of co
 			insert_if_matching(completions, argument, "%")
 		end
 		
-		local steam_id = ply:SteamID()
-		
-		insert_if_matching(completions, argument, "#" .. ply:UserID())
-		insert_if_matching(completions, argument, "$" .. steam_id)
-		insert_if_matching(completions, argument, "$" .. string.sub(steam_id, 9))
+		if not ply:IsWorld() then
+			local steam_id = ply:SteamID()
+			
+			insert_if_matching(completions, argument, "#" .. ply:UserID())
+			insert_if_matching(completions, argument, "$" .. steam_id)
+			insert_if_matching(completions, argument, "$" .. string.sub(steam_id, 9))
+		end
 	end
 	
 	return completions, language.GetPhrase(settings.Single and "pyrition.command.argument.player" or "pyrition.command.argument.players")
