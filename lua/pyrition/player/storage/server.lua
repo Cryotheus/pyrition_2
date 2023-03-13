@@ -102,7 +102,7 @@ function PYRITION:PlayerStorageLoad(ply, key, tracker)
 	local player_data = self.PlayerStoragePlayers[ply]
 	local player_datum = player_data[key]
 	local storage_data = self.PlayerStorages[key]
-	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or "pyrition_" .. storage_data.TableName
+	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or self.SQLSettings.MySQLDatabaseName .. storage_data.TableName
 	
 	self:SQLQuery("select * from `" .. table_name .. "` where steam_id = '" .. player_data._ShortSteamID .. "';", function(result)
 		--give up on disconnected and invalid players
@@ -156,7 +156,7 @@ function PYRITION:PlayerStorageSave(ply, key)
 	hook.Call("PyritionPlayerStorageSave" .. key, self, ply, player_datum)
 	
 	local storage_data = self.PlayerStorages[key]
-	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or "pyrition_" .. storage_data.TableName
+	local table_name = database_name and database_name .. "`.`" .. storage_data.TableName or self.SQLSettings.MySQLDatabaseName .. storage_data.TableName
 	local type_names = storage_data.TypeNames
 	local values_placed = {"'" .. player_data._ShortSteamID .. "'"}
 	
@@ -336,7 +336,7 @@ end
 function PYRITION:PyritionPlayerStorageRegistration(database_name)
 	for key, meta_data in pairs(self.PlayerStorages) do
 		local fields = table.Copy(meta_data.Fields)
-		local table_name = database_name and database_name .. "`.`" .. meta_data.TableName or "pyrition_" .. meta_data.TableName
+		local table_name = database_name and database_name .. "`.`" .. meta_data.TableName or self.SQLSettings.MySQLDatabaseName .. meta_data.TableName
 		
 		table.insert(fields, 1, "`steam_id` varchar(12) not null")
 		self:SQLQuery("create table if not exists `" .. table_name .. "` (" .. table.concat(fields, ", ") .. ", primary key (steam_id));")
