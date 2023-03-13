@@ -254,7 +254,7 @@ function PYRITION:PyritionConsoleComplete(prefix, arguments_string)
 end
 
 --post
-if SERVER and game.SinglePlayer() then
+if SERVER and (game.SinglePlayer() or not game.IsDedicated()) then
 	create_master_command("sv_pyrition")
 	create_master_command("sv_pyrition_nfr", "pyrition.command.help.nfr", true)
 else
