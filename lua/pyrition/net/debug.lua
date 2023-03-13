@@ -6,7 +6,7 @@ local originals = PYRITION.NetDebugOriginals or {}
 PYRITION.NetDebugOriginals = originals
 
 --post
-if true then
+if false then --TODO: disable debug!
 	for key, value in pairs(net) do
 		if isfunction(value) and key ~= "ReadBit" and (string.StartWith(key, "Read") or string.StartWith(key, "Write")) then
 			local original = originals[key] or net[key]
