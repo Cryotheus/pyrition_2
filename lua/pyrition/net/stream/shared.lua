@@ -470,6 +470,17 @@ end
 function stream_meta:ReadString() return self:ReadStringRaw(self:ReadUShort()) end
 
 function stream_meta:ReadStringRaw(length)
+	local bytes_to_read = length
+	local output = ""
+	
+	repeat
+		local segment_length = math_min(bytes_to_read, 8000)
+		bytes_to_read = bytes_to_read - segment_length
+		output = output .. self:ReadStringRawInternal(segment_length)
+	until bytes_to_read <= 0
+end
+
+function stream_meta:ReadStringRawInternal(length)
 	local read_bit = self.PointerBit
 	local read_byte = self.Pointer
 	local read_target = read_byte + length
