@@ -474,7 +474,7 @@ function stream_meta:ReadStringRaw(length)
 	local output = ""
 	
 	repeat
-		local segment_length = math_min(bytes_to_read, 8000)
+		local segment_length = math_min(bytes_to_read, 7998)
 		bytes_to_read = bytes_to_read - segment_length
 		output = output .. self:ReadStringRawInternal(segment_length)
 	until bytes_to_read <= 0
