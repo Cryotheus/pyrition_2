@@ -203,7 +203,7 @@ local function write_float(float)
 		exponential = exponential + 0x7F
 		
 		if exponential <= 0 then
-			fractional = math_ldexp(fractional, exponential - 1 )
+			fractional = math_ldexp(fractional, exponential - 1)
 			exponential = 0
 		elseif exponential >= 0xFF then --became inf
 			exponential = 0xFF
