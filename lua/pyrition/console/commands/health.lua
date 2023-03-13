@@ -1,12 +1,11 @@
 --locals
 local COMMAND = {
 	Arguments = {
-		Required = 1,
+		Required = 2,
 		
 		{
 			Class = "Player",
 			Default = true,
-			Optional = true
 		},
 		
 		{
