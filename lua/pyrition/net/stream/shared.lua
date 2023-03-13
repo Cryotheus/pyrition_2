@@ -388,6 +388,8 @@ function stream_meta:ReadBits(bits) --for reading less than a byte
 		self.Pointer = byte_pointer + 1
 		self.PointerBit = next_bits
 		
+		if not current_byte then return 0 end
+		
 		return bit_lshift(bit_band(current_byte, get_right_mask(remaining_bits)), next_bits) + bit_rshift(bit_band(next_byte or 0, get_left_mask(next_bits)), 8 - next_bits)
 	end
 	
