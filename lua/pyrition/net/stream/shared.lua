@@ -478,6 +478,8 @@ function stream_meta:ReadStringRaw(length)
 		bytes_to_read = bytes_to_read - segment_length
 		output = output .. self:ReadStringRawInternal(segment_length)
 	until bytes_to_read <= 0
+	
+	return output
 end
 
 function stream_meta:ReadStringRawInternal(length)
