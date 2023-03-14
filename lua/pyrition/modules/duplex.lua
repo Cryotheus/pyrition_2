@@ -13,7 +13,7 @@ local table_remove = table.remove
 local table_sort = table.sort
 local type = type
 
---post function setup
+--no need for package.seall, we're not using many globals
 module("duplex")
 
 --module functions
