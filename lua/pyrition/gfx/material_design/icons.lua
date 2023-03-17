@@ -2,10 +2,11 @@
 --thus we only process them once
 if PYRITION.GFXMaterialDesignIcons then return end
 
---you bet we're localizing this
-local utf8_char = utf8.char
+--locals
+local icons = {}
+local utf8_char = utf8.char --you bet we're localizing this
 
-local icons = {
+local icon_codes = {
 	ab_testing = 0xf01c9, abacus = 0xf16e0, abjad_arabic = 0xf1328, abjad_hebrew = 0xf1329,
 	abugida_devanagari = 0xf132a, abugida_thai = 0xf132b, access_point = 0xf0003, access_point_check = 0xf1538,
 	access_point_minus = 0xf1539, access_point_network = 0xf0002, access_point_network_off = 0xf0be1, access_point_off = 0xf1511,
@@ -1499,9 +1500,11 @@ local icons = {
 
 --globals
 PYRITION.GFXMaterialDesignIcons = icons
+PYRITION.GFXMaterialDesignIconCodes = icons
 
 --pyrition functions
 function PYRITION:GFXMaterialDesignIcon(key) return icons[key] end
+function PYRITION:GFXMaterialDesignIconCode(key) return icon_codes[key] end
 
 --post
-for key, code in pairs(icons) do icons[key] = utf8_char(code) end
+for key, code in pairs(icon_codes) do icons[key] = utf8_char(code) end

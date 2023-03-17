@@ -63,7 +63,8 @@ local config = {
 	
 	gfx = {
 		material_design = {
-			icons = 21,	--10 101
+			client = 37,	--100 101
+			icons = 21,		--010 101
 		},
 	},
 	
