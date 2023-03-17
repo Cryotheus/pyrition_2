@@ -1,6 +1,14 @@
 --locals
 local COMMAND = {
-	Arguments = {"Player"},
+	Arguments = {
+		Required = 1,
+		
+		{
+			Class = "Player",
+			Default = true,
+		}
+	},
+	
 	Console = true
 }
 

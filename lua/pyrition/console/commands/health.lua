@@ -1,19 +1,19 @@
 --locals
 local COMMAND = {
 	Arguments = {
-		Required = 2,
-		
-		{
-			Class = "Player",
-			Default = true,
-		},
+		Required = 1,
 		
 		{
 			Class = "Integer",
 			Default = 100,
 			Maximum = 2 ^ 31 - 1,
 			Minimum = 1
-		}
+		},
+		
+		{
+			Class = "Player",
+			Default = true,
+		},
 	},
 	
 	Console = true
