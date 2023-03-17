@@ -15,6 +15,8 @@ local config = {
 	time = 23,			--0010 111
 	vector = 31,		--0011 111
 	
+	gfx = {material_design = 37}, --100 101
+	
 	console = {
 		chat = {
 			calculator = 61,	--111 101
@@ -59,13 +61,6 @@ local config = {
 		command_argument = 63,	--111 111
 		server = 58,			--111 010
 		shared = 55,			--110 111
-	},
-	
-	gfx = {
-		material_design = {
-			client = 37,	--100 101
-			icons = 21,		--010 101
-		},
 	},
 	
 	global = {
