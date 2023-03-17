@@ -61,6 +61,12 @@ local config = {
 		shared = 55,			--110 111
 	},
 	
+	gfx = {
+		material_design = {
+			icons = 21,	--10 101
+		},
+	},
+	
 	global = {
 		client = 13,		--001 101
 		hook = 15,			--001 111
