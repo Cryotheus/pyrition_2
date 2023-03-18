@@ -1,361 +1,591 @@
---Cryotheum#4096
---https://github.com/Cryotheus/preconfigured_loader
---intent: rewrite pyrition
---status: active
---motivation: whats that
-
+--https://github.com/Cryotheus/cryotheums_loader
+--going to use this when ready
 local config = {
-	convention = 23,	--0010 111
-	gradient = 23,		--0010 111
-	hibernate = 26,		--0011 010
-	html = 23,			--0010 111
-	ip = 18,			--0010 010
-	loader = 4,			--0000 100
-	string = 31,		--0011 111
-	time = 23,			--0010 111
-	vector = 31,		--0011 111
-	
-	gfx = {material_design = 37}, --100 101
-	
-	console = {
-		chat = {
-			calculator = 61,	--111 101
-			client = 53,		--110 101
-			server = 50,		--110 010
+	{
+		global = {
+			shared = true,
+			texture_flags = "shared",
 		},
-		
-		command_arguments = {
-			integer = 71,	--1000 111
-			map = 71,		--1000 111
-			number = 71,	--1000 111
-			player = 71,	--1000 111
-			string = 71,	--1000 111
-			time = 71,		--1000 111
+
+		loader = "download",
+	},
+
+	{
+		global = {
+			hook = "shared",
+			client = "client",
+			server = "server",
 		},
-		
-		commands = {
-			bring = 74,			--1001 010
-			cleanup = 74,		--1001 010
-			["goto"] = 74,		--1001 010
-			heal = 74,			--1001 010
-			health = 74,		--1001 010
-			kick = 74,			--1001 010
-			map = 74,			--1001 010
-			message = 74,		--1001 010
-			noclip = 74,		--1001 010
-			respawn = 74,		--1001 010
-			["return"] = 74,	--1001 010
-			send = 74,			--1001 010
-			slap = 74,			--1001 010
-			slay = 74,			--1001 010
-			sql = 74,			--1001 010
-			strip = 74,			--1001 010
+	},
+
+	{
+		convention = "shared",
+		gradient = "shared",
+		html = "shared",
+		ip = "server",
+
+		language = {
+			library = "server",
 		},
-		
-		stream = {
-			command = 63,	--111 111
-			commands = 63,	--111 111
+
+		modules = {
+			duplex = "shared",
+			math = "shared",
 		},
-		
-		command = 63,			--111 111
-		command_argument = 63,	--111 111
-		server = 58,			--111 010
-		shared = 55,			--110 111
+
+		player = {
+			identity = {
+				client = "client",
+			},
+
+			meta = {
+				client = "client",
+				server = "server",
+				shared = "shared",
+			},
+		},
+
+		time = "shared",
 	},
-	
-	global = {
-		client = 13,		--001 101
-		hook = 15,			--001 111
-		server = 10,		--001 010
-		shared = 7,			--000 111
-		texture_flags = 7	--000 111
+
+	{
+		hibernate = "server",
+
+		net = {
+			debug = "shared",
+			shared = "shared",
+		},
+
+		player = {
+			credation = "shared",
+			find = "shared",
+			kick = "server",
+			landing = "server",
+
+			message = {
+				client = "client",
+				server = "server",
+			},
+
+			slap = "server",
+		},
+
+		string = "shared",
+		vector = "shared",
 	},
-	
-	hud_declutter = {
-		blocks = 37,	--100 101
-		crosshair = 37,	--100 101
+
+	{
+		gfx = {
+			material_design = "client",
+		},
+
+		hud_declutter = {
+			blocks = "client",
+			crosshair = "client",
+		},
+
+		net = {
+			client = "client",
+			server = "server",
+		},
 	},
-	
-	language = {
-		client = 53,	--101 101
-		debug = 47,		--101 111
-		library = 18,	--010 010
-		shared = 47,	--101 111
-		server = 42,	--101 010
-		stream = 55,	--110 111
+
+	{
+		language = {
+			debug = "shared",
+			server = "server",
+			shared = "shared",
+		},
+
+		net = {
+			stream = {
+				model = {
+					shared = "shared",
+				},
+
+				shared = "shared",
+			},
+		},
 	},
-	
-	map = {
-		client = 69,	--1000 101
-		shared = 63,	--0111 111
-		server = 66,	--1000 010
-		stream = 71,	--1000 111
+
+	{
+		console = {
+			chat = {
+				--client = "client",
+			},
+
+			shared = "shared",
+		},
+
+		language = {
+			client = "client",
+		},
+
+		net = {
+			stream = {
+				model = {
+					client = "client",
+				},
+			},
+		},
 	},
-	
-	modules = {
-		duplex = 23,	--0010 111
-		math = 23,		--0010 111
-	},
-	
-	net = {
-		client = 37,			--100 101
-		debug = 31,				--011 111
-		enumeration_bits = 55,	--110 111
-		server = 34,			--100 010
-		shared = 31,			--011 111
-		
-		stream = {
-			client = 53,	--110 101
-			shared = 47,	--101 111
-			server = 50,	--110 010
+
+	{
+		console = {
+			chat = {
+				--server = "server",
+			},
+		},
+
+		language = {
+			stream = "shared",
+		},
+
+		net = {
+			enumeration_bits = "shared",
 			
-			model = {
-				client = 53,	--110 101
-				server = 50,	--110 010
-				shared = 47,	--101 111
-			}
-		}
+			stream = {
+				client = "client",
+
+				model = {
+					server = "server",
+				},
+
+				server = "server",
+			},
+		},
+
+		player = {
+			teleport = {
+				shared = "shared",
+			},
+		},
+
+		sql = {
+			client = "client",
+		},
 	},
-	
-	player = {
-		credation = 31,	--0011 111
-		find = 31,		--0011 111
-		kick = 26,		--0011 010
-		landing = 26,	--0011 010
-		slap = 26,		--0011 010
-		
-		badge = {
-			client = 77,	--1001 101
-			server = 74,	--1001 010
-			shared = 71,	--1000 111
-			stream = 71,	--1000 111
+
+	{
+		console = {
+			chat = {
+				--calculator = "client",
+			},
+
+			command = "shared",
+			--command_argument = "shared",
+			--server = "server",
+
+			stream = {
+				--command = "shared",
+				--commands = "shared",
+			},
 		},
-		
-		badges = {
-			anniversary = 87,			--1010 111
-			bot = 87,					--1010 111
-			killer = 87,				--1010 111
-			pyrition_developer = 87,	--1010 111
-			rosette = 87,				--1010 111
-			victim = 87,				--1010 111
+
+		map = {
+			shared = "shared",
 		},
-		
-		identity = {
-			client = 21,	--0010 101
-			server = 66		--1000 010
+
+		player = {
+			storage = {
+				client = "client",
+				server = "server",
+				shared = "shared",
+				stream = "shared",
+			},
+
+			teleport = {
+				client = "client",
+				server = "server",
+				stream = "shared",
+			},
 		},
-		
-		message = {
-			client = 29,	--11 101
-			server = 26,	--11 010
+
+		sql = {
+			server = "server",
 		},
-		
-		meta = {
-			client = 21,	--0010 101
-			server = 18,	--0010 111
-			shared = 23,	--0010 111
-		},
-		
-		storage = {
-			client = 61,	--111 101
-			server = 58,	--111 010
-			shared = 63,	--111 111
-			stream = 63,	--111 111
-		},
-		
-		teleport = {
-			client = 61,	--111 101
-			server = 58,	--111 010
-			shared = 55,	--110 111
-			stream = 63,	--111 111
-		},
-		
-		time = {
-			server = 66,	--1000 010
-			shared = 71,	--1000 111
-		}
 	},
-	
-	spawnmenu = {
-		client = 69,	--1000 101
+
+	{
+		console = {
+			command_arguments = {
+				--integer = "shared",
+				--map = "shared",
+				--number = "shared",
+				--player = "shared",
+				--string = "shared",
+				--time = "shared",
+			},
+		},
+		map = {
+			client = "client",
+			server = "server",
+			stream = "shared",
+		},
+
+		player = {
+			badge = {
+				shared = "shared",
+				stream = "shared",
+			},
+			
+			identity = {
+				server = "server",
+			},
+
+			time = {
+				server = "server",
+				shared = "shared",
+			},
+		},
+		
+		spawnmenu = {
+			client = "client",
+		},
 	},
-	
-	sql = {
-		client = 53,	--110 101
-		server = 58,	--111 010
-	}
+
+	{
+		console = {
+			commands = {
+				--["goto"] = "server",
+				--["return"] = "server",
+				--bring = "server",
+				--cleanup = "server",
+				--heal = "server",
+				--health = "server",
+				--kick = "server",
+				--map = "server",
+				--message = "server",
+				--noclip = "server",
+				--respawn = "server",
+				--send = "server",
+				--slap = "server",
+				--slay = "server",
+				--sql = "server",
+				--strip = "server",
+			},
+		},
+
+		player = {
+			badge = {
+				client = "client",
+				server = "server",
+			},
+		},
+	},
+
+	{
+		player = {
+			badges = {
+				anniversary = "shared",
+				bot = "shared",
+				killer = "shared",
+				pyrition_developer = "shared",
+				rosette = "shared",
+				victim = "shared",
+			},
+		},
+	},
 }
 
---what do we say we are when we load up?
 local branding = "Pyrition"
+local color = Color(255, 128, 64) --color representing your project
+local color_generic = Color(240, 240, 240) --most frequently used color
+local silent = false --disable console messages
 
---path to the folder for merging entries into the config folder
---setting this to true is the same as setting this to "extensions"
-local loader_extension_path = true
-
---maximum amount of folders we may go down in the configuration tree
-local max_depth = 4
-
---set this to a string if you want a command under that name to be created for reloading the scripts 
-local reload_command = false
-
---should the file self-include for command reloads instead of loading with the source's path as a prefix
---instead of true, you can put a string for the include function to use
-local self_include_reload = true
-
---colors
-local color_generic = Color(255, 255, 255)
-local color_significant = Color(255, 128, 64)
-
---end of configurable variables
-
-
-
-----not configuration variables but go ahead and change them if you know what you're doing
+do --do not touch
+	--locals
 	local active_gamemode = engine.ActiveGamemode()
-	local fl_bit_band = bit.band
-	local fl_bit_rshift = bit.rshift
-	local highest_priority = 0
-	local load_order = {}
-	
-	--don't forget to shift over priority bits if you change the amount of load functions in use
-	--make sure you go by powers of 2 as well
-	local load_functions = {
-		[1] = function(path) if CLIENT then include(path) end end,
-		[2] = function(path) if SERVER then include(path) end end,
-		[4] = function(path) if SERVER then AddCSLuaFile(path) end end
-	}
-	
-	local load_function_shift = table.Count(load_functions)
-	
-	--directory stuff
-	loader_extension_path = loader_extension_path == true and "extensions/" or loader_extension_path .. "/"
-	local loader_full_source = debug.getinfo(1, "S").short_src
-	local loader_path = string.sub(loader_full_source, select(2, string.find(loader_full_source, "lua/", 1, true)) + 1)
-	local loader_directory = string.GetPathFromFilename(loader_path)
-	local map = game.GetMap()
+	local block_developer = not GetConVar("developer"):GetBool()
+	local check_words, load_late, load_methods, word_methods
+	local extension_list = {}
+	local global = _G["CryotheumsLoader_" .. branding] or {}
+	local hook_name = "CryotheumsLoader" .. branding
+	local include_list = {}
+	local workshop_ids = {}
 
---local functions
-local function construct_order(config_table, depth, path)
-	--local tabs = " ]" .. string.rep("    ", depth)
-	
-	for key, value in pairs(config_table) do
-		if istable(value) then
-			--MsgC(color_generic, tabs .. key .. ":\n")
-			
-			if depth < max_depth then construct_order(value, depth + 1, path .. key .. "/")
-			else MsgC(color_significant, " ]" .. string.rep("    ", depth) .. "    !!! MAX DEPTH !!!\n") end
-		else
-			--MsgC(color_generic, tabs .. key .. " = 0d" .. value .. "\n")
-			
-			local priority = fl_bit_rshift(value, load_function_shift)
-			local script_path = path .. key
-			
-			if priority > highest_priority then highest_priority = priority end
-			if load_order[priority] then load_order[priority][script_path] = fl_bit_band(value, 7)
-			else load_order[priority] = {[script_path] = fl_bit_band(value, 7)} end
-		end
-	end
-end
+	--local functions
+	local function build_list(include_list, prefix, tree) --recursively explores to build load order
+		for name, object in pairs(tree) do
+			local trimmed_path = name == 1 and string.sub(prefix, 1, -2) or prefix .. name
 
-local function find_extensions(file_list, root_directory, directory)
-	local extended_directory = root_directory .. directory
-	local files = file.Find(extended_directory .. "/*", "LUA")
-	
-	--file.Exists is not reliable for directories on client
-	if files then
-		local added_configurations = false
-		
-		for index, file_name in ipairs(files) do
-			added_configurations = true
-			
-			table.insert(file_list, directory .. "/" .. file_name)
-		end
-		
-		if added_configurations then return MsgC(color_generic, " Appended ", color_significant, directory, color_generic, " extension configurations.\n") end
-	end
-	
-	MsgC(color_generic, " No ", color_significant, directory, color_generic, " extension configurations to append.\n")
-end
+			if istable(object) then build_list(include_list, trimmed_path .. "/", object)
+			elseif object then
+				local words = isstring(object) and string.Split(object, " ") or {name}
+				local script = trimmed_path .. ".lua"
+				local word = table.remove(words, 1)
+				local load_method = load_methods[word]
 
-local function grab_extensions(extension_directory)
-	--grab all files in the extension folder, these are loaded first
-	local files = file.Find(extension_directory .. "*", "LUA")
-	
-	if files then
-		find_extensions(files, extension_directory, "gamemode/" .. active_gamemode)
-		find_extensions(files, extension_directory, "map/" .. map)
-		
-		--load all those files and merge their return if its a table
-		for index, file_name in ipairs(files) do
-			local file_path = extension_directory .. file_name
-			local config_extension, add_for_download = include(file_path)
-			
-			if config_extension then table.Merge(config, config_extension) end
-			if add_for_download and SERVER then MsgC(color_generic, " ]    SHARED	", color_significant, string.GetPathFromFilename(file_name), color_generic, string.GetFileFromFilename(file_name) .. "\n")
-			else MsgC(color_generic, CLIENT and " ]    SHARED	" or " ]    SERVER	", color_significant, string.GetPathFromFilename(file_name), color_generic, string.GetFileFromFilename(file_name) .. "\n") continue end
-			
-			AddCSLuaFile(file_path)
-		end
-	else MsgC(color_significant, "No extension folder.\nThis is not an error, the path used for extensions does not exist most likely meaning all extensions are third party.\n") end
-end
-
-local function load_by_order(prefix_directory)
-	for priority = 0, highest_priority do
-		local script_paths = load_order[priority]
-		
-		if script_paths then
-			if priority == 0 then MsgC(color_generic, " Loading scripts at level 0...\n")
-			else MsgC(color_generic, "\n Loading scripts at level " .. priority .. "...\n") end
-			
-			for script_path, bits in pairs(script_paths) do
-				local script_path_extension = script_path .. ".lua"
-				
-				MsgC(color_generic, " ]    0d" .. bits .. "	" .. script_path_extension .. "\n")
-				
-				for bit_flag, func in pairs(load_functions) do if fl_bit_band(bits, bit_flag) > 0 then func(prefix_directory .. script_path_extension) end end
+				if load_method and (load_method == true or load_method(script)) and check_words(words, script) then table.insert(include_list, script) end
 			end
-		else MsgC(color_significant, "\nSkipping level " .. priority .. " as it contains no scripts.\n") end
-	end
-end
-
-local function load_scripts(command_reload)
-	--load extensions if enabled; this will be converted into extensions/ if true
-	if loader_extension_path then
-		MsgC(color_generic, "\n\\\\\\ ", color_significant, branding, color_generic, " ///\n\n", color_significant, "Grabbing extension configurations...\n")
-		grab_extensions(loader_directory .. loader_extension_path)
-		MsgC(color_significant, "\nGrabbed extension configurations.\n\nConstructing load order...\n")
-	else MsgC(color_generic, "\n\\\\\\ ", color_significant, branding, color_generic, " ///\n\n", color_significant, "Constructing load order...\n") end
-	
-	--create a table of load priorities
-	construct_order(config, 1, "")
-	MsgC(color_significant, "\nConstructed load order.\n\nLoading scripts by load order...\n")
-	
-	--then load them in that order relative to a path
-	if command_reload then
-		MsgC(color_generic, "\n!!! ", color_significant, "PRECONFIGURED LOADER NOTE", color_generic, " !!!\nAs the load was requested using command, the source file for the loader be used as a prefix for the following includes. You may experience issues with scripts loaded using this command that do not persist when the file is loaded by an include. If that happens, try making the file include itself instead of executing the load_scripts function in the reload command. You can do this by setting self_include_reload to true (attempts to automatically grab the file's path) or the full path of the loader.\n||| ", color_significant, "PRECONFIGURED LOADER NOTE", color_generic, " |||\n\n")
-		load_by_order(loader_directory)
-	else load_by_order("") end
-	
-	--we do this manually here so I don't keep adjusting its load order
-	AddCSLuaFile("hooks.lua")
-	include("hooks.lua")
-	
-	MsgC(color_significant, "\nLoaded scripts.\n\n", color_generic, "/// ", color_significant, "All scripts loaded.", color_generic, " \\\\\\\n\n")
-end
-
---concommands
-if isstring(reload_command) then
-	concommand.Add(reload_command, function(ply)
-		if CLIENT or not IsValid(ply) or ply:IsSuperAdmin() then
-			if self_include_reload then
-				--zero timers to prevent breaking of autoload?
-				if isstring(self_include_reload) then timer.Simple(0, function() include(self_include_reload) end)
-				else timer.Simple(0, function() include(loader_path) end) end
-			else load_scripts(true) end
 		end
-	end, nil, "Reload all " .. branding .. " scripts.")
-end
+	end
 
---post function setup
-load_scripts(false)
+	function check_words(words, script)
+		for index, raw_word in ipairs(words) do
+			local word_parts = string.Split(raw_word, ":")
+			local word = table.remove(word_parts, 1)
+			local word_method = word_methods[word] or nil
+
+			if word_method and (word_method == true or word_method(words, script, unpack(word_parts))) then return false end
+		end
+
+		return true
+	end
+
+	local function create_hook(hook_event, script, repeated)
+		global[hook_event] = {{script, repeated}, First = true}
+
+		hook.Add(hook_event, hook_name, function() load_late(hook_event) end)
+	end
+
+	local function grab_extensions(directory)
+		local files, folders = file.Find(directory .. "*", "LUA")
+
+		--file.Exists is not reliable for directories on client
+		if files then
+			for index, folder_name in ipairs(folders) do
+				local directory = directory .. folder_name .. "/"
+				local files = file.Find(directory .. "*.lua", "LUA")
+
+				if files then
+					for index, file_name in ipairs(files) do
+						if _G[string.upper(string.sub(file_name, 1, -5))] then
+							--added the file if a global in all uppers of its name exists
+							--client.lua will be loaded on the client because of the CLIENT variable
+							--server.lua works just as you expect, and shared.lua works because we make the global
+							table.insert(extension_list, directory .. file_name)
+						end
+					end
+				end
+			end
+
+			for index, file_name in ipairs(files) do table.insert(extension_list, directory .. file_name) end
+		end
+	end
+
+	function load_late(hook_event)
+		local scripts = global[hook_event]
+
+		--lazy load wizardry
+		if scripts.First then
+			local new_scripts = {}
+			global[hook_event] = new_scripts
+
+			for index, script_pair in ipairs(scripts) do
+				local script = script_pair[1]
+
+				include(script)
+
+				if script_pair[2] then table.insert(new_scripts, script) end
+			end
+
+			--stop if we have scripts that load on repeated calls
+			if new_scripts[1] then return end
+
+			hook.Remove(hook_event, hook_name)
+		else for index, script in ipairs(scripts) do include(script) end end
+	end
+
+	local function load_scripts(include_list)
+		--to allow detours to have some hope of working properly, we only just now cache MsgC
+		local MsgC = silent and function() end or MsgC
+
+		if GM then MsgC(color, "\nLoading " .. branding .. " (Gamemode) scripts...\n")
+		else MsgC(color, "\nLoading " .. branding .. " scripts...\n") end
+
+		MsgC(color_generic, "This load is running in the " .. (SERVER and "SERVER" or "CLIENT") .. " realm.\n")
+
+		for index, script in ipairs(include_list) do
+			MsgC(color_generic, "\t" .. index .. ": " .. script .. "\n")
+			include(script)
+		end
+
+		MsgC(color, GM and "Gamemode load concluded.\n\n" or "Load concluded.\n\n")
+	end
+
+	--local tables
+	load_methods = SERVER and {
+		client = AddCSLuaFile,
+		download = AddCSLuaFile,
+		server = true,
+
+		shared = function(script)
+			AddCSLuaFile(script)
+
+			return true
+		end
+	} or {client = true, shared = true}
+
+	word_methods = { --return true to block the script
+		dedicated = not game.IsDedicated(),
+		developer = block_developer,
+		hosted = not game.IsDedicated() and game.SinglePlayer(),
+		if_addon = function(_words, _script, workshop_id) return not workshop_ids[workshop_id] end,
+		if_gamemode = function(_words, _script, name) return active_gamemode ~= name end,
+		if_global = function(_words, _script, global_name) return _G[global_name] == nil end,
+		listen = game.IsDedicated() or game.SinglePlayer(),
+		no_addon = function(_words, _script, workshop_id) return workshop_ids[workshop_id] end,
+		no_gamemode = function(_words, _script, name) return active_gamemode == name end,
+		no_global = function(_words, _script, global_name) return _G[global_name] ~= nil end,
+		simple = game.IsDedicated(),
+		single = not game.SinglePlayer(),
+
+		await = function(_words, script, hook_event)
+			if _CryotheumsLoaderHookHistory[hook_event] then return true end
+
+			local scripts = global[hook_event]
+
+			if scripts then table.insert(scripts, {script, false})
+			else create_hook(hook_event, script, false) end
+
+			return false
+		end,
+
+		gamemode = function(_words, script)
+			if _CryotheumsLoaderHookHistory.Initialize then return true end
+
+			local scripts = global.Initialize
+
+			if scripts then table.insert(scripts, {script, false})
+			else create_hook("Initialize", script, false) end
+
+			return false
+		end,
+
+		hook = function(_words, script, hook_event)
+			local scripts = global[hook_event]
+
+			if _CryotheumsLoaderHookHistory[hook_event] then
+				if scripts then table.insert(scripts, script)
+				else global[hook_event] = {script} end
+			else
+				if scripts then table.insert(scripts, {script, true})
+				else create_hook(hook_event, script, true) end
+			end
+
+			--only ever run by the hook
+			return true
+		end,
+
+		player = function(_words, script)
+			if _CryotheumsLoaderHookHistory.PlayerInitialSpawn then return true end
+
+			local scripts = global.PlayerInitialSpawn
+
+			if scripts then table.insert(scripts, {script, false})
+			else create_hook("PlayerInitialSpawn", script, false) end
+
+			return false
+		end,
+
+		world = function(_words, script)
+			if _CryotheumsLoaderHookHistory.InitPostEntity then return true end
+
+			local scripts = global.InitPostEntity
+
+			if scripts then table.insert(scripts, {script, false})
+			else create_hook("InitPostEntity", script, false) end
+
+			return false
+		end,
+	}
+
+	--globals
+	_CryotheumsLoaderHookHistory = _CryotheumsLoaderHookHistory or {}
+	_G["CryotheumsLoader_" .. branding] = global
+
+	--post
+	if load_extensions then
+		local loader = debug.getinfo(1, "S").short_src
+		--local loader_substring
+		local _start, finish
+
+		if GM then
+			_start, finish = string.find(loader, "/.-/gamemodes/")
+			--loader_substring = string.sub(loader, finish + 1)
+			--loader_substring =
+		else
+			_start, finish = string.find(loader, "/?lua/", 1, true)
+			--loader_substring = string.sub(loader, start + 4, finish)
+		end
+
+		local loader_path = string.sub(loader, finish + 1)
+		local loader_extensions_directory = string.GetPathFromFilename(loader_path) .. "extensions/"
+		local map = game.GetMap()
+		SHARED = true --for shared.lua extension files
+
+		grab_extensions(loader_extensions_directory)
+		grab_extensions(loader_extensions_directory .. "gamemode/" .. active_gamemode .. "/")
+		grab_extensions(loader_extensions_directory .. "map/" .. map .. "/")
+		table.sort(extension_list)
+	end
+
+	local function contains_path_list(file_structure, path_list)
+		local indexed = file_structure
+		
+		for index, object in ipairs(path_list) do
+			indexed = indexed[object]
+			
+			if not indexed then return false end
+		end
+
+		return not indexed or indexed[1]
+	end
+
+	local function find_path(path)
+		local path_list = string.Split(path, "/")
+
+		for index, file_structure in ipairs(config) do if contains_path_list(file_structure, path_list) then return index end end
+
+		return false
+	end
+
+	--give access to the config to extensions
+	CryotheumsLoaderActiveConfig = config
+
+	--provide useful functions
+	CryotheumsLoaderFunctions = {
+		After = function(path)
+			local index = find_path(path)
+
+			if index then
+				local next_structure = config[index + 1]
+
+				if next_structure then return next_structure, index + 1, true end
+
+				next_structure = {}
+				
+				return next_structure, table.insert(config, next_structure), true
+			else index = #config end
+
+			return config[index], config, false
+		end,
+
+		Before = function(path)
+			local index = find_path(path)
+			local found = false
+
+			if index == 1 then found = true
+			elseif index then return config[index - 1], index - 1 end
+
+			local first_structure = {}
+
+			table.insert(config, 1, first_structure)
+
+			return first_structure, 1, found
+		end
+	}
+
+	--load the extensions
+	for index, value in ipairs(extension_list) do include(value) end
+
+	CryotheumsLoaderActiveConfig = nil
+	CryotheumsLoaderFunctions = nil
+
+	for hook_event, hook_functions in pairs(hook.GetTable()) do if hook_functions[hook_name] then hook.Remove(hook_event, hook_name) end end --remove outdated hooks
+	for index, addon in ipairs(engine.GetAddons()) do workshop_ids[addon.wsid] = true end --build the workshop id list
+	for priority, tree in ipairs(config) do build_list(include_list, "", tree) end --build the load order
+
+	load_scripts(include_list, false)
+end

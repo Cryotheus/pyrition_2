@@ -1,38 +1,33 @@
---locals
-local COMMAND = {
-	Arguments = {
-		Required = 1,
-		
-		{
-			Class = "Player",
-			Default = true,
-		}
-	},
-	
-	Console = true
-}
+PYRITION:ConsoleCommandRegister("heal", {
+	Arguments = {"Player Default"},
+	Console = true,
 
---command function
-function COMMAND:Execute(_ply, targets)
-	for index, target in ipairs(targets) do
-		target:Extinguish()
-		
-		if target:Alive() then
-			local armor = target:Armor()
-			local max_health = target:GetMaxHealth()
-			
-			if target:Health() < max_health then target:SetHealth(max_health) end
-			
-			if armor > 0 then
-				local max_armor = target:GetMaxArmor()
-				
-				if armor < max_armor then target:SetArmor(max_armor) end
+	Execute = function(ply, targets)
+		local healed_targets = {}
+
+		for index, target in ipairs(targets) do
+			local healed = false
+
+			if not target:Alive() then --revive
+				healed = true
+
+				target:Spawn()
+			elseif target:Health() < maximum_health then --heal
+				healed = true
+
+				target:SetHealth(target:GetMaxHealth())
 			end
-		else target:Spawn() end
-	end
-	
-	return true, nil, {targets = targets}
-end
 
---registration
-PYRITION:ConsoleCommandRegister("heal", COMMAND)
+			if target:IsOnFire() then --extinguish
+				healed = true
+
+				target:Extinguish()
+			end
+
+			if healed then table.insert(healed_targets, target) end
+		end
+
+		if healed[1] then return true, {targets = healed_targets}
+		else return false, nil, PYRITION_COMMAND_MISSED end
+	end
+})
