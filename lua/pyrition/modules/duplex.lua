@@ -40,14 +40,14 @@ end
 function Insert(duplex, value, set_value)
 	if isnumber(value) then return Set(duplex, value, set_value) end
 	
-	if duplex[value] == nil then
-		local index = table_insert(duplex, value)
+	local index = duplex[value]
+
+	if index == nil then
+		index = table_insert(duplex, value)
 		duplex[value] = index
-		
-		return index
 	end
 	
-	return false
+	return index
 end
 
 function IsFooplex(duplex) --check duplex for "holes"
