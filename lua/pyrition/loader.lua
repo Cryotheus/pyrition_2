@@ -13,8 +13,13 @@ local config = {
 	{
 		global = {
 			hook = "shared",
-			client = "client",
-			server = "server",
+			client = true,
+			server = true,
+		},
+
+		modules = {
+			duplex = "shared",
+			math = "shared",
 		},
 	},
 
@@ -28,20 +33,15 @@ local config = {
 			library = "server",
 		},
 
-		modules = {
-			duplex = "shared",
-			math = "shared",
-		},
-
 		player = {
 			identity = {
-				client = "client",
+				client = true,
 			},
 
 			meta = {
-				client = "client",
-				server = "server",
-				shared = "shared",
+				client = true,
+				server = true,
+				shared = true,
 			},
 		},
 
@@ -53,7 +53,7 @@ local config = {
 
 		net = {
 			debug = "shared",
-			shared = "shared",
+			shared = true,
 		},
 
 		player = {
@@ -63,8 +63,8 @@ local config = {
 			landing = "server",
 
 			message = {
-				client = "client",
-				server = "server",
+				client = true,
+				server = true,
 			},
 
 			slap = "server",
@@ -85,25 +85,25 @@ local config = {
 		},
 
 		net = {
-			client = "client",
-			server = "server",
+			client = true,
+			server = true,
 		},
 	},
 
 	{
 		language = {
 			debug = "shared",
-			server = "server",
-			shared = "shared",
+			server = true,
+			shared = true,
 		},
 
 		net = {
 			stream = {
 				model = {
-					shared = "shared",
+					shared = true,
 				},
 
-				shared = "shared",
+				shared = true,
 			},
 		},
 	},
@@ -111,20 +111,20 @@ local config = {
 	{
 		console = {
 			chat = {
-				--client = "client",
+				--client = true,
 			},
 
-			shared = "shared",
+			shared = true,
 		},
 
 		language = {
-			client = "client",
+			client = true,
 		},
 
 		net = {
 			stream = {
 				model = {
-					client = "client",
+					client = true,
 				},
 			},
 		},
@@ -133,7 +133,7 @@ local config = {
 	{
 		console = {
 			chat = {
-				--server = "server",
+				--server = true,
 			},
 		},
 
@@ -143,26 +143,26 @@ local config = {
 
 		net = {
 			enumeration_bits = "shared",
-			
+
 			stream = {
-				client = "client",
+				client = true,
 
 				model = {
-					server = "server",
+					server = true,
 				},
 
-				server = "server",
+				server = true,
 			},
 		},
 
 		player = {
 			teleport = {
-				shared = "shared",
+				shared = true,
 			},
 		},
 
 		sql = {
-			client = "client",
+			client = true,
 		},
 	},
 
@@ -174,7 +174,7 @@ local config = {
 
 			command = "shared",
 			--command_argument = "shared",
-			--server = "server",
+			--server = true,
 
 			stream = {
 				--command = "shared",
@@ -183,26 +183,26 @@ local config = {
 		},
 
 		map = {
-			shared = "shared",
+			shared = true,
 		},
 
 		player = {
 			storage = {
-				client = "client",
-				server = "server",
-				shared = "shared",
+				client = true,
+				server = true,
+				shared = true,
 				stream = "shared",
 			},
 
 			teleport = {
-				client = "client",
-				server = "server",
+				client = true,
+				server = true,
 				stream = "shared",
 			},
 		},
 
 		sql = {
-			server = "server",
+			server = true,
 		},
 	},
 
@@ -218,29 +218,29 @@ local config = {
 			},
 		},
 		map = {
-			client = "client",
-			server = "server",
+			client = true,
+			server = true,
 			stream = "shared",
 		},
 
 		player = {
 			badge = {
-				shared = "shared",
+				shared = true,
 				stream = "shared",
 			},
-			
+
 			identity = {
-				server = "server",
+				server = true,
 			},
 
 			time = {
-				server = "server",
-				shared = "shared",
+				server = true,
+				shared = true,
 			},
 		},
-		
+
 		spawnmenu = {
-			client = "client",
+			client = true,
 		},
 	},
 
@@ -268,8 +268,8 @@ local config = {
 
 		player = {
 			badge = {
-				client = "client",
-				server = "server",
+				client = true,
+				server = true,
 			},
 		},
 	},
@@ -286,6 +286,8 @@ local config = {
 			},
 		},
 	},
+
+	{global = {hooks = "shared"}} --this should always be the last script included
 }
 
 local branding = "Pyrition"
@@ -523,10 +525,10 @@ do --do not touch
 
 	local function contains_path_list(file_structure, path_list)
 		local indexed = file_structure
-		
+
 		for index, object in ipairs(path_list) do
 			indexed = indexed[object]
-			
+
 			if not indexed then return false end
 		end
 
@@ -546,29 +548,31 @@ do --do not touch
 
 	--provide useful functions
 	CryotheumsLoaderFunctions = {
-		After = function(path)
+		After = function(path, dont_create_table)
 			local index = find_path(path)
 
 			if index then
 				local next_structure = config[index + 1]
 
-				if next_structure then return next_structure, index + 1, true end
+				if next_structure then return next_structure, index + 1, false end
+				if dont_create_table then return nil, index + 1, false end
 
 				next_structure = {}
-				
+
 				return next_structure, table.insert(config, next_structure), true
 			else index = #config end
 
 			return config[index], config, false
 		end,
 
-		Before = function(path)
+		Before = function(path, dont_create_table)
 			local index = find_path(path)
 			local found = false
 
 			if index == 1 then found = true
-			elseif index then return config[index - 1], index - 1 end
-
+			elseif index then return config[index - 1], index - 1, false end
+			if dont_create_table then return nil, index or 1, false end
+			
 			local first_structure = {}
 
 			table.insert(config, 1, first_structure)

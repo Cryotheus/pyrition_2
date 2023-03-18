@@ -27,7 +27,7 @@ PYRITION:ConsoleCommandRegister("heal", {
 			if healed then table.insert(healed_targets, target) end
 		end
 
-		if healed[1] then return true, {targets = healed_targets}
+		if healed_targets[1] then return true, {targets = healed_targets}
 		else return false, nil, PYRITION_COMMAND_MISSED end
 	end
 })

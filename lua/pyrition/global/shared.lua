@@ -7,6 +7,16 @@
 --please note, entries beginning with _ in the PYRITION table are local functions made global
 local developer = GetConVar("developer")
 
+local enumerations = {
+	{
+		Prefix = "COMMAND",
+
+		"ERRED",
+		"MISSED",
+		"SUCCEEDED",
+	}
+}
+
 --false in MENU state
 --was deprecated, but kept it because of stream models
 SHARED = CLIENT or SERVER or false
@@ -27,7 +37,19 @@ if PYRITION then
 	MsgC("\nDone.\n")
 else PYRITION = {} end
 
+--pyrition functions
 function PYRITION._drint(level, ...)
-	--p rint with developer only
-	if developer:GetInt() >= level then print(...) end
+	--pr1nt with developer only
+	--hide from d3bug searches
+	if developer:GetInt() >= level then _G["\x70rint"](...) end
+end
+
+--post
+for _, enumerations in ipairs(enumerations) do
+	local prefix = enumerations.Prefix
+
+	if not prefix then prefix = "PYRITION_"
+	else prefix = "PYRITION_" .. prefix .. "_" end
+
+	for value, name in ipairs(enumerations) do _G[prefix .. name] = value end
 end
