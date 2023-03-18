@@ -173,7 +173,7 @@ local config = {
 			},
 
 			command = "shared",
-			--command_argument = "shared",
+			command_argument = "shared",
 			--server = true,
 
 			stream = {
@@ -209,14 +209,15 @@ local config = {
 	{
 		console = {
 			command_arguments = {
-				--integer = "shared",
+				integer = "shared",
 				--map = "shared",
 				--number = "shared",
-				--player = "shared",
+				player = "shared",
 				--string = "shared",
 				--time = "shared",
 			},
 		},
+
 		map = {
 			client = true,
 			server = true,
@@ -251,8 +252,8 @@ local config = {
 				--["return"] = "server",
 				--bring = "server",
 				--cleanup = "server",
-				--heal = "server",
-				--health = "server",
+				heal = "server",
+				health = "server",
 				--kick = "server",
 				--map = "server",
 				--message = "server",
@@ -293,7 +294,7 @@ local config = {
 local branding = "Pyrition"
 local color = Color(255, 128, 64) --color representing your project
 local color_generic = Color(240, 240, 240) --most frequently used color
-local silent = false --disable console messages
+local silent = CLIENT --disable console messages
 
 do --do not touch
 	--locals

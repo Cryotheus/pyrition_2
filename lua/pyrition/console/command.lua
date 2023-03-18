@@ -38,7 +38,7 @@ function PYRITION:ConsoleCommandSignatureTreeSet(command_table)
 		tree = branch
 	end
 
-	for index, signature in ipairs(command.Signatures) do tree[index] = signature end
+	for index, signature in ipairs(command_table.Signatures) do tree[index] = signature end
 end
 
 --pyrition hooks
@@ -54,7 +54,7 @@ function PYRITION:PyritionConsoleCommandRegister(command_path, command_table)
 
 	local path_length = #command_path
 
-	assert(select(2, string.find(text, "[%S ]+")) == path_length, "Command path words should only be spaced apart by one space.")
+	assert(select(2, string.find(command_path, "[%S ]+")) == path_length, "Command path words should only be spaced apart by one space.")
 	assert(utf8.len(command_path) == path_length, "Command path cannot contain any unicode characters including invalid ones.")
 
 	local arguments = command_table.Arguments
@@ -82,6 +82,7 @@ function PYRITION:PyritionConsoleCommandRegister(command_path, command_table)
 		for text_index, argument_text in ipairs(argument_list) do
 			local argument_object = self:ConsoleCommandArgumentParse(argument_text)
 
+			print("parsed!", text_index, argument_object, argument_text)
 			arguments[text_index] = argument_object
 			signature_builder = signature_builder .. argument_object.Class .. " "
 		end

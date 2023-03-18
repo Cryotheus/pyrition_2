@@ -1,3 +1,29 @@
+--local functions
+local function best_find(text, from, ...)
+	local found
+	local from = from or 1
+	local record_start, record_finish = math.huge, -math.huge
+
+	for index, matcher in ipairs{...} do
+		local start, finish = string.find(text, matcher, from)
+
+		if start == record_start then
+			if finish > record_finish then
+				found = index
+				record_finish = finish
+			end
+		elseif start and start < record_start then
+			found = index
+			record_finish = finish
+			record_start = start
+		end
+	end
+
+	if found then return record_start, record_finish, found end
+
+	return
+end
+
 --globals
 PYRITION.ConsoleCommandArgumentClasses = PYRITION.ConsoleCommandArgumentClasses or {}
 PYRITION.ConsoleCommandArgumentSettings = PYRITION.ConsoleCommandArgumentSettings or {}
@@ -11,21 +37,46 @@ function PYRITION:ConsoleCommandArgumentGetSettingMacro(enumeration)
 end
 
 function PYRITION:ConsoleCommandArgumentParse(text)
-	local words = string.Split(text, " ")
-	local class = table.remove(words, 1)
+	--local words = string.Split(text, " ")
+	--local class = table.remove(words, 1)
 
-	local argument_object = setmetatable({Class = class}, {__index = self.ConsoleCommandArgumentClasses[class]})
+	local argument_object
+	local from = 1
 
-	for index, word in ipairs(words) do
-		local split = string.Explode("%s*=%s*", word, true)
-		local key = table.remove(split, 1)
-		local values
-		local values_string = split[1]
+	print("!!!!\n!!!!\n!!!! internal parse start", text)
 
-		if values_string then values = string.Explode(",%s+", values_string, true) end
+	repeat
+		local start, finish = best_find(text, from, "%w+%s*=%s*[%w%-%.,]+", "%w+%s*")
+		if not start then print("broke", from) break end
+		found = string.TrimRight(string.sub(text, start, finish))
 
-		argument_object[key] = argument_object["ParseSetting" .. key](argument_object, values)
-	end
+		print(from, found)
+
+		local equals = string.find(found, "=")
+
+		if equals then
+			if from == 1 then error("Argument creation started with key-value pair (should be one word class)") end --TODO: make an ID10T error
+
+			local key = string.TrimRight(string.sub(found, 1, equals - 1))
+			local values_string = string.TrimLeft(string.sub(found, equals + 1))
+			local values = string.Explode(",%s*", values_string, true)
+
+			print("values string", values_string)
+			print("values", unpack(values))
+
+			argument_object[key] = argument_object["ParseSetting" .. key](argument_object, values)
+		else
+			if from == 1 then argument_object = setmetatable({Class = found}, {__index = self.ConsoleCommandArgumentClasses[found]}) print("made object", argument_object)
+			else
+				print("the found is <" .. found .. ">", #found)
+				argument_object[found] = argument_object["ParseSetting" .. found](argument_object)
+			end
+		end
+
+		from = finish + 1
+	until found == ""
+
+	print("!!!!\n!!!!\n!!!! internal parse complete", argument_object)
 
 	if argument_object.ParsedSettings then argument_object:ParsedSettings() end
 
@@ -87,6 +138,8 @@ end
 
 --pyrition hooks
 function PYRITION:PyritionConsoleCommandArgumentRegister(class, argument_table)
+	assert(not string.find(class, "[%s=,]"), "Class name cannot contain spaces, commas, or equals signs.") --TODO: make an ID10T error
+
 	for key, enumeration in pairs(argument_table.ParseSettingMacros or {}) do
 		--replace the macro enumeration with the actual function
 		argument_table["ParseSetting" .. key] = self:ConsoleCommandArgumentGetSettingMacro(enumeration)
@@ -94,6 +147,8 @@ function PYRITION:PyritionConsoleCommandArgumentRegister(class, argument_table)
 
 	argument_table.ParseSettingMacros = nil --only used during setup - destroy it now that we're done
 	local existing_table = self.ConsoleCommandArgumentClasses[class]
+
+	PrintTable(argument_table)
 
 	--maintain reference since we use these as the __index for the argument metatables
 	if existing_table then table.CopyFromTo(existing_table, argument_table)
@@ -106,6 +161,7 @@ PYRITION:ConsoleCommandArgumentRegisterSettingMacro("BOOLEAN", function(_self, v
 PYRITION:ConsoleCommandArgumentRegisterSettingMacro("COLOR", function(_self, values) return Angle(values[1], values[2], values[3], values[4] or 255) end)
 PYRITION:ConsoleCommandArgumentRegisterSettingMacro("NUMERICAL", function(_self, values) return tonumber(values[1]) end)
 PYRITION:ConsoleCommandArgumentRegisterSettingMacro("NUMERICAL_LIST", function(_self, values) for index, value in ipairs(values) do values[index] = tonumber(value) end return values end)
+PYRITION:ConsoleCommandArgumentRegisterSettingMacro("PRESENT", function() return true end)
 PYRITION:ConsoleCommandArgumentRegisterSettingMacro("STRING", function(_self, values) return values[1] end)
 PYRITION:ConsoleCommandArgumentRegisterSettingMacro("NUMERICAL_LIST", function(_self, values) return values end)
 PYRITION:ConsoleCommandArgumentRegisterSettingMacro("VECTOR", function(_self, values) return Vector(values[1], values[2], values[3]) end)

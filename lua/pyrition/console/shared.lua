@@ -11,7 +11,7 @@ local function create_master_command(command_name, help, no_fail_response)
 		local _arguments = PYRITION:ConsoleParseString(arguments_string)
 
 
-	end, language.GetPhrase(help))
+	end, language.GetPhrase(help or "pyrition.command.help"))
 end
 
 --globals
@@ -35,7 +35,8 @@ function PYRITION:ConsoleParseArguments(arguments)
 		if argument[-1] == "?" then break end
 	end
 
-
+	print("command_path_count: " .. command_path_count)
+	print("signatures: <" .. table.concat(tree, ">-<") .. ">")
 end
 
 function PYRITION:ConsoleParseString(arguments_string)
