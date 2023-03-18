@@ -44,7 +44,7 @@ function Insert(duplex, value, set_value)
 
 	if index == nil then
 		index = table_insert(duplex, value)
-		duplex[value] = index
+		duplex[value] = index	
 	end
 	
 	return index
