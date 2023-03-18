@@ -572,7 +572,7 @@ do --do not touch
 			if index == 1 then found = true
 			elseif index then return config[index - 1], index - 1, false end
 			if dont_create_table then return nil, index or 1, false end
-			
+
 			local first_structure = {}
 
 			table.insert(config, 1, first_structure)

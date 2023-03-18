@@ -20,7 +20,7 @@ end
 
 function disable_hud_updates()
 	hook.Remove("Think", "PyritionHUDDeclutterBlocks")
-	
+
 	hud_blocks = {}
 end
 
@@ -38,12 +38,12 @@ function enable_hud_updates() hook.Add("Think", "PyritionHUDDeclutterBlocks", up
 function update_hud_blocks()
 	local armor = local_player:Armor()
 	local real_time = RealTime()
-	
+
 	if armor ~= last_armor then
 		last_armor = armor
 		last_armor_time = real_time + 2
 	end
-	
+
 	if local_player:Health() == local_player:GetMaxHealth() then
 		hud_blocks.CHudBattery = real_time > last_armor_time
 		hud_blocks.CHudHealth = true
@@ -56,14 +56,14 @@ end
 --convars
 cvars.AddChangeCallback("pyrition_hud_declutter", function()
 	if pyrition_hud_declutter:GetBool() then return enable_hud_blocks() end
-	
+
 	disable_hud_blocks()
 end, "PyritionHUDDeclutterBlocks")
 
 --hooks
 hook.Add("PyritionNetClientInitialized", "PyritionHUDDeclutterBlocks", function(ply)
 	local_player = ply
-	
+
 	if pyrition_hud_declutter:GetBool() then enable_hud_blocks() end
 end)
 

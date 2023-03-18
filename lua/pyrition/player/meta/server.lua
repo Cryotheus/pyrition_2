@@ -8,6 +8,6 @@ PYRITION.PlayerMetaTimeConnected = fl_Player_TimeConnected
 --player meta functions
 function player_meta:TimeConnected()
 	if self:IsBot() then PYRITION:PlayerTimeConnected(self) end
-	
+
 	return fl_Player_TimeConnected(self)
 end

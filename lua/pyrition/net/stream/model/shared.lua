@@ -29,23 +29,23 @@ function model_meta:Call(...) return self:Write(self.Player, ...) end
 function model_meta:Complete()
 	local prevent_write = self.PreventWrite
 	local targets = {}
-	
+
 	self.Completed = true
-	
+
 	self:WriteFooter()
-	
+
 	--create a list of methods to remove
 	for key, value in pairs(self) do if isfunction(value) and string.StartWith(key, "Write") then table.insert(targets, key) end end
-	
+
 	--then replace those functions with a function that spits out an error
 	for index, key in ipairs(targets) do self[key] = prevent_write end
-	
+
 	--it's ok call WriteFooter
 	function self:WriteFooter() return false end
-	
+
 	--finally, if we're not already sending the model, send it!
 	if self.Sending then return end
-	
+
 	self:Send()
 end
 
@@ -61,16 +61,16 @@ function model_meta:Write(_ply) ErrorNoHaltWithStack("ID10T-17.2: Stream model '
 --pyrition functions
 function PYRITION:NetStreamModel(stream)
 	if stream.IsPyritionStreamModel then return stream end
-	
+
 	local class = stream.Class
 	local model_methods = stream_model_methods[class]
-	
+
 	assert(model_methods, "ID10T-18.2: Attempt to convert stream model with non-existant class '" .. tostring(class) .. "'")
 	table.Merge(stream, model_meta)
 	table.Merge(stream, model_methods)
-	
+
 	stream:Initialize()
-	
+
 	return stream
 end
 
@@ -78,15 +78,15 @@ function PYRITION:NetStreamModelCreate(class, ply)
 	local stream = self:NetStreamCreate(class, ply)
 	local model_methods = stream_model_methods[class]
 	local stream_models = stream_models_active[class]
-	
+
 	stream_models[stream] = SERVER and ply or false
-	
+
 	assert(model_methods, "ID10T-18.1: Attempt to create stream model with non-existant class '" .. tostring(class) .. "'")
 	table.Merge(stream, model_meta) --default methods
 	table.Merge(stream, model_methods) --class custom methods
-	
+
 	stream:Initialize()
-	
+
 	return stream
 end
 
@@ -97,9 +97,9 @@ end
 
 function PYRITION:NetStreamModelGetExisting(class, ply) --get an existing model or false if no writable models exist
 	local models = self:NetStreamModelsGet(class, ply) --realm dependent
-	
+
 	if models then return select(2, next(models)) end
-	
+
 	return false
 end
 
@@ -107,37 +107,37 @@ end
 function PYRITION:PyritionNetStreamModelRegister(class, realm, model, base_class)
 	local base = base_class and stream_model_methods[base_class]
 	local enumerate = model.EnumerateClass
-	
+
 	model.Class = class
-	
+
 	if base then
 		local base_initialize = base.Initialize
 		local model_initialize = model.Initialize
-		
+
 		--modifications to the table being registered
 		model.BaseClass = base_class
 		model.BaseInitialize = base_initialize
-		
+
 		--merge initialize functions
 		if base_initialize and model_initialize then
 			model.InitializeX = model_initialize
-			
+
 			function model:Initialize(...)
 				self:BaseInitialize(...)
-				
+
 				return self:InitializeX(...)
 			end
 		end
-		
+
 		--finally merge
 		model = table.Merge(table.Copy(base), model)
 	end
-	
+
 	self:NetStreamRegisterClass(class, realm, enumerate == nil or enumerate)
-	
+
 	stream_model_methods[class] = model
 	stream_models_active[class] = stream_models_active[class] or {}
-	
+
 	return model
 end
 
@@ -148,12 +148,12 @@ hook.Add("PyritionNetPlayerInitialized", "PyritionNetStreamModel", function(ply,
 		if model_table.InitialSync and model_table:InitialSync(ply, emulated) then
 			local model = PYRITION:NetStreamModelCreate(class, ply)
 			model.IsInitialSync = true
-			
+
 			if model.WriteInitialSync then model:WriteInitialSync(ply)
 			else model() end
-			
+
 			--print("init sync for model", model)
-			
+
 			--make sure the model is being sent
 			if not model.Sending then model:Send() end
 		end

@@ -12,9 +12,9 @@ end
 
 local function string_to_ip(text)
 	local alpha, bravo, charlie, delta = string.match(text, "^(%d+)%.(%d+)%.(%d+)%.(%d+)")
-	
+
 	if not delta then return end
-	
+
 	return ((d * 256 + charlie) * 256 + bravo) * 256 + alpha
 end
 

@@ -5,7 +5,7 @@ local MODEL = {}
 function MODEL:Initialize()
 	if SERVER then
 		self.Badges = {}
-		
+
 		self:Send()
 	end
 end
@@ -14,10 +14,10 @@ function MODEL:InitialSync()
 	--only make an initial sync if there are badges to sync
 	for index, ply in ipairs(PYRITION.NetLoadedPlayers) do
 		local badges = PYRITION:PlayerBadgesGet(ply)
-		
+
 		if badges and next(badges) then return true end
 	end
-	
+
 	return false
 end
 
@@ -28,14 +28,14 @@ function MODEL:Write(_ply, badge)
 	--[[do
 		local badges = self.Badges
 		local written = badges[badge]
-		
+
 		--we don't need to resync badges we are already preparing to sync
 		--if the badge was already sent to the client, we'll have to resend it (oops)
 		if written and (self.BytesSent or 0) < written then return end
-		
+
 		badges[badge] = self:Size()
 	end]]
-	
+
 	self:WriteBool(true) --signify we have a badge written
 	self:WritePlayer(badge.Player) --the owner
 	self:WriteEnumeratedString("badge", badge.Class) --the badge
@@ -45,7 +45,7 @@ end
 function MODEL:WriteInitialSync(target_player)
 	for index, ply in ipairs(PYRITION.NetLoadedPlayers) do
 		local badges = PYRITION:PlayerBadgesGet(ply)
-		
+
 		if badges then for class, badge in pairs(badges) do self:Write(target_player, badge) end end
 	end
 end

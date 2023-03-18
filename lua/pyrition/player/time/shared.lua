@@ -5,7 +5,7 @@ PYRITION.PlayerTimeConnections = PYRITION.PlayerTimeConnections or {}
 function PYRITION:PlayerTimeConnected(ply)
 	local player_storages = self.PlayerStoragePlayers[ply]
 	local connection_time = player_storages and player_storages.Time and player_storages.Time.SessionStart
-	
+
 	return connection_time and os.time() - connection_time or 0
 end
 
@@ -20,7 +20,7 @@ PYRITION:PlayerStorageRegisterSyncs("Time", {
 	streak = "ULong",
 	total = "ULong",
 	week = "ULong",
-	
+
 	--custom fields
 	LastSessionTime = "ULong",
 	SessionStart = "ULong",

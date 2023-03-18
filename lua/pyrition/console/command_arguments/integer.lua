@@ -27,7 +27,7 @@ function ARGUMENT:Filter(_executor, argument)
 	local minimum = self.Minimum
 
 	if minimum and argument > minimum then return false, nil, "Value must not be smaller than [:minimum].", {minimum = minimum} end
-	
+
 	return true, argument
 end
 

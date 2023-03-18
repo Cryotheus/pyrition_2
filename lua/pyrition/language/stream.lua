@@ -9,13 +9,13 @@ function MODEL:Read()
 		local option = self:ReadEnumeratedString("language_options")
 		local phrases
 		local key = self:ReadString()
-		
+
 		if self:ReadBool() then
 			phrases = {}
-			
+
 			repeat
 				local tag = self:ReadTerminatedString()
-				
+
 				if self:ReadBool() then --list
 					if self:ReadBool() then phrases[tag] = self:ReadNullableTerminatedList(self.ReadPlayer)
 					else phrases[tag] = self:ReadNullableTerminatedList(self.ReadString) end
@@ -25,7 +25,7 @@ function MODEL:Read()
 				end
 			until self:ReadBoolNot()
 		end
-		
+
 		PYRITION:LanguageDisplay(option, key, phrases)
 	end
 end
@@ -33,19 +33,19 @@ end
 function MODEL:Write(_ply, key, phrases, option)
 	--flag that there is a message to read
 	self:WriteBool(true)
-	
+
 	--write key and method of delivery
 	self:WriteEnumeratedString("language_options", option)
 	self:WriteString(key)
-	
+
 	if phrases then
 		for tag, phrase in pairs(phrases) do
 			self:WriteBool(true)
 			self:WriteTerminatedString(tag)
-			
+
 			if istable(phrase) then --list of items
 				self:WriteBool(true)
-				
+
 				if phrase.IsPlayerList then --players
 					self:WriteBool(true)
 					self:WriteNullableTerminatedList(phrase, self.WritePlayer)
@@ -55,7 +55,7 @@ function MODEL:Write(_ply, key, phrases, option)
 				end
 			else --single item, player or string
 				self:WriteBool(false)
-				
+
 				if IsEntity(phrase) then
 					self:WriteBool(true)
 					self:WritePlayer(phrase)
@@ -65,10 +65,10 @@ function MODEL:Write(_ply, key, phrases, option)
 				end
 			end
 		end
-		
+
 		return self:WriteBool(false)
 	end
-	
+
 	self:WriteBool(false)
 end
 

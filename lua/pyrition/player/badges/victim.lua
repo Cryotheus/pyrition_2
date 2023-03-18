@@ -1,7 +1,7 @@
 --locals
 local BADGE = {
 	Level = 0,
-	
+
 	Tiers = {
 		{200, "icon16/cross.png"},
 		{1000, "icon16/cross.png"},

@@ -11,7 +11,7 @@ language.Add("pyrition.badges.anniversary.description", "Awarded to players who 
 --hooks
 hook.Add("PyritionPlayerStorageLoadedTime", "PyritionPlayerBadgesAnniversary", function(ply, player_data)
 	local first = player_data.first
-	
+
 	if first then PYRITION:PlayerBadgeSet(ply, "anniversary", os.date("!*t", os.time() - first * 86400).year - 1970, true) end
 end)
 

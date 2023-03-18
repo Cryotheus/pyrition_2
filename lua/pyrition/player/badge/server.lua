@@ -10,13 +10,13 @@ function PYRITION:PlayerBadgeLoaded(ply, class, level) return self:PlayerBadgeEx
 
 function PYRITION:PlayerBadgeSave(ply, class)
 	local badge = self:PlayerBadgeGet(ply, class)
-	
+
 	if badge.DontSave then return end
-	
+
 	local database_name = self.SQLDatabaseName
 	local level = badge.Level
 	local table_name = database_name and "`" .. database_name .. "`.`badges`" or "pyrition_badges"
-	
+
 	--update the badge, if the levels is less than 1 we remove it instead
 	if level > 0 then self:SQLQuery("insert into " .. table_name .. " (steam_id, class, level) values ('" .. short_steam_id(ply) .. "', " .. self:SQLEscape(class) .. ", " .. level .. ") on duplicate key update level = " .. level .. ";")
 	else self:SQLQuery("delete from " .. table_name .. " where steam_id = '" .. short_steam_id(ply) .. "' and class = " .. self:SQLEscape(class)) end
@@ -25,31 +25,31 @@ end
 function PYRITION:PlayerBadgesLoad(ply)
 	local database_name = self.SQLDatabaseName
 	local table_name = database_name and database_name .. "`.`badges" or "pyrition_badges"
-	
+
 	self.PlayerBadgeLoading[ply] = true
-	
+
 	self:SQLQuery("select * from `" .. table_name .. "` where steam_id = '" .. short_steam_id(ply) .. "';", function(result)
 		if ply:IsValid() and ply:IsConnected() and self.PlayerBadgeLoading[ply] and result then
 			--grant the player all the badges from the query
 			for index, entry in ipairs(result) do self:PlayerBadgeLoaded(ply, entry.class, entry.level) end
 		end
-		
+
 		self.PlayerBadgeLoading[ply] = nil
-		
+
 		hook.Call("PyritionPlayerBadgesLoaded", self, ply)
 	end, function() self.PlayerBadgeLoading[ply] = nil end)
 end
 
 function PYRITION:PlayerBadgeRevoke(ply, class)
 	local badge = self:PlayerBadgeGet(ply, class)
-	
+
 	if badge then
 		table.Empty(badge)
-		
+
 		badge.Class = class
 		badge.Player = ply
 		badge.Level = 0 --we mark this badge for removal
-		
+
 		badge:Sync()
 	end
 end
@@ -58,21 +58,21 @@ function PYRITION:PlayerBadgeSync(ply, badge)
 	--POST: use the more optimal NetStreamModelQueue
 	if ply == true then
 		for index, ply in ipairs(self.NetLoadedPlayers) do self:PlayerBadgeSync(ply, badge) end
-		
+
 		return true
 	end
-	
+
 	return self:NetStreamModelGet("badge", ply)(badge)
 end
 
 function PYRITION:PlayerBadgesSave(ply, transaction)
 	local player_badges = self.PlayerBadges[ply]
-	
+
 	if not player_badges then return end
 	if not transaction then self:SQLBegin() end
-	
+
 	for class, level in pairs(player_badges) do self:PlayerBadgeSave(ply, class, true) end
-	
+
 	if not transaction then self:SQLCommitOrDiscard() end
 end
 
@@ -80,7 +80,7 @@ end
 function PYRITION:PyritionPlayerBadgeLevelChanged(ply, badge, old_level, level, old_tier, tier)
 	if old_tier then
 		if tier < 1 or tier <= old_tier then return end
-		
+
 		self:LanguageQueue(ply, "[:player:you=Your:possessive=en] [:badge] badge has tiered up to tier [:tier].", {
 			badge = badge.Class,
 			tier = tostring(tier),
@@ -88,7 +88,7 @@ function PYRITION:PyritionPlayerBadgeLevelChanged(ply, badge, old_level, level, 
 		})
 	else
 		if level < 1 or level <= old_level then return end
-		
+
 		self:LanguageQueue(ply, "[:player:you=Your:possessive=en] [:badge] badge has levelled up to level [:level].", {
 			badge = badge.Class,
 			level = tostring(level),
@@ -107,14 +107,14 @@ hook.Add("PyritionPlayerStorageLoadAll", "PyritionPlayerBadge", function(ply) PY
 
 hook.Add("PyritionPlayerStorageSaveAll", "PyritionPlayerBadge", function(ply, disconnected)
 	PYRITION:PlayerBadgesSave(ply)
-	
+
 	if disconnected then PYRITION.PlayerBadges[ply] = nil end
 end)
 
 hook.Add("PyritionPlayerStorageSaveEveryone", "PyritionPlayerBadge", function(everyone)
 	local transaction = PYRITION:SQLBegin()
-	
+
 	for index, ply in ipairs(everyone) do PYRITION:PlayerBadgesSave(ply, transaction) end
-	
+
 	PYRITION:SQLCommitOrDiscard()
 end)

@@ -54,7 +54,7 @@ function PYRITION:GFXMaterialDesignCreate(icon_name, size)
 			MATERIAL_RT_DEPTH_NONE,
 			256, --no mips
 			0,
-			IMAGE_FORMAT_RGBA8888
+			IMAGE_FORMAT_IA88 --IMAGE_FORMAT_RGBA8888
 		)
 
 		render_target_details = {

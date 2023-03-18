@@ -1,12 +1,17 @@
 --locals
-local function create_master_command(command_name, _help, _no_fail_response)
-	concommand.Add(command_name, function(_ply, _command, arguments, _arguments_string)
-		for index, argument in ipairs(arguments) do
-			
-		end
-	end, function(_command, _arguments_string)
-		
-	end)
+local function create_master_command(command_name, help, no_fail_response)
+	concommand.Add(command_name, function(ply, _command, arguments)
+		local command = PYRITION:ConsoleParseArguments(arguments)
+
+		if command then
+
+		elseif no_fail_response then return
+		else PYRITION:LanguageQueue(ply, "pyrition.command.unknown") end
+	end, function(_command, arguments_string)
+		local _arguments = PYRITION:ConsoleParseString(arguments_string)
+
+
+	end, language.GetPhrase(help))
 end
 
 --globals
@@ -82,7 +87,7 @@ if SERVER and (game.SinglePlayer() or not game.IsDedicated()) then
 else
 	create_master_command("pyrition")
 	create_master_command("pyrition_nfr", "pyrition.command.help.nfr", true)
-	
+
 	--hee hee hee haw |\/\/|
 	create_master_command("ulx", "pyrition.command.help.ulx")
 end

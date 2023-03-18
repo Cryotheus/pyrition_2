@@ -14,10 +14,6 @@ PYRITION.ConsoleCommandSignedRegistry = PYRITION.ConsoleCommandSignedRegistry or
 PYRITION.ConsoleCommandSignatureTree = PYRITION.ConsoleCommandSignatureTree or {}
 
 --pyrition functions
-function PYRITION:PyritionConsoleComplete(_executor, _command, _arguments)
-
-end
-
 function PYRITION:ConsoleCommandGet(command_signature) --returns command_table, signature_index
 	local command_table = self.ConsoleCommandSignedRegistry[command_signature]
 
@@ -34,7 +30,7 @@ function PYRITION:ConsoleCommandSignatureTreeSet(command_table)
 	for index, word in ipairs(command_table.PathWords) do
 		local branch = tree[word]
 
-		if not branch then 
+		if not branch then
 			branch = {}
 			tree[word] = branch
 		end

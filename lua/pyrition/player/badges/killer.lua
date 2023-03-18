@@ -1,7 +1,7 @@
 --locals
 local BADGE = {
 	Level = 0,
-	
+
 	Tiers = {
 		{100, "icon16/user_orange.png"},
 		{500, "icon16/user_red.png"},
@@ -23,14 +23,14 @@ language.Add("pyrition.badges.killer.tier_5", "Genocider")
 local function attempt_increment(victim, attacker)
 	if attacker:IsNPC() then return end --ignore npcs
 	if victim == attacker then return end --no suicides
-	
+
 	if attacker:IsPlayer() then
 		--don't allow players to farm bots
 		--if victim:IsBot() and not attacker:IsBot() then return false end --RELEASE: re-enable this
-		
+
 		PYRITION:PlayerBadgeIncrement(attacker, "killer")
 		PYRITION:PlayerBadgeIncrement(victim, "victim")
-		
+
 		return true
 	end
 end
@@ -40,11 +40,11 @@ local function attempt_increments(victim, attacker)
 		if attempt_increment(victim, attacker) then return true
 		else
 			local owner = attacker:GetOwner()
-			
+
 			if IsValid(owner) and attempt_increment(victim, owner) then return true
 			elseif attacker:IsVehicle() then
 				local driver = attacker:GetDriver()
-				
+
 				if IsValid(driver) and attempt_increment(victim, driver) then return true end
 			end
 		end
@@ -59,21 +59,21 @@ if SERVER then --we should only have these two server side
 	function BADGE:OnLevelChanged(_old_level, level)
 		local tier = self.Tier
 		local next_level = self.TierLevels[tier + 1]
-		
+
 		if next_level then
 			PYRITION:LanguageQueue(self.Player, "[:level] / [:next_level] kills", {
 				next_level = tostring(next_level),
 				level = tostring(level)
 			}, "killer_badge")
-			
+
 			return
 		end
-		
+
 		PYRITION:LanguageQueue(self.Player, "[:level] total kills", {level = tostring(level)}, "killer_badge")
-		
+
 		return true
 	end
-	
+
 	--hooks
 	hook.Add("PlayerDeath", "PyritionPlayerBadgesKiller", function(victim, inflictor, attacker)
 		if IsValid(victim) and IsValid(attacker) then

@@ -11,19 +11,19 @@ if false then --TODO: disable debug!
 		if isfunction(value) and key ~= "ReadBit" and (string.StartWith(key, "Read") or string.StartWith(key, "Write")) then
 			local original = originals[key] or net[key]
 			originals[key] = original
-			
+
 			net[key] = function(...)
 				local returns = {original(...)}
-				
+
 				drint(drint_level, key, ...)
-				
+
 				if next(returns) then
 					drint(drint_level, "returns", unpack(returns))
 					drint(drint_level, "")
-					
+
 					return unpack(returns)
 				end
-				
+
 				drint(drint_level, "")
 			end
 		end

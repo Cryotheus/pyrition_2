@@ -15,15 +15,15 @@ PYRITION.HibernateRegistry = hibernation_registry
 function PYRITION:Hibernate(key, state) --Toggles hibernation thinking
 	if state ~= false then
 		hibernation_registry[key] = nil
-		
+
 		--hibernate if possible
 		if table.IsEmpty(hibernation_registry) and not pyrition_hibernate_think:GetBool() then RunConsoleCommand("sv_hibernate_think", 0) end
-		
+
 		return
 	end
-	
+
 	hibernation_registry[key] = true
-	
+
 	RunConsoleCommand("sv_hibernate_think", 1)
 end
 

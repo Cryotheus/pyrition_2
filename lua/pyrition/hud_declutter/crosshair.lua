@@ -29,26 +29,26 @@ function update_blocks()
 	local position = local_player:EyePos()
 	local real_time = RealTime()
 	local update = false
-	
+
 	if angle ~= last_angle then
 		last_angle = angle
 		update = true
 	end
-	
+
 	if position ~= last_position then
 		last_position = position
 		update = true
 	end
-	
+
 	if update then last_changed = real_time + update_delay end
-	
+
 	hud_blocks.CHudCrosshair = real_time > last_changed
 end
 
 --convars
 cvars.AddChangeCallback("pyrition_hud_declutter_crosshair", function()
 	if pyrition_hud_declutter_crosshair:GetBool() then return enable_declutter() end
-	
+
 	disable_declutter()
 end, "PyritionHUDDeclutterCrosshair")
 
@@ -57,7 +57,7 @@ cvars.AddChangeCallback("pyrition_hud_declutter_crosshair_delay", function() upd
 --hooks
 hook.Add("PyritionNetClientInitialized", "PyritionHUDDeclutterCrosshair", function(ply)
 	local_player = ply
-	
+
 	if pyrition_hud_declutter_crosshair:GetBool() then enable_declutter() end
 end)
 

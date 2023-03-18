@@ -11,15 +11,15 @@
 local function create_hooked_functions(self, key, hook_key, post)
 	if post == nil then post = self["_GlobalHookPost_" .. key]
 	else self["_GlobalHookPost_" .. key] = post end
-	
+
 	if post then
 		local post_key = "PyritionPost" .. key
-		
+
 		self[key] = function(self, ...)
 			local returns = {hook.Call(hook_key, self, ...)}
-			
+
 			hook.Call(post_key, self, ...)
-			
+
 			return unpack(returns)
 		end
 	else self[key] = function(self, ...) return hook.Call(hook_key, self, ...) end end
@@ -29,7 +29,7 @@ end
 function PYRITION:GlobalHookConvert(key, post, immediate)
 	local hook_key = "Pyrition" .. key
 	self[hook_key] = self[hook_key] or self[key]
-	
+
 	if immediate then create_hooked_functions(self, key, hook_key, post) end
 end
 
@@ -41,17 +41,17 @@ end
 
 function PYRITION:GlobalHookRefresh()
 	local hook_roster = {}
-	
+
 	--editing PYRITION while using pairs on it cause some values to get skipped
 	for key, value in pairs(self) do
 		if isfunction(value) and string.StartWith(key, "Pyrition") then
 			table.insert(hook_roster, key)
 		end
 	end
-	
+
 	for index, key in ipairs(hook_roster) do
 		local short_key = string.sub(key, 9)
-		
+
 		if not self[short_key] then self[short_key] = function(self, ...) return hook.Call(key, self, ...) end end
 	end
 end

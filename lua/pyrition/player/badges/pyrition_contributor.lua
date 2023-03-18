@@ -4,7 +4,7 @@ local BADGE = {
 	Glint = Color(255, 128, 64),
 	Material = "icon16/fire.png",
 	Removable = false,
-	
+
 	Tiers = {
 		"icon16/asterisk_yellow.png", --1 motivation
 		"icon16/asterisk_orange.png", --2 gave input

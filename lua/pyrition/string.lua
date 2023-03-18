@@ -15,15 +15,15 @@ local utf8_len = utf8.len
 local function replace_unsafe(text)
 	if string_find(text, sequence) then --if there's an illegal character, reconstruct the string without it
 		local codes = {}
-		
+
 		for point, code in utf8_codes(text) do
 			if blacklisted_bytes[code] then table_insert(codes, 32)
 			else table_insert(codes, code) end
 		end
-		
+
 		return utf8_char(unpack(codes))
 	end
-	
+
 	return text
 end
 

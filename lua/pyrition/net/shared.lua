@@ -9,7 +9,7 @@ local function maybe_read(net_function, ...) if net.ReadBool() then return net_f
 
 local function maybe_write(net_function, value, ...)
 	if value == nil then return net.WriteBool(false) end
-	
+
 	net.WriteBool(true)
 	net_function(value, ...)
 end
