@@ -62,6 +62,7 @@ end
 
 --pyrition functions
 function PYRITION:WikiCollect()
+	---Disgusting code to collect information about the methods available in the current realm.
 	file.CreateDir(output_path)
 
 	local realm_details = {}
@@ -104,6 +105,7 @@ function PYRITION:WikiCollect()
 end
 
 function PYRITION:WikiGenerate()
+	---Somehow even more disgusting code to generate a wiki from the collected information.
 	local current_prefix
 	local details_collection = {}
 	local documentation = {}
@@ -188,7 +190,7 @@ function PYRITION:WikiGenerate()
 		local component_name = string.sub(string.gsub(trimmed_source, "/", ""), 1, -5)
 		local order = {}
 		local script = file.Read(current_prefix .. trimmed_source, "LUA")
-		--local script_lines = script and string.Split(script, "\n")
+		local script_lines = script and string.Split(script, "\n")
 
 		local last_component = component_indexing[#component_indexing]
 
@@ -213,18 +215,29 @@ function PYRITION:WikiGenerate()
 			local meta_data = {
 				FilePath = file_path .. ".txt",
 				ParentComponenet = method_parent,
+				FriendlyName = table.concat(component_indexing, "-")
 			}
 
 			meta_data.Path = string.sub(file_path, 1, -1 - #component_indexing[#component_indexing])
 			tree[0] = meta_data
 
 			for variant_index, details in ipairs(methods[key]) do
-				--it's hard to scrap
+				local mark_down = ""
+
+				for line_index = details.Line, details.LineEnd do
+					local line = script_lines[line_index]
+					local wiki_comment = string.find(line, "%-%-%-")
+
+					if wiki_comment then mark_down = mark_down .. string.sub(line, wiki_comment + 3) .. "\n" end
+				end
+
+				--script_lines
 				local data = {
-					Name = method_name,
 					Line = details.Line,
 					LineEnd = details.LineEnd,
 					Link = details.Link,
+					MarkDown = mark_down ~= "" and string.sub(mark_down, 1, -2) or nil,
+					Name = method_name,
 				}
 
 				for index, environment_signature in ipairs(details.Environments) do
@@ -242,11 +255,11 @@ function PYRITION:WikiGenerate()
 		--tree[0] = nil
 
 		if meta_data then
-			local file_path = meta_data.FilePath
+			--local file_path = meta_data.FilePath
 			local parent_component = meta_data.ParentComponenet
-			local path = meta_data.Path
+			--local path = meta_data.Path
 
-			local mark_down = "# " .. parent_component .. "\n\n"
+			local mark_down = "# " .. parent_component .. "\nThis page is automatically generated. Generated pages are still in beta and will change drastically as the generator is improved.\n"
 
 			--print("parent_component", parent_component)
 
@@ -258,11 +271,17 @@ function PYRITION:WikiGenerate()
 				elseif method_details.Client then icon = "client"
 				elseif method_details.Server then icon = "server" end 
 
-				mark_down = mark_down .. "## []" .. method_details.Name .. "](" .. method_details.Link .. ")\n\n"
+				if icon then icon = "![" .. icon .. "](https://raw.githubusercontent.com/Cryotheus/pyrition_2/main/.github/WIKI/" .. icon .. ".png) "
+				else icon = "" end
+
+				mark_down = mark_down .. "## " .. icon .. "[" .. method_details.Name .. "](" .. method_details.Link .. ")\n"
+
+				if method_details.MarkDown then mark_down = mark_down .. method_details.MarkDown end
+
+				mark_down = mark_down .. "\n"
 			end
 
-			file.CreateDir(output_path .. "/" .. path)
-			file.Write(output_path .. "/" .. file_path, mark_down)
+			file.Write(output_path .. "/g-" .. meta_data.FriendlyName .. ".txt", mark_down)
 		end
 
 		for key, value in pairs(tree) do

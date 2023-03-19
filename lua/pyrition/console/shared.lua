@@ -43,6 +43,7 @@ function PYRITION:ConsoleParseArguments(arguments)
 end
 
 function PYRITION:ConsoleParseString(arguments_string)
+	---Parses the `arguments_string` into a table of arguments.
 	local arguments = {}
 	local in_string = false
 	local quote_count = select(2, string.gsub(arguments_string, "\"", "\"")) or 0
@@ -73,7 +74,7 @@ end
 
 --pyrition hooks
 function PYRITION:PyritionConsoleComplete(_executor, _arguments)
-
+	
 end
 
 function PYRITION:PyritionConsoleExecute(executor, _arguments)

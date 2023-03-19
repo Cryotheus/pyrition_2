@@ -15,16 +15,20 @@ PYRITION.ConsoleCommandSignatureTree = PYRITION.ConsoleCommandSignatureTree or {
 
 --pyrition functions
 function PYRITION:ConsoleCommandGet(command_signature) --returns command_table, signature_index
+	---Returns the command table when given the full command signature, eg. `health~Player Integer`.
+	---Also returns argument signature's index in the command's `Signature` table.
 	local command_table = self.ConsoleCommandSignedRegistry[command_signature]
 
 	return command_table, command_table.Signatures[string.sub(command_signature, command_table.SignatureStart)]
 end
 
 function PYRITION:ConsoleCommandGetSignatures(command_path)
+	---Returns a table of signatures for the given command path string.
 	return self.ConsoleCommandRegistry[command_path].Signatures
 end
 
 function PYRITION:ConsoleCommandSignatureTreeSet(command_table)
+	--Sets the command's signatures into the signature tree.
 	local tree = self.ConsoleCommandSignatureTree
 
 	for index, word in ipairs(command_table.PathWords) do

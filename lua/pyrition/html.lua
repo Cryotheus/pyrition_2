@@ -129,6 +129,7 @@ end
 
 --pyrition functions
 function PYRITION:HTMLParseAsync(body, callback, budget)
+	---Parses an XHTML string asynchronously, calling the `callback` function with a table of the elements when finished.
 	local budget = budget or 0.001
 	local proxy = {IsValid = function(self) return coroutine.status(self.Thread) ~= "dead" end}
 	proxy.Thread = coroutine.create(function() xhtml_parse(body, callback) end)

@@ -98,6 +98,8 @@ PYRITION.PlayerStoragesLoading = PYRITION.PlayerStoragesLoading or {}
 
 --pyrition functions
 function PYRITION:PlayerStorageLoad(ply, key, tracker)
+	---Loads a specific storage for the specified player, overwriting any existing data.
+	---This calls `PlayerStorageLoaded` when finished.
 	local database_name = PYRITION.SQLDatabaseName
 	local player_data = self.PlayerStoragePlayers[ply]
 	local player_datum = player_data[key]
@@ -145,6 +147,7 @@ function PYRITION:PlayerStorageGetSavablePlayers()
 end
 
 function PYRITION:PlayerStorageSave(ply, key)
+	---Saves a single storage specified by the `ply` and `key`.
 	if read_only then return end
 
 	local database_name = PYRITION.SQLDatabaseName
