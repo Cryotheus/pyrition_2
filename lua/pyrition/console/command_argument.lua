@@ -37,46 +37,32 @@ function PYRITION:ConsoleCommandArgumentGetSettingMacro(enumeration)
 end
 
 function PYRITION:ConsoleCommandArgumentParse(text)
-	--local words = string.Split(text, " ")
-	--local class = table.remove(words, 1)
-
 	local argument_object
 	local from = 1
 
-	print("!!!!\n!!!!\n!!!! internal parse start", text)
-
 	repeat
 		local start, finish = best_find(text, from, "%w+%s*=%s*[%w%-%.,]+", "%w+%s*")
-		if not start then print("broke", from) break end
+		if not start then break end
 		found = string.TrimRight(string.sub(text, start, finish))
-
-		print(from, found)
 
 		local equals = string.find(found, "=")
 
 		if equals then
-			if from == 1 then error("Argument creation started with key-value pair (should be one word class)") end --TODO: make an ID10T error
+			--TODO: make an ID10T error
+			if from == 1 then error("Argument creation started with key-value pair (should be one word class)") end
 
 			local key = string.TrimRight(string.sub(found, 1, equals - 1))
 			local values_string = string.TrimLeft(string.sub(found, equals + 1))
 			local values = string.Explode(",%s*", values_string, true)
 
-			print("values string", values_string)
-			print("values", unpack(values))
-
 			argument_object[key] = argument_object["ParseSetting" .. key](argument_object, values)
 		else
-			if from == 1 then argument_object = setmetatable({Class = found}, {__index = self.ConsoleCommandArgumentClasses[found]}) print("made object", argument_object)
-			else
-				print("the found is <" .. found .. ">", #found)
-				argument_object[found] = argument_object["ParseSetting" .. found](argument_object)
-			end
+			if from == 1 then argument_object = setmetatable({Class = found}, {__index = self.ConsoleCommandArgumentClasses[found]})
+			else argument_object[found] = argument_object["ParseSetting" .. found](argument_object) end
 		end
 
 		from = finish + 1
 	until found == ""
-
-	print("!!!!\n!!!!\n!!!! internal parse complete", argument_object)
 
 	if argument_object.ParsedSettings then argument_object:ParsedSettings() end
 
@@ -147,8 +133,6 @@ function PYRITION:PyritionConsoleCommandArgumentRegister(class, argument_table)
 
 	argument_table.ParseSettingMacros = nil --only used during setup - destroy it now that we're done
 	local existing_table = self.ConsoleCommandArgumentClasses[class]
-
-	PrintTable(argument_table)
 
 	--maintain reference since we use these as the __index for the argument metatables
 	if existing_table then table.CopyFromTo(existing_table, argument_table)

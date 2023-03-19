@@ -35,6 +35,9 @@ function PYRITION:ConsoleParseArguments(arguments)
 		if argument[-1] == "?" then break end
 	end
 
+	print("printing tree")
+	PrintTable(tree)
+
 	print("command_path_count: " .. command_path_count)
 	print("signatures: <" .. table.concat(tree, ">-<") .. ">")
 end

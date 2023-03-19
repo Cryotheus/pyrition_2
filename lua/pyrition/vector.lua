@@ -35,8 +35,8 @@ function PYRITION:VectorCompileBezier(point_count) --create a bezier method for 
 	----example:
 	--PYRITION:VectorCompileBezier(3)
 	--PYRITION:VectorCompileBezier(4)
-	--print(Vector(1, 2, 3):Bezier3(0.75, Vector(4, 5, 6), Vector(7, 8, 9)))
-	--print(Vector(1, 2, 3):Bezier4(0.75, Vector(4, 5, 6), Vector(7, 8, 9), Vector(10, 11, 12)))
+	--Msg(Vector(1, 2, 3):Bezier3(0.75, Vector(4, 5, 6), Vector(7, 8, 9)))
+	--Msg(Vector(1, 2, 3):Bezier4(0.75, Vector(4, 5, 6), Vector(7, 8, 9), Vector(10, 11, 12)))
 
 	--if you're learning, don't learn from this
 	--it's not very readable, but the function it compiles is the fastest solution I know

@@ -243,6 +243,10 @@ local config = {
 		spawnmenu = {
 			client = true,
 		},
+
+		wiki = {
+			shared = true,
+		}
 	},
 
 	{

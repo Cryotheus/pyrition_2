@@ -82,8 +82,7 @@ function PYRITION:PyritionConsoleCommandRegister(command_path, command_table)
 		for text_index, argument_text in ipairs(argument_list) do
 			local argument_object = self:ConsoleCommandArgumentParse(argument_text)
 
-			print("parsed!", text_index, argument_object, argument_text)
-			arguments[text_index] = argument_object
+			argument_list[text_index] = argument_object
 			signature_builder = signature_builder .. argument_object.Class .. " "
 		end
 
