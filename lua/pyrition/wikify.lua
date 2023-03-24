@@ -3,7 +3,6 @@
 command_prefix = SERVER and "sv_pyrition_wikify_" or "cl_pyrition_wikify_"
 
 include("includes/entity_proxy.lua")
-print("hi!")
 
 --local functions
 local function best_match(hay_stack, pattern_start, patterns)
@@ -119,6 +118,7 @@ end
 --pyrition functions
 function PYRITION:Wikify()
 	local default_pattern = "pyrition/.+%.lua"
+	local default_source_url = "https://github.com/Cryotheus/pyrition_2/blob/main/"
 	local filtered = {}
 
 	local pyrition = {
@@ -127,6 +127,7 @@ function PYRITION:Wikify()
 		Owner = "Pyrition",
 		Parent = "PYRITION",
 		SourcePattern = "pyrition/",
+		SourceURL = default_source_url,
 	}
 
 	local pyrition_hooks = {
@@ -135,6 +136,7 @@ function PYRITION:Wikify()
 		Owner = "Pyrition",
 		Parent = "PYRITION",
 		SourcePattern = "pyrition/",
+		SourceURL = default_source_url,
 	}
 
 	file.CreateDir("pyrition/wikify/pages")
@@ -159,6 +161,7 @@ function PYRITION:Wikify()
 			Name = "entity_proxy",
 			Owner = "Networking Entity Proxy Module",
 			Parent = "entity_proxy",
+			SourceURL = "https://github.com/Cryotheus/entity_proxy/blob/master/",
 		}))
 	end
 
@@ -168,6 +171,7 @@ function PYRITION:Wikify()
 		Owner = "Pyrition",
 		Parent = "duplex",
 		SourcePattern = "pyrition/modules/duplex%.lua$",
+		SourceURL = default_source_url,
 	}))
 
 	self:WikifyCollectFunctions(collect_functions(math, {
@@ -176,6 +180,7 @@ function PYRITION:Wikify()
 		Owner = "Pyrition",
 		Parent = "math",
 		SourcePattern = "pyrition/modules/math%.lua$",
+		SourceURL = default_source_url,
 	}))
 
 	self:WikifyCollectFunctions(collect_functions(FindMetaTable("Vector"), {
@@ -184,6 +189,7 @@ function PYRITION:Wikify()
 		Owner = "Pyrition",
 		Parent = "Vector",
 		SourcePattern = default_pattern,
+		SourceURL = default_source_url,
 	}))
 
 	self:WikifyCollectFunctions(collect_functions(FindMetaTable("Player"), {
@@ -192,6 +198,7 @@ function PYRITION:Wikify()
 		Owner = "Pyrition",
 		Parent = "Player",
 		SourcePattern = default_pattern,
+		SourceURL = default_source_url,
 	}))
 end
 
@@ -199,6 +206,8 @@ function PYRITION:WikifyCollectFunctions(function_list)
 	local file_line_positions = {}
 	local files_read = {}
 	local source_pattern = function_list.SourcePattern
+	local source_url_prefix = function_list.SourceURL
+	local source_url_defix = function_list.SourceURLDefix or "addons/.-/(.+)"
 
 	for index = #function_list, 1, -1 do
 		local info = debug.getinfo(function_list[index], "S")
@@ -206,8 +215,20 @@ function PYRITION:WikifyCollectFunctions(function_list)
 
 		if info.what == "Lua" and (not source_pattern or string.find(source, source_pattern)) then
 			local comments = {}
-			local script_lines = file_line_positions[source]
+			local end_line = info.lastlinedefined
 			local script = files_read[source]
+			local script_lines = file_line_positions[source]
+			local source_url
+			local start_line = info.linedefined
+
+			if source_url_prefix then
+				source_url = select(3, string.find(source, source_url_defix))
+
+				if source_url then
+					if start_line == end_line then source_url = source_url_prefix .. source_url .. "#L" .. start_line
+					else source_url = source_url_prefix .. source_url .. "#L" .. start_line .. "-L" .. end_line end
+				end
+			end
 
 			--read the file if it hasn't been read yet
 			if not script then
@@ -236,13 +257,10 @@ function PYRITION:WikifyCollectFunctions(function_list)
 				if march < script_length then table.insert(script_lines, {march, script_length}) end
 			end
 
-			local end_line = info.lastlinedefined
-			local start_line = info.linedefined
 			local code = string.sub(script, script_lines[start_line][1], script_lines[end_line][2]) .. "\n"
 			local name = table.remove(string.Split(table.remove(string.Split(select(3, string.find(code, "%s*function%s+(.-)%s*%(.-\n")), ".")), ":"))
 
 			if name then
-				print("name", name)
 				for line_comment, block_comment in multiple_gmatch(code, 1, "%-%-%-(.-)\r?\n", "%-%-%[%[%-%s*(.-)%]%]", "%b''", "%b\"\"") do
 					local comment = line_comment or block_comment
 
@@ -250,11 +268,11 @@ function PYRITION:WikifyCollectFunctions(function_list)
 				end
 
 				function_list[index] = {
-					Comments = next(comments) and comments,
+					Documentation = next(comments) and table.concat(comments, "\n"),
 					Line = start_line,
 					LineEnd = end_line,
 					Name = name,
-					Source = source,
+					SourceURL = source_url,
 				}
 			else table.remove(function_list, index) end
 		else table.remove(function_list, index) end
@@ -297,10 +315,13 @@ function PYRITION:WikifyGenerate()
 			if not registered then
 				registered = {
 					Category = category,
-					Comments = info.Comments,
+					Documentation = info.Documentation,
+					Line = info.Line,
+					LineEnd = info.LineEnd,
 					Name = info.Name,
 					Owner = owner,
 					Parent = parent,
+					SourceURL = info.SourceURL,
 					Tags = {},
 				}
 
@@ -317,7 +338,6 @@ function PYRITION:WikifyGenerate()
 
 	for signature, info in pairs(function_registry) do
 		local category = info.Category
-		local comments = info.Comments
 		local function_name = info.Name
 		local name = function_name
 		local owner = info.Owner
@@ -329,14 +349,24 @@ function PYRITION:WikifyGenerate()
 		if tag_list then
 			table.sort(tag_list)
 
-			name = table.concat(tag_list, "") .. "-" .. name
+			tag_list = table.concat(tag_list, "")
+			name = tag_list .. "-" .. name
 		end
 
-		local contents = "# " .. function_name .. "\n" .. (comments and table.concat(comments, "\n") or "No documentation available.")
+		local contents = "# " .. function_name .. "\n"
 		local prefix = owner .. "/" .. category .. "/" .. (parent and parent .. "/" or "/")
 		local path = indicative_case(prefix .. name .. ".txt")
 
-		print(root_path .. path)
+		if info.Documentation then contents = contents .. info.Documentation
+		else
+			local meta_list = {}
+
+			if info.SourceURL then table.insert(meta_list, "SOURCE: " .. info.SourceURL) end
+			if tag_list then table.insert(meta_list, "TAGS: " .. tag_list) end
+
+			contents = contents .. "<!--META!" .. table.concat(meta_list, "\n") .. "-->\nNo documentation found."
+		end
+
 		file.CreateDir(root_path .. string.GetPathFromFilename(path))
 		file.Write(root_path .. path, contents)
 	end
