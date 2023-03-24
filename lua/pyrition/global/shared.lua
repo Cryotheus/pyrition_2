@@ -46,6 +46,18 @@ local enumerations = {
 		"RGBA16161616F",
 		"RGBA16161616",
 		"UVLX8888",
+	},
+
+	{
+		Prefix = "WIKIFY",
+
+		"GLOBALS",
+		"CLASSES",
+		"LIBRARIES",
+		"HOOKS",
+		"PANELS",
+		"ENUMS",
+		"STRUCTS",
 	}
 }
 

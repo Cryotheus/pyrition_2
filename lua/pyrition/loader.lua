@@ -243,10 +243,6 @@ local config = {
 		spawnmenu = {
 			client = true,
 		},
-
-		wiki = {
-			shared = true,
-		}
 	},
 
 	{
@@ -290,6 +286,10 @@ local config = {
 				victim = "shared",
 			},
 		},
+	},
+
+	{
+		wikify = "shared developer",
 	},
 
 	{global = {hooks = "shared"}} --this should always be the last script included

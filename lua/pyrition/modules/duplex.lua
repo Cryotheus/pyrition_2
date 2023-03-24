@@ -1,5 +1,5 @@
 --pragma once
-if duplex then return end
+--if duplex then return end
 
 --locals
 local assert = assert
@@ -18,12 +18,18 @@ module("duplex")
 
 --module functions
 function Destroy(duplex) --turn a duplex into a list
+	---TYPES: table
+	---RETURNS: table
+	---Turns the duplex into a list, modifying the original table.
 	for index, value in ipairs(duplex) do duplex[value] = nil end
 
 	return duplex
 end
 
 function Extract(duplex) --get a list from a duplex
+	---TYPES: table
+	---RETURNS: table
+	--Creates a list from the duplex, without touching the original.
 	local copy = {}
 
 	for index, value in ipairs(duplex) do copy[index] = value end
@@ -32,12 +38,17 @@ function Extract(duplex) --get a list from a duplex
 end
 
 function InheritEntry(target, source, index)
+	---TYPES: table, table, any
+	---RETURNS: any
 	if isnumber(index) then return Set(target, index, source[index]) end
 
 	return Set(target, source[index], index)
 end
 
 function Insert(duplex, value, set_value)
+	---TYPES: table, any
+	---TYPES: table, number, any
+	---RETURNS: number
 	if isnumber(value) then return Set(duplex, value, set_value) end
 
 	local index = duplex[value]
@@ -51,6 +62,9 @@ function Insert(duplex, value, set_value)
 end
 
 function IsFooplex(duplex) --check duplex for "holes"
+	---TYPES: table
+	---RETURNS: boolean
+	---Returns true if the duplex is not sequential, false otherwise.
 	local count = table_Count(duplex)
 
 	--quick check by comparing counts
@@ -63,6 +77,9 @@ function IsFooplex(duplex) --check duplex for "holes"
 end
 
 function Make(duplex, modify)
+	---TYPES: table, boolean
+	---RETURNS: table
+	---Creates a duplex from a sequential table, or turns the original into one instead of creating a new table entirely.
 	local duplex = modify and duplex or table_Copy(duplex)
 
 	for index, value in ipairs(duplex) do duplex[value] = index end
@@ -71,6 +88,9 @@ function Make(duplex, modify)
 end
 
 function MakeFooplex(duplex, modify)
+	---TYPES: table, boolean
+	---RETURNS: table
+	---Creates a non-sequential duplex (fooplex) from a sequential table, or turns the original into one instead of creating a new table entirely.
 	local duplex = modify and duplex or table_Copy(duplex)
 
 	for index, value in pairs(duplex) do if isnumber(index) then duplex[value] = index end end
@@ -79,6 +99,9 @@ function MakeFooplex(duplex, modify)
 end
 
 function Remove(duplex, index)
+	---TYPES: table, number
+	---RETURNS: any
+	---Removes an entry from the duplex, and returns the value. All following entries are shifted down.
 	local value
 
 	if index then
@@ -105,6 +128,10 @@ function Remove(duplex, index)
 end
 
 function Set(duplex, position, value)
+	---TYPES: table, number, any
+	---RETURNS: number
+	---Sets a value at a specific index in the duplex, and returns the index.
+
 	assert(isnumber(position), "ID10T-8: Attempt to set a non-numerical " .. type(position) .. " index in duplex.")
 	assert(value ~= nil, "ID10T-9: Attempt to set a nil value in duplex. Use duplex.Unset instead.")
 
@@ -124,6 +151,9 @@ function Set(duplex, position, value)
 end
 
 function Sort(duplex, sorter)
+	---TYPES: table, function=nil
+	---RETURNS: table, table
+	---Sorts the duplex, and returns the sorted table and a list of the values.
 	local values = Extract(duplex)
 
 	table_sort(values, sorter)
@@ -137,6 +167,9 @@ function Sort(duplex, sorter)
 end
 
 function Unset(duplex, index)
+	---TYPES: table, any
+	---RETURNS: any
+	---Removes an entry from the duplex, and returns the index. This does not shift down the following entries.
 	local value = duplex[index]
 	duplex[index] = nil
 
