@@ -1,5 +1,5 @@
 # Pyrition
-[![Discord](https://img.shields.io/discord/785233414374686720?label=Discord&logo=discord)](https://discord.gg/PuxPSDun2k)
+[![Discord](https://img.shields.io/discord/1086337904458084392?label=Discord&logo=discord)](https://discord.gg/PuxPSDun2k)
 [![Codacy](https://img.shields.io/codacy/grade/ac3be98e8eeb49a7b8052dbe8eeb1062)](https://www.codacy.com/gh/Cryotheus/pyrition_2/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Cryotheus/pyrition_2&amp;utm_campaign=Badge_Grade)
 [![License](https://img.shields.io/github/license/Cryotheus/pyrition_2)](https://github.com/Cryotheus/pyrition_2/blob/main/LICENSE)
 [![Crowdin](https://badges.crowdin.net/pyrition/localized.svg)](https://crowdin.com/project/pyrition)  
