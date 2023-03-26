@@ -258,9 +258,12 @@ function PYRITION:WikifyCollectFunctions(function_list)
 			end
 
 			local code = string.sub(script, script_lines[start_line][1], script_lines[end_line][2]) .. "\n"
-			local name = table.remove(string.Split(table.remove(string.Split(select(3, string.find(code, "%s*function%s+(.-)%s*%(.-\n")), ".")), ":"))
+			local match_name, match_arguments = select(3, string.find(code, "%s*function%s+(.-)%s*%((.-)%)"))
 
-			if name then
+			if match_name and match_arguments then
+				local name = table.remove(string.Split(table.remove(string.Split(match_name, ".")), ":"))
+				local arguments = string.Explode("%s*,%s*", match_arguments, true)
+
 				for line_comment, block_comment in multiple_gmatch(code, 1, "%-%-%-(.-)\r?\n", "%-%-%[%[%-%s*(.-)%]%]", "%b''", "%b\"\"") do
 					local comment = line_comment or block_comment
 
@@ -268,6 +271,7 @@ function PYRITION:WikifyCollectFunctions(function_list)
 				end
 
 				function_list[index] = {
+					Arguments = next(arguments) and arguments[1] ~= "" and arguments or nil,
 					Documentation = next(comments) and table.concat(comments, "\n"),
 					Line = start_line,
 					LineEnd = end_line,
@@ -314,6 +318,7 @@ function PYRITION:WikifyGenerate()
 
 			if not registered then
 				registered = {
+					Arguments = info.Arguments,
 					Category = category,
 					Documentation = info.Documentation,
 					Line = info.Line,
