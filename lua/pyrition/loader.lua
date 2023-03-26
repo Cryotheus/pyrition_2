@@ -28,9 +28,9 @@ local config = {
 		gradient = "shared",
 		html = "shared",
 		ip = "server",
-
-		language = {
-			library = "server",
+		
+		modules = {
+			language = "server",
 		},
 
 		player = {
