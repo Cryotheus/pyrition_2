@@ -194,7 +194,7 @@ function PYRITION:Wikify()
 
 	self:WikifyCollectFunctions(collect_functions(FindMetaTable("Vector"), {
 		Category = PYRITION_WIKIFY_CLASSES,
-		Name = "Vector",
+		Name = "class_vector",
 		Owner = "Pyrition",
 		Parent = "Vector",
 		SourcePattern = default_pattern,
@@ -203,12 +203,30 @@ function PYRITION:Wikify()
 
 	self:WikifyCollectFunctions(collect_functions(FindMetaTable("Player"), {
 		Category = PYRITION_WIKIFY_CLASSES,
-		Name = "Player",
+		Name = "class_player",
 		Owner = "Pyrition",
 		Parent = "Player",
 		SourcePattern = default_pattern,
 		SourceURL = default_source_url,
 	}))
+
+	self:WikifyCollectFunctions(collect_functions(self.PlayerBadgeMeta, collect_functions(FindMetaTable("PyritionBadge"), {
+		Category = PYRITION_WIKIFY_CLASSES,
+		Name = "class_pyritionbadge",
+		Owner = "Pyrition",
+		Parent = "PyritionBadge",
+		SourcePattern = default_pattern,
+		SourceURL = default_source_url,
+	})))
+
+	self:WikifyCollectFunctions(collect_functions(self.NetStreamMeta, collect_functions(FindMetaTable("PyritionStream"), {
+		Category = PYRITION_WIKIFY_CLASSES,
+		Name = "class_pyritionstream",
+		Owner = "Pyrition",
+		Parent = "PyritionStream",
+		SourcePattern = default_pattern,
+		SourceURL = default_source_url,
+	})))
 end
 
 function PYRITION:WikifyCollectFunctions(function_list)

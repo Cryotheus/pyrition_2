@@ -238,6 +238,7 @@ PYRITION.NetStreamsActive = active_streams
 PYRITION.NetStreamClasses = stream_classes
 PYRITION.NetStreamCounters = stream_counters
 PYRITION.NetStreamQueue = stream_send_queue
+PYRITION.NetStreamMeta = stream_meta
 _R.PyritionStream = stream_public
 
 --meta functions
