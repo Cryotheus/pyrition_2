@@ -78,7 +78,7 @@ function Add(place_holder, full_text) LanguagePhrases[place_holder] = full_text 
 function GetPhrase(phrase) return LanguagePhrases[phrase] or phrase end
 
 --convars
-cvars.AddChangeCallback("sv_gmod_language", function(name, old, new)
+cvars.AddChangeCallback("sv_gmod_language", function(_name, _old, new)
 	--if they never set up their server's language we want to scream at them so they become wiser
 	if not load_localizations(new) then error_code() end
 end, "PyritionLanguageLibrary")

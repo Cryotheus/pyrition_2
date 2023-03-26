@@ -183,6 +183,15 @@ function PYRITION:Wikify()
 		SourceURL = default_source_url,
 	}))
 
+	self:WikifyCollectFunctions(collect_functions(language, {
+		Category = PYRITION_WIKIFY_LIBRARIES,
+		Name = "pyrition_language",
+		Owner = "Pyrition",
+		Parent = "language",
+		SourcePattern = "pyrition/modules/language%.lua$",
+		SourceURL = default_source_url,
+	}))
+
 	self:WikifyCollectFunctions(collect_functions(FindMetaTable("Vector"), {
 		Category = PYRITION_WIKIFY_CLASSES,
 		Name = "Vector",
