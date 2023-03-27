@@ -1,5 +1,10 @@
 name: Merge Crowdin Pull Requests
 
+env:
+  MERGE_LABELS: ""
+  MERGE_METHOD: "squash"
+  MERGE_COMMIT_MESSAGE: "Crowdin Sync #{pullRequest.number}"
+
 on:
   pull_request:
     branches:
@@ -17,11 +22,11 @@ on:
 jobs:
   automerge:
     #check to make sure the pr is related to Crowdin and the pr creator is Cryotheus
-    if: ${{ contains(github.event.head_commit.message, 'Crowdin') && github.actor_id == '14439112' }}
+    if: ${{ github.event.pull_request.head.ref == 'l10n_main' && github.actor_id == 14439112 }}
     runs-on: ubuntu-latest
     steps:
       - id: automerge
         name: automerge
         uses: "pascalgn/automerge-action@v0.15.6"
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.PAT }}"
