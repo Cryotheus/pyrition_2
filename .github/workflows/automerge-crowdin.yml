@@ -1,5 +1,8 @@
 name: Merge Crowdin Pull Requests
 
+env:
+  MERGE_LABELS: ""
+
 on:
   pull_request:
     branches:
