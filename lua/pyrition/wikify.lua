@@ -115,11 +115,13 @@ local function recursive_delete(path)
 	file.Delete(path)
 end
 
+--globals
+PYRITION._WikifyCollectFunctions = collect_functions
+
 --pyrition functions
 function PYRITION:Wikify()
 	local default_pattern = "pyrition/.+%.lua"
 	local default_source_url = "https://github.com/Cryotheus/pyrition_2/blob/main/"
-	local filtered = {}
 
 	local pyrition = {
 		Category = PYRITION_WIKIFY_GLOBALS,
@@ -141,19 +143,7 @@ function PYRITION:Wikify()
 
 	file.CreateDir("pyrition/wikify/pages")
 
-	for key, value in pairs(self) do if isstring(key) and isfunction(value) then table.insert(filtered, key) end end
-
-	for index, key in pairs(filtered) do
-		if not string.StartWith(key, "Pyrition") then
-			local hook_key = "Pyrition" .. key
-
-			if isfunction(self[hook_key]) then table.insert(pyrition_hooks, self[hook_key])
-			else table.insert(pyrition, self[key]) end
-		elseif isfunction(self[key]) then table.insert(pyrition_hooks, self[key]) end
-	end
-
-	self:WikifyCollectFunctions(pyrition)
-	self:WikifyCollectFunctions(pyrition_hooks)
+	self:WikifyCollectHooks(self, "Pyrition", pyrition_hooks, pyrition)
 
 	if entity_proxy then
 		self:WikifyCollectFunctions(collect_functions(entity_proxy, {
@@ -317,6 +307,24 @@ function PYRITION:WikifyCollectFunctions(function_list)
 		string.lower("pyrition/wikify/" .. (SERVER and "server_function_" or "client_function_") .. (function_list.Name or "list") .. ".json"),
 		util.TableToJSON(function_list)
 	)
+end
+
+function PYRITION:WikifyCollectHooks(hook_table, hook_prefix, hook_functions, standard_functions)
+	local filtered = {}
+
+	for key, value in pairs(hook_table) do if isstring(key) and isfunction(value) then table.insert(filtered, key) end end
+
+	for index, key in pairs(filtered) do
+		if not string.StartWith(key, hook_prefix) then
+			local hook_key = hook_prefix .. key
+
+			if isfunction(hook_table[hook_key]) then table.insert(hook_functions, hook_table[hook_key])
+			else table.insert(standard_functions, hook_table[key]) end
+		elseif isfunction(hook_table[key]) then table.insert(hook_functions, hook_table[key]) end
+	end
+
+	self:WikifyCollectFunctions(hook_functions)
+	self:WikifyCollectFunctions(standard_functions)
 end
 
 function PYRITION:WikifyGenerate()
