@@ -25,6 +25,7 @@ local config = {
 
 	{
 		convention = "shared",
+		download = "shared",
 		gradient = "shared",
 		html = "shared",
 		ip = "server",
