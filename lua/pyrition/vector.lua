@@ -27,16 +27,20 @@ end
 PYRITION._RemainingAxes = remaining_axes
 
 --pyrition functions
-function PYRITION:VectorCompileBezier(point_count) --create a bezier method for all vectors
-	--you only need to call this once, ever
-	--this will generate a method on the vector metatable to calculate bezier curvers
-	--if you pass 3 to point_count, the method will be named Bezier3
+function PYRITION:VectorCompileBezier(point_count)
+	---Compiles a bezier method into the Vector metatable.
+	---You only need to call this once, per point count.
+	---The created method is named Bezier# where # is the point count specified.
+	--[[-```
+--only call these once, anywhere before you need to use them.
+PYRITION:VectorCompileBezier(3)
+PYRITION:VectorCompileBezier(4)
 
-	----example:
-	--PYRITION:VectorCompileBezier(3)
-	--PYRITION:VectorCompileBezier(4)
-	--Msg(Vector(1, 2, 3):Bezier3(0.75, Vector(4, 5, 6), Vector(7, 8, 9)))
-	--Msg(Vector(1, 2, 3):Bezier4(0.75, Vector(4, 5, 6), Vector(7, 8, 9), Vector(10, 11, 12)))
+--now you can use the newly created methods
+Msg(Vector(1, 2, 3):Bezier3(0.75, Vector(4, 5, 6), Vector(7, 8, 9)))
+Msg(Vector(1, 2, 3):Bezier4(0.75, Vector(4, 5, 6), Vector(7, 8, 9), Vector(10, 11, 12)))
+```]]
+	---TYPES: number
 
 	--if you're learning, don't learn from this
 	--it's not very readable, but the function it compiles is the fastest solution I know
@@ -83,17 +87,23 @@ end
 function vector_meta:__le(right) return self.x <= right.x and self.y <= right.y and self.z <= right.z end
 function vector_meta:__lt(right) return self.x < right.x and self.y < right.y and self.z < right.z end
 
-function vector_meta:Absolute() --!makes components positive
-	self.x = math.abs(self.x)
-	self.y = math.abs(self.y)
-	self.z = math.abs(self.z)
+function vector_meta:Absolute()
+	---Makes all of the components of the vector positive.
+	---This modifies the vector.
+	self.x = math_abs(self.x)
+	self.y = math_abs(self.y)
+	self.z = math_abs(self.z)
 
 	return self
 end
 
-function vector_meta:AbsoluteDot(right) return math_abs(self:Dot(right)) end
+function vector_meta:AbsoluteDot(right)
+	---Returns the absolute dot product of two vectors.
+	return math_abs(self:Dot(right))
+end
 
-function vector_meta:Bounds(target) --returns a minimums and maximums between vectors
+function vector_meta:Bounds(target)
+	---Returns a minimum position and maximum position between two vectors.
 	local maximum_x, maximum_y, maximum_z
 	local minimum_x, minimum_y, minimum_z
 	local target_x, target_y, target_z = target:Unpack()
@@ -111,7 +121,9 @@ function vector_meta:Bounds(target) --returns a minimums and maximums between ve
 	return Vector(minimum_x, minimum_y, minimum_z), Vector(maximum_x, maximum_y, maximum_z)
 end
 
-function vector_meta:Ceil() --!rounds a vector up
+function vector_meta:Ceil()
+	---Round the vector up to the nearest integer.
+	---This modifies the vector.
 	self.x = math_ceil(self.x)
 	self.y = math_ceil(self.y)
 	self.z = math_ceil(self.z)
@@ -119,7 +131,11 @@ function vector_meta:Ceil() --!rounds a vector up
 	return self
 end
 
-function vector_meta:Clamp(minimum, maximum) --!clamp a vector to a minimum and maximum value, vectors or numbers can be used
+function vector_meta:Clamp(minimum, maximum)
+	---Clamp the vector's components to a minimum and maximum value.
+	---If provided numbers, the vector's components will be clamped to those numbers.
+	---If provided vectors, the vector's components will be clamped to the corresponding component of the vector.
+	---This modifies the vector.
 	if isnumber(minimum) then
 		self.x = math_Clamp(self.x, minimum, maximum)
 		self.y = math_Clamp(self.y, minimum, maximum)
@@ -135,9 +151,14 @@ function vector_meta:Clamp(minimum, maximum) --!clamp a vector to a minimum and 
 	return self
 end
 
-function vector_meta:Clone() return Vector(self.x, self.y, self.z) end
+function vector_meta:Clone()
+	---Returns a copy of the vector.
+	return Vector(self.x, self.y, self.z)
+end
 
-function vector_meta:ClosestAxis() --returns the closest axis a vector is aligned to
+function vector_meta:ClosestAxis()
+	---Returns the closest axis a vector is aligned to.
+	---A number 1-3 is returned representing the component, and negative values represent negative axes.
 	local normalized = self:GetNormalized():Absolute()
 	local record_axis = 0
 	local record_distance = math.huge
@@ -154,7 +175,8 @@ function vector_meta:ClosestAxis() --returns the closest axis a vector is aligne
 	return self[record_axis] < 0 and -record_axis or record_axis
 end
 
-function vector_meta:CubeIntersect(delta_vector, minimums, maximums) --find a bounds intersection given an offset
+function vector_meta:CubeIntersect(delta_vector, minimums, maximums)
+	---Find a bounds intersection from the vector given an offset and the bounds.
 	--given the position, the delta to our target, and bounds: where does this interect our universal bounds?
 	local destination = self + delta_vector
 	local record_scalar = 1
@@ -181,7 +203,8 @@ function vector_meta:CubeIntersect(delta_vector, minimums, maximums) --find a bo
 	return self + delta_vector * record_scalar
 end
 
-function vector_meta:CubeIntersectTarget(destination, minimums, maximums) --find a bounds intersection given a target
+function vector_meta:CubeIntersectTarget(destination, minimums, maximums)
+	---Find a bounds intersection from the vector given a target and bounds.
 	--give then position, the delta to our target, and bounds:
 	--where does this interect our universal bounds?
 	local delta_vector = destination - self
@@ -209,9 +232,14 @@ function vector_meta:CubeIntersectTarget(destination, minimums, maximums) --find
 	return self + delta_vector * record_scalar
 end
 
-function vector_meta:Dwells(minimums, maximums) return self >= minimums and self <= maximums end --returns if the point is contained by the two vectors (includes surfaces)
+function vector_meta:Dwells(minimums, maximums)
+	---Returns true if the point is contained by the two vectors (specifying bounds) (includes surfaces)
+	return self >= minimums and self <= maximums
+end
 
-function vector_meta:Floor() --!rounds a vector down
+function vector_meta:Floor()
+	---Round the vector down to the nearest integer.
+	---This modifies the vector.
 	self.x = math_floor(self.x)
 	self.y = math_floor(self.y)
 	self.z = math_floor(self.z)
@@ -219,7 +247,10 @@ function vector_meta:Floor() --!rounds a vector down
 	return self
 end
 
-function vector_meta:GetAxis(intolerance) --returns the closest axis a UNIT VECTOR is aligned to, or false if it was not greater than intolerance (default of 0.99)
+function vector_meta:GetAxis(intolerance)
+	---TYPES: number=0.99
+	---RETURNS: boolean
+	---Returns the closest axis a UNIT VECTOR is aligned to, or false if it was not greater than intolerance (default of 0.99)
 	local intolerance = intolerance or 0.99
 
 	for axis = 1, 3 do
@@ -231,10 +262,22 @@ function vector_meta:GetAxis(intolerance) --returns the closest axis a UNIT VECT
 	return false
 end
 
-function vector_meta:GetZeroed(zero) return Vector(self.x == 0 and zero, self.y == 0 and zero, self.z == 0 and zero) end --returns a vector with all components of zero set to the sepcified amount
-function vector_meta:Inside(minimums, maximums) return self > minimums and self < maximums end --returns if the point is contained by the two vectors (excludes surfaces)
+function vector_meta:GetZeroed(zero)
+	---TYPES: number
+	---RETURNS: Vector
+	---Returns a vector with all components of zero set to the sepcified amount.
+	return Vector(self.x == 0 and zero, self.y == 0 and zero, self.z == 0 and zero)
+end
 
-function vector_meta:MultiBounds(...) --same as Bounds but can take as many vectors as you want
+function vector_meta:Inside(minimums, maximums)
+	---Returns true if the point is contained by the two vectors (specifying bounds) (excludes surfaces)
+	return self > minimums and self < maximums
+end
+
+function vector_meta:MultiBounds(...)
+	--Same as Bounds but can take as many vectors as you want.
+	---TYPES: Vector
+	---RETURNS: Vector, Vector
 	local maximums = huge_negative_vector:Clone()
 	local minimums = huge_vector:Clone()
 
@@ -252,10 +295,30 @@ function vector_meta:MultiBounds(...) --same as Bounds but can take as many vect
 	return minimums, maximums
 end
 
-function vector_meta:SetLength(magnitude) return self:Mul(magnitude / self:Length()) end --!sets the vector's length
-function vector_meta:SetZeroes(zero) for axis = 1, 3 do if self[axis] == 0 then self[axis] = zero end end end --!sets all components of zero to the sepcified amount
+function vector_meta:SetLength(magnitude)
+	---Sets the vector's length.
+	---This modifies the vector.
+	---TYPES: number
+	---RETURNS: Vector
+	self:Mul(magnitude / self:Length())
 
-function vector_meta:TriangleNormal(second, third) --given two additional points, returns the normal of the triangle
+	return self 
+end
+
+function vector_meta:SetZeroes(zero)
+	---TYPES: number
+	---RETURNS: Vector
+	---Sets all components of zero to the sepcified amount.
+	---Unlike GetZeroed, this modifies the vector.
+	for axis = 1, 3 do if self[axis] == 0 then self[axis] = zero end end
+
+	return self
+end
+
+function vector_meta:TriangleNormal(second, third)
+	---TYPES: Vector, Vector
+	---RETURNS: Vector
+	---Given two additional points, returns the normal of the created triangle.
 	local normal = (second - self):Cross(third - self)
 
 	normal:Normalize()
@@ -263,7 +326,11 @@ function vector_meta:TriangleNormal(second, third) --given two additional points
 	return normal
 end
 
-function vector_meta:Truncate(digits) --!round componenets towards zero
+function vector_meta:Truncate(digits)
+	---TYPES: number=0
+	---RETURNS: Vector
+	---Round components towards zero.
+	---This modifies the vector.
 	digits = digits or 0
 
 	self.x = math_Truncate(self.x, digits)
@@ -273,7 +340,12 @@ function vector_meta:Truncate(digits) --!round componenets towards zero
 	return self
 end
 
-function vector_meta:WithMagnitude(magnitude) return self * magnitude / self:Length() end
+function vector_meta:WithMagnitude(magnitude)
+	---TYPES: number
+	---RETURNS: Vector
+	---Returns a copied vector with the specified magnitude.
+	return self * magnitude / self:Length()
+end
 
 --post
 for axis = 1, 3 do

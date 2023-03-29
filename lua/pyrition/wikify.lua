@@ -217,6 +217,8 @@ function PYRITION:Wikify()
 		SourcePattern = default_pattern,
 		SourceURL = default_source_url,
 	})))
+
+	if GAMEMODE.Wikify then GAMEMODE:Wikify() end
 end
 
 function PYRITION:WikifyCollectFunctions(function_list)
@@ -284,7 +286,7 @@ function PYRITION:WikifyCollectFunctions(function_list)
 				for line_comment, block_comment in multiple_gmatch(code, 1, "%-%-%-(.-)\r?\n", "%-%-%[%[%-%s*(.-)%]%]", "%b''", "%b\"\"") do
 					local comment = line_comment or block_comment
 
-					if comment then table.insert(comments, line_comment) end
+					if comment then table.insert(comments, comment) end
 				end
 
 				function_list[index] = {
@@ -378,6 +380,7 @@ function PYRITION:WikifyGenerate()
 
 	for signature, info in pairs(function_registry) do
 		local category = info.Category
+		local arguments = info.Arguments
 		local function_name = info.Name
 		local name = function_name
 		local owner = info.Owner
@@ -403,6 +406,7 @@ function PYRITION:WikifyGenerate()
 
 			if info.SourceURL then table.insert(meta_list, "SOURCE: " .. info.SourceURL) end
 			if tag_list then table.insert(meta_list, "TAGS: " .. tag_list) end
+			if arguments then table.insert(meta_list, "ARGUMENTS: " .. table.concat(arguments, " ")) end
 
 			contents = contents .. "<!--META!" .. table.concat(meta_list, "\n") .. "-->\nNo documentation found."
 		end
@@ -417,6 +421,19 @@ concommand.Add(SERVER and "sv_pyrition_wikify" or "cl_pyrition_wikify", function
 	if SERVER and ply:IsValid() and not ply:IsListenServerHost() then return end
 
 	PYRITION:Wikify()
-end)
+end, nil, "Automatically called.", FCVAR_UNREGISTERED)
 
-if CLIENT then concommand.Add("cl_pyrition_wikify_generate", function() PYRITION:WikifyGenerate() end) end
+if CLIENT then
+	concommand.Add("cl_pyrition_wikify_generate", function() PYRITION:WikifyGenerate() end, nil, "Automatically called.", FCVAR_UNREGISTERED)
+
+	concommand.Add("pyrition_wikify", function()
+		recursive_delete("pyrition/wikify")
+
+		timer.Simple(0.5, function()
+			RunConsoleCommand("cl_pyrition_wikify")
+			RunConsoleCommand("sv_pyrition_wikify")
+		end)
+
+		timer.Simple(1, function() RunConsoleCommand("cl_pyrition_wikify_generate") end)
+	end, nil, "Autonomously generates the wiki.")
+end
