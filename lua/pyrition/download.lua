@@ -45,6 +45,8 @@ function PYRITION:DownloadFiles(url_list, prefix, path_prefix)
 	---Called by DownloadList to download the files in the list fetched.
 	local routine
 	routine = coroutine.create(function() download_loop(routine, url_list, prefix, path_prefix) end)
+
+	coroutine.resume(routine)
 end
 
 function PYRITION:DownloadList(prefix, url_path, path_prefix)
