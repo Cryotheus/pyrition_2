@@ -22,7 +22,7 @@ function PYRITION:MapBuildList()
 	for index, map_file in ipairs(map_files) do duplex_insert(maps, string.StripExtension(map_file)) end
 
 	--duplex_sort(maps)
-	PYRITION:NetAddEnumeratedString("map", maps)
+	PYRITION:NetAddEnumeratedString("Map", maps)
 
 	return maps
 end
@@ -54,7 +54,7 @@ function PYRITION:MapChange(map_name, delay)
 		net.Start("pyrition_map")
 		net.WriteBool(true)
 		net.WriteFloat(time)
-		self:NetWriteEnumeratedString("map", map_name, true)
+		self:NetWriteEnumeratedString("Map", map_name, true)
 		net.Broadcast()
 	end
 
@@ -64,7 +64,7 @@ end
 function PYRITION:MapDisable(map_name) end --coming soon!
 function PYRITION:MapDisableGame(game_root) end --coming soon!
 function PYRITION:MapEnable(map_name) end --coming soon!
-function PYRITION:MapSync(map_name) duplex_inherit_entry(self:NetStreamModelQueue("map", true, {}), maps, map_name) end
+function PYRITION:MapSync(map_name) duplex_inherit_entry(self:NetStreamModelQueue("Map", true, {}), maps, map_name) end
 
 function PYRITION:MapThink()
 	if CurTime() < self.MapChanges then return end
@@ -138,4 +138,4 @@ end
 
 --post
 PYRITION:MapBuildList()
-PYRITION:NetAddEnumeratedString("map")
+PYRITION:NetAddEnumeratedString("Map")

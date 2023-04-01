@@ -203,7 +203,7 @@ function PYRITION:PlayerStorageWrite(stream, ply, key, fields)
 
 	--write the value of each field now
 	for index, field in ipairs(fields) do
-		stream:WriteEnumeratedString("storage_field", field)
+		stream:WriteEnumeratedString("StorageField", field)
 		stream[stream_methods[field]](stream, player_storage[field])
 	end
 end
@@ -317,14 +317,14 @@ function PYRITION:PyritionPlayerStorageRegisterSyncs(key, stream_methods)
 	local fields = {}
 
 	--we only need to enumerate storages that are synced
-	self:NetAddEnumeratedString("storage", key)
+	self:NetAddEnumeratedString("Storage", key)
 
 	--prefix the methods with write
 	--and create the enumerated string for the field
 	for field, method in pairs(stream_methods) do
 		count = count + 1
 
-		self:NetAddEnumeratedString("storage_field", field)
+		self:NetAddEnumeratedString("StorageField", field)
 		table.insert(fields, field)
 
 		if isstring(method) then stream_methods[field] = "Write" .. method end

@@ -6,7 +6,7 @@ function MODEL:Initialize() if SERVER then self:Send() end end
 
 function MODEL:Read()
 	while self:ReadBool() do
-		local option = self:ReadEnumeratedString("language_options")
+		local option = self:ReadEnumeratedString("LanguageOptions")
 		local phrases
 		local key = self:ReadString()
 
@@ -35,7 +35,7 @@ function MODEL:Write(_ply, key, phrases, option)
 	self:WriteBool(true)
 
 	--write key and method of delivery
-	self:WriteEnumeratedString("language_options", option)
+	self:WriteEnumeratedString("LanguageOptions", option)
 	self:WriteString(key)
 
 	if phrases then
@@ -73,4 +73,4 @@ function MODEL:Write(_ply, key, phrases, option)
 end
 
 --post
-PYRITION:NetStreamModelRegister("language", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("Language", CLIENT, MODEL)

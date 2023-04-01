@@ -11,7 +11,7 @@ function MODEL:Read()
 		teleport_history[index] = {
 			Note = self:ReadBool() and self:ReadPlayer() or self:ReadString(),
 			Position = self:ReadVector(),
-			Type = self:ReadEnumeratedString("teleport_type"),
+			Type = self:ReadEnumeratedString("TeleportType"),
 			Unix = self:ReadUInt(32),
 		}
 	end
@@ -36,7 +36,7 @@ function MODEL:Write(ply)
 		end
 
 		self:WriteVector(data.Position)
-		self:WriteEnumeratedString("teleport_type", data.Type)
+		self:WriteEnumeratedString("TeleportType", data.Type)
 		self:WriteUInt(data.Unix, 32)
 	end
 
@@ -44,4 +44,4 @@ function MODEL:Write(ply)
 end
 
 --post
-PYRITION:NetStreamModelRegister("teleport", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("Teleport", CLIENT, MODEL)

@@ -16,7 +16,7 @@ local function teleport(self, ply, destination)
 	if ply:InVehicle() then ply:ExitVehicle() end
 
 	ply:SetPos(destination)
-	self:NetStreamModelGet("teleport", ply)()
+	self:NetStreamModelGet("Teleport", ply)()
 end
 
 --pyrition functions
@@ -34,7 +34,7 @@ function PYRITION:PlayerTeleportReturn(ply, entry)
 
 	if history and next(history) then
 		local count = #history
-		local entry = entry or count
+		entry = entry or count
 		local poll = history[entry]
 
 		if poll then
@@ -55,4 +55,4 @@ end
 hook.Add("PlayerDisconnected", "PyritionPlayerTeleport", function(ply) teleport_history[ply] = nil end)
 
 --post
-PYRITION:NetAddEnumeratedString("teleport_type", "bring", "goto", "send")
+PYRITION:NetAddEnumeratedString("TeleportType", "bring", "goto", "send")

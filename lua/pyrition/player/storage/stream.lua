@@ -21,7 +21,7 @@ function MODEL:Read()
 				PYRITION.PlayerStoragePlayers[ply] = player_storage
 			end
 
-			while self:ReadBool() do PYRITION:PlayerStorageRead(self, ply, self:ReadEnumeratedString("storage")) end
+			while self:ReadBool() do PYRITION:PlayerStorageRead(self, ply, self:ReadEnumeratedString("Storage")) end
 		else PYRITION.PlayerStoragePlayers[ply] = nil end
 	end
 end
@@ -47,7 +47,7 @@ function MODEL:Write(_ply, data)
 			for key, fields in pairs(player_storages) do
 				if next(fields) then
 					self:WriteBool(true)
-					self:WriteEnumeratedString("storage", key)
+					self:WriteEnumeratedString("Storage", key)
 					PYRITION:PlayerStorageWrite(self, ply, key, fields)
 				end
 			end
@@ -65,7 +65,7 @@ function MODEL:WriteInitialSync()
 
 		for key, stream_method in pairs(PYRITION.PlayerStorageStreamMethods) do
 			self:WriteBool(true)
-			self:WriteEnumeratedString("storage", key)
+			self:WriteEnumeratedString("Storage", key)
 			PYRITION:PlayerStorageWrite(self, ply, key, true)
 		end
 
@@ -74,4 +74,4 @@ function MODEL:WriteInitialSync()
 end
 
 --post
-PYRITION:NetStreamModelRegister("storage", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("Storage", CLIENT, MODEL)

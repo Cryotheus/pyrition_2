@@ -50,4 +50,4 @@ function MODEL:Write()
 end
 
 --post
-PYRITION:NetStreamModelRegister("enumeration_bits", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("EnumerationBits", CLIENT, MODEL)

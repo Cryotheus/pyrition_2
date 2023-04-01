@@ -7,7 +7,7 @@ local MODEL = {CopyOptimization = true, Priority = 20}
 
 --local function
 local function read_map(self, index)
-	local map = self:ReadEnumeratedString("map")
+	local map = self:ReadEnumeratedString("Map")
 	map_status[index] = self:ReadBool()
 
 	local votes = self:ReadUInt(max_players_bits)
@@ -17,7 +17,7 @@ local function read_map(self, index)
 end
 
 local function write_map(self, _update_maps, map)
-	self:WriteEnumeratedString("map", map)
+	self:WriteEnumeratedString("Map", map)
 	self:WriteBool(map_status[map])
 	self:WriteUInt(map_votes[map] or 0, max_players_bits)
 end
@@ -26,7 +26,7 @@ end
 function MODEL:InitialSync() return next(PYRITION.MapList) and true or false end
 
 function MODEL:Read()
-	local bits = PYRITION.NetEnumerationBits.map
+	local bits = PYRITION.NetEnumerationBits.Map
 
 	--true if this is the complete list and in order
 	if self:ReadBool() then for index = 1, self:ReadUInt(bits) + 1 do read_map(self, index) end
@@ -34,7 +34,7 @@ function MODEL:Read()
 end
 
 function MODEL:Write(_ply, update_maps)
-	local bits = PYRITION.NetEnumerationBits.map
+	local bits = PYRITION.NetEnumerationBits.Map
 
 	if update_maps == PYRITION.MapList then --reference check because I'm worried about the order
 		self:WriteBool(true) --true because the maps being written are in order
@@ -56,10 +56,10 @@ end
 
 function MODEL:WriteInitialSync()
 	self:WriteBool(true) --true because the maps being written are in order
-	self:WriteUInt(#PYRITION.MapList - 1, PYRITION.NetEnumerationBits.map)
+	self:WriteUInt(#PYRITION.MapList - 1, PYRITION.NetEnumerationBits.Map)
 
 	for index, map in ipairs(PYRITION.MapList) do write_map(self, update_maps, map) end
 end
 
 --post
-PYRITION:NetStreamModelRegister("map", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("Map", CLIENT, MODEL)

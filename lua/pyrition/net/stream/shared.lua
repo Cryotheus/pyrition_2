@@ -309,7 +309,7 @@ function stream_meta:NetWrite(length)
 
 	if self.EnumerateClass and false then --TODO: remove this debug false
 		net_WriteBool(true)
-		PYRITION:NetWriteEnumeratedString("stream", self, self.Class, self.Player)
+		PYRITION:NetWriteEnumeratedString("Stream", self, self.Class, self.Player)
 	else
 		--print("writing that stream class", self, self.Class, self.Player)
 
@@ -1088,7 +1088,7 @@ net.Receive("pyrition_stream", function(_length, ply)
 
 	repeat
 		local stream = PYRITION:NetStreamIncoming(
-			net_ReadBool() and PYRITION:NetReadEnumeratedString("stream", ply) or net_ReadString(),
+			net_ReadBool() and PYRITION:NetReadEnumeratedString("Stream", ply) or net_ReadString(),
 			net_ReadUInt(32) + 1,
 			ply
 		)

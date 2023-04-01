@@ -323,7 +323,7 @@ function PYRITION:PyritionLanguageRegisterOption(option, operation, colored) --o
 
 	if CLIENT then return end
 
-	self:NetAddEnumeratedString("language_options", option)
+	self:NetAddEnumeratedString("LanguageOptions", option)
 end
 
 function PYRITION:PyritionLanguageRegisterTieve(tieve_function, ...)
@@ -348,10 +348,10 @@ PYRITION:LanguageRegisterColor(color_player, "name", "player", "target", "target
 PYRITION:LanguageRegisterKieve(kieve_player, "player")
 PYRITION:LanguageRegisterKieve(kieve_targets, "target", "targets")
 
-PYRITION:LanguageRegisterOption("center", function(formatted, _key, _phrases) local_player:PrintMessage(HUD_PRINTCENTER, formatted) end)
-PYRITION:LanguageRegisterOption("chat", function(formatted_table, _key, _phrases) chat.AddText(unpack(formatted_table)) end, true)
+PYRITION:LanguageRegisterOption("Center", function(formatted, _key, _phrases) local_player:PrintMessage(HUD_PRINTCENTER, formatted) end)
+PYRITION:LanguageRegisterOption("Chat", function(formatted_table, _key, _phrases) chat.AddText(unpack(formatted_table)) end, true)
 
-PYRITION:LanguageRegisterOption("console", function(formatted_table)
+PYRITION:LanguageRegisterOption("Console", function(formatted_table)
 	table.insert(formatted_table, "\n")
 	MsgC(unpack(formatted_table))
 end)

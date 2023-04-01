@@ -14,4 +14,4 @@ function PYRITION:LanguageDisplay(option, key, phrases)
 	)
 end
 
-function PYRITION:LanguageQueue(_ply, key, phrases, option) self:LanguageDisplay(option or "chat", key, phrases) end
+function PYRITION:LanguageQueue(_ply, key, phrases, option) self:LanguageDisplay(option or "Chat", key, phrases) end

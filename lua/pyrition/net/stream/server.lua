@@ -45,7 +45,7 @@ hook.Add("PlayerDisconnected", "PyritionNetStream", function(ply)
 	stream_send_queue[ply] = nil
 end)
 
-hook.Add("PyritionNetStreamRegisterClass", "PyritionNetStream", function(class, _realm, enumerated) if enumerated then PYRITION:NetAddEnumeratedString("stream", class) end end)
+hook.Add("PyritionNetStreamRegisterClass", "PyritionNetStream", function(class, _realm, enumerated) if enumerated then PYRITION:NetAddEnumeratedString("Stream", class) end end)
 
 --post
-PYRITION:NetAddEnumeratedString("stream")
+PYRITION:NetAddEnumeratedString("Stream")
