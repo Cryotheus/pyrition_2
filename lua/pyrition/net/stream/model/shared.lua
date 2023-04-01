@@ -17,10 +17,11 @@ local function dequeue_model(model, ...)
 end
 
 --globals
+PYRITION.NetStreamModelMerger = model_meta
 PYRITION.NetStreamModelMethods = stream_model_methods
-PYRITION.NetStreamModelsQueued = model_queue
 PYRITION.NetStreamModels = stream_models
 PYRITION.NetStreamModelsActive = stream_models_active
+PYRITION.NetStreamModelsQueued = model_queue
 PYRITION.__DequeueModel = dequeue_model
 
 --meta functions

@@ -41,6 +41,15 @@ local function collect_functions(hashed, collection)
 	return collection
 end
 
+local function collect_multiple(...)
+	local arguments = {...}
+	local collection = table.remove(arguments)
+
+	for index = #arguments, 1, -1 do collection = collect_functions(arguments[index], collection) end
+
+	return collection
+end
+
 local function _common_prefix(alpha, bravo)
 	local finish = #alpha
 
@@ -117,6 +126,7 @@ end
 
 --globals
 PYRITION._WikifyCollectFunctions = collect_functions
+PYRITION._WikifyCollectMultiple = collect_multiple
 
 --pyrition functions
 function PYRITION:Wikify()
@@ -200,23 +210,42 @@ function PYRITION:Wikify()
 		SourceURL = default_source_url,
 	}))
 
-	self:WikifyCollectFunctions(collect_functions(self.PlayerBadgeMeta, collect_functions(FindMetaTable("PyritionBadge"), {
-		Category = PYRITION_WIKIFY_CLASSES,
-		Name = "class_pyritionbadge",
-		Owner = "Pyrition",
-		Parent = "PyritionBadge",
-		SourcePattern = default_pattern,
-		SourceURL = default_source_url,
-	})))
+	self:WikifyCollectFunctions(collect_multiple(
+		self.PlayerBadgeMeta,
+		FindMetaTable("PyritionBadge"),
 
-	self:WikifyCollectFunctions(collect_functions(self.NetStreamMeta, collect_functions(FindMetaTable("PyritionStream"), {
-		Category = PYRITION_WIKIFY_CLASSES,
-		Name = "class_pyritionstream",
-		Owner = "Pyrition",
-		Parent = "PyritionStream",
-		SourcePattern = default_pattern,
-		SourceURL = default_source_url,
-	})))
+		{
+			Category = PYRITION_WIKIFY_CLASSES,
+			Name = "class_pyritionbadge",
+			Owner = "Pyrition",
+			Parent = "PyritionBadge",
+			SourcePattern = default_pattern,
+			SourceURL = default_source_url,
+		}
+	))
+
+	self:WikifyCollectFunctions(collect_multiple(
+		self.NetStreamMeta,
+		FindMetaTable("PyritionStream"),
+
+		{
+			Category = PYRITION_WIKIFY_CLASSES,
+			Name = "class_pyritionstream",
+			Owner = "Pyrition",
+			Parent = "PyritionStream",
+			SourcePattern = default_pattern,
+			SourceURL = default_source_url,
+		}
+	))
+
+	self:WikifyCollectFunctions(collect_functions(self.NetStreamModelMerger, {
+			Category = PYRITION_WIKIFY_CLASSES,
+			Name = "class_pyritionstreammodel",
+			Owner = "Pyrition",
+			Parent = "PyritionStreamModel",
+			SourcePattern = default_pattern,
+			SourceURL = default_source_url,
+	}))
 
 	if GAMEMODE.Wikify then GAMEMODE:Wikify() end
 end
