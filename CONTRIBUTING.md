@@ -5,4 +5,4 @@ Use one of the issue templates [here](https://github.com/Cryotheus/pyrition_2/is
 Use the specified style as described below. If it's not perfect, the maintainers of this repository can make corrections.
 
 ## Code Style
-Please follow the guidelines posted on the [wiki](https://cryotheus.github.io/wiki/?page=/developers/1-Code%20Style.md).
+Please follow the guidelines posted on the [wiki](https://cryotheus.github.io/wiki/?page=/developers/Pyrition/3/Pyrition.md).
