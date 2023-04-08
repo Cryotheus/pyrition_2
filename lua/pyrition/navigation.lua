@@ -7,7 +7,7 @@ PYRITION.NavigationAreaIndices = area_indices
 PYRITION.NavigationAreaList = area_list
 
 --pyrition functions
-function PYRITION:PyritionNavigationSetup()
+function PYRITION:NavigationSetup()
 	table.Empty(area_indices)
 	table.Empty(area_list)
 
