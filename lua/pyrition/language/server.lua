@@ -32,7 +32,7 @@ function PYRITION:LanguageDisplay(log, key, phrases, broadcast)
 end
 
 function PYRITION:LanguageQueue(ply, key, phrases, option)
-	assert(not option or self.NetEnumeratedStrings.language_options[option], "ID10T-4/S: Cannot queue language module message for non-existent option '" .. tostring(option) .. "'")
+	assert(not option or self.NetEnumeratedStrings.language_options[option], "Cannot queue language module message for non-existent option '" .. tostring(option) .. "'")
 
 	--having ply = true means to broadcast to everyone
 	if ply == true then

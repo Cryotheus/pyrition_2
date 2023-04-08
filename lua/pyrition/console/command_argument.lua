@@ -48,7 +48,6 @@ function PYRITION:ConsoleCommandArgumentParse(text)
 		local equals = string.find(found, "=")
 
 		if equals then
-			--TODO: make an ID10T error
 			if from == 1 then error("Argument creation started with key-value pair (should be one word class)") end
 
 			local key = string.TrimRight(string.sub(found, 1, equals - 1))
@@ -124,7 +123,7 @@ end
 
 --pyrition hooks
 function PYRITION:PyritionConsoleCommandArgumentRegister(class, argument_table)
-	assert(not string.find(class, "[%s=,]"), "Class name cannot contain spaces, commas, or equals signs.") --TODO: make an ID10T error
+	assert(not string.find(class, "[%s=,]"), "Class name cannot contain spaces, commas, or equals signs.")
 
 	for key, enumeration in pairs(argument_table.ParseSettingMacros or {}) do
 		--replace the macro enumeration with the actual function

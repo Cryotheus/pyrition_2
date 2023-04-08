@@ -31,7 +31,7 @@ function PYRITION:NetStreamThink()
 
 			if table.IsEmpty(stream_queue) then table_insert(completed_players, ply) end
 		else
-			ErrorNoHalt("ID10T-20: Illegal stream send queue key of type '" .. type(ply) .. "'\nStream will be dropped.\nMake sure you're not mixing the client and server realms.")
+			ErrorNoHalt("Illegal stream send queue key of type '" .. type(ply) .. "'\nStream will be dropped.\nMake sure you're not mixing the client and server realms.")
 			table_insert(completed_players, ply)
 		end
 	end

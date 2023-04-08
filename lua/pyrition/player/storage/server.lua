@@ -192,7 +192,7 @@ function PYRITION:PlayerStorageSyncRemove(who, ply) self:NetStreamModelQueue("st
 function PYRITION:PlayerStorageWrite(stream, ply, key, fields)
 	local stream_methods = self.PlayerStorageStreamMethods[key]
 
-	assert(stream_methods, "ID10T-23/S: Missing stream methods for syncing storage " .. tostring(key))
+	assert(stream_methods, "Missing stream methods for syncing storage " .. tostring(key))
 
 	if fields == true then fields = stream_methods._Fields end
 
@@ -273,14 +273,14 @@ function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
 	local type_names_builder = {}
 	local values_builder = {}
 
-	assert(next(fields), "ID10T-15: No fields for player storage '" .. tostring(key) .. "'")
+	assert(next(fields), "No fields for player storage '" .. tostring(key) .. "'")
 
 	for index, field_meta in ipairs(fields) do
 		local field_key = field_meta.Key
 		local type_name = string.lower(field_meta.TypeName)
 		local valid = valid_type_names[type_name]
 
-		assert(field_key and field_key ~= "steam_id", "ID10T-15: Invalid Key field. Key must not be nil or 'steam_id'")
+		assert(field_key and field_key ~= "steam_id", "Invalid Key field. Key must not be nil or 'steam_id'")
 
 		if valid then
 			local type_name_instruction = type_name
@@ -289,7 +289,7 @@ function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
 				local parameters = field_meta.TypeParameters
 				parameters = isnumber(parameters) and {parameters}
 
-				assert(parameters and #parameters == valid, "ID10T-14: TypeParameters field has a mismatch in typename parameter quantity. Value required is " .. valid .. ", and value given is '" .. tostring(parameters and #parameters)  .. "'.")
+				assert(parameters and #parameters == valid, "TypeParameters field has a mismatch in typename parameter quantity. Value required is " .. valid .. ", and value given is '" .. tostring(parameters and #parameters)  .. "'.")
 
 				type_name_instruction = type_name_instruction .. "(" .. table.concat(parameters, ", ") .. ")"
 			end
@@ -300,7 +300,7 @@ function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
 			table.insert(type_names_builder, type_name)
 			table.insert(field_instructions, "`" .. field_key .. "` " .. type_name_instruction)
 			table.insert(values_builder, field_key)
-		else ErrorNoHalt("ID10T-13: Invalid TypeName value '" .. tostring(type_name) .. "' for player storage registration.") end
+		else ErrorNoHalt("Invalid TypeName value '" .. tostring(type_name) .. "' for player storage registration.") end
 	end
 
 	self.PlayerStorages[key] = {

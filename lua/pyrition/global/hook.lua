@@ -34,8 +34,11 @@ function PYRITION:GlobalHookConvert(key, post, immediate)
 end
 
 function PYRITION:GlobalHookCreate(key, post)
-	--this creates a macro to hook.Call the key prefixed by Pyrition
-	--although this is done automatically to all functions starting with Pyrition in the PYRITION table
+	---This creates a macro to hook.Call the key prefixed by Pyrition.
+	---This is done automatically to all functions starting with Pyrition in the PYRITION table after all of Pyrition loads.
+	---The function you call this for MUST be prefixed with Pyrition.
+	---The key parameter should not contain the Pyrition prefix however.
+	---Set post to true to create a hook prefixed PyritionPost which is called after hook's function is called.
 	create_hooked_functions(self, key, "Pyrition" .. key, post)
 end
 

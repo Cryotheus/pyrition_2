@@ -29,7 +29,7 @@ local config = {
 		gradient = "shared",
 		html = "shared",
 		ip = "server",
-		
+
 		modules = {
 			language = "server",
 		},
@@ -142,11 +142,15 @@ local config = {
 			stream = "shared",
 		},
 
+		navigation = "server",
+
 		net = {
+			debug = "client",
 			enumeration_bits = "shared",
 
 			stream = {
 				client = true,
+				debug = "client",
 
 				model = {
 					server = true,

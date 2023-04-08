@@ -7,7 +7,7 @@ local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] =
 local function read_enumerated_string(namespace, _ply, text, enumeration)
 	local enumerations = net_enumerations[namespace]
 
-	assert(enumerations, "ID10T-2/C: Attempt to read enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
+	assert(enumerations, "Attempt to read enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
 
 	if text then
 		enumerations[enumeration] = text
@@ -22,7 +22,7 @@ end
 local function write_enumerated_string(namespace, text)
 	local enumerations = net_enumerations[namespace]
 
-	assert(enumerations, "ID10T-3/C: Attempt to write enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
+	assert(enumerations, "Attempt to write enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
 
 	local enumeration = enumerations[text]
 

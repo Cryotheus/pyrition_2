@@ -989,8 +989,8 @@ function PYRITION:NetStreamIncoming(class, uid, ply)
 		return false
 	else
 		if CLIENT then
-			if realm == nil then ErrorNoHalt("ID10T-16.1: Received stream with unregistered class '" .. tostring(class) .. "'")
-			else ErrorNoHalt("ID10T-16.2: Received class '" .. tostring(class) .. "' stream in the wrong realm.") end
+			if realm == nil then ErrorNoHalt("Received stream with unregistered class '" .. tostring(class) .. "'")
+			else ErrorNoHalt("Received class '" .. tostring(class) .. "' stream in the wrong realm.") end
 		end
 
 		--read the data anyways so following streams are not butchered

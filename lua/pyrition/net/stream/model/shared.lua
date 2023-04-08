@@ -54,10 +54,10 @@ function model_meta:Initialize() end
 function model_meta:InitialSync(_ply) return false end
 function model_meta:CleanUp() stream_models_active[self.Class][self] = nil end
 function model_meta:OnComplete(_ply) self:CleanUp() end
-function model_meta:PreventWrite() ErrorNoHaltWithStack("ID10T-15: Attempt to call a write method after stream model has been marked complete.") end
-function model_meta:Read(_ply) ErrorNoHaltWithStack("ID10T-17.1: Stream model '" .. tostring(self) .. "' is missing a Read method.") end
+function model_meta:PreventWrite() ErrorNoHaltWithStack("Attempt to call a write method after stream model has been marked complete.") end
+function model_meta:Read(_ply) ErrorNoHaltWithStack("Stream model '" .. tostring(self) .. "' is missing a Read method.") end
 function model_meta:SendFinished() self:CleanUp() end
-function model_meta:Write(_ply) ErrorNoHaltWithStack("ID10T-17.2: Stream model '" .. tostring(self) .. "' is missing a Write method.") end
+function model_meta:Write(_ply) ErrorNoHaltWithStack("Stream model '" .. tostring(self) .. "' is missing a Write method.") end
 
 --pyrition functions
 function PYRITION:NetStreamModel(stream)
@@ -66,7 +66,7 @@ function PYRITION:NetStreamModel(stream)
 	local class = stream.Class
 	local model_methods = stream_model_methods[class]
 
-	assert(model_methods, "ID10T-18.2: Attempt to convert stream model with non-existant class '" .. tostring(class) .. "'")
+	assert(model_methods, "Attempt to convert stream model with non-existant class '" .. tostring(class) .. "'")
 	table.Merge(stream, model_meta)
 	table.Merge(stream, model_methods)
 
@@ -82,7 +82,7 @@ function PYRITION:NetStreamModelCreate(class, ply)
 
 	stream_models[stream] = SERVER and ply or false
 
-	assert(model_methods, "ID10T-18.1: Attempt to create stream model with non-existant class '" .. tostring(class) .. "'")
+	assert(model_methods, "Attempt to create stream model with non-existant class '" .. tostring(class) .. "'")
 	table.Merge(stream, model_meta) --default methods
 	table.Merge(stream, model_methods) --class custom methods
 

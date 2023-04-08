@@ -132,8 +132,8 @@ function Set(duplex, position, value)
 	---RETURNS: number
 	---Sets a value at a specific index in the duplex, and returns the index.
 
-	assert(isnumber(position), "ID10T-8: Attempt to set a non-numerical " .. type(position) .. " index in duplex.")
-	assert(value ~= nil, "ID10T-9: Attempt to set a nil value in duplex. Use duplex.Unset instead.")
+	assert(isnumber(position), "Attempt to set a non-numerical " .. type(position) .. " index in duplex.")
+	assert(value ~= nil, "Attempt to set a nil value in duplex. Use duplex.Unset instead.")
 
 	local old_index = duplex[value]
 

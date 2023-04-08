@@ -53,7 +53,7 @@ function PYRITION:PyritionConsoleCommandExecute(executor, command, signature_ind
 end
 
 function PYRITION:PyritionConsoleCommandRegister(command_path, command_table)
-	assert(not string.find(command_path, "[`~%?]"), "Command path cannot contain a the following characters: ` ~ ?") --TODO: make an ID10T error message
+	assert(not string.find(command_path, "[`~%?]"), "Command path cannot contain a the following characters: ` ~ ?")
 	assert(not string.find(command_path, "  +"), "Command path words should only be spaced apart by one space.")
 
 	local path_length = #command_path

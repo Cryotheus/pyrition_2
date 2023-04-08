@@ -17,7 +17,7 @@ local teaching_queue = {}
 local function read_enumerated_string(namespace, ply, text, enumeration)
 	local enumerations = net_enumerations[namespace]
 
-	assert(enumerations, "ID10T-2/S: Attempt to read enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
+	assert(enumerations, "Attempt to read enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
 
 	if text then
 		--we're not king tut, we return if there's text and it's not restricted if ply is provided
@@ -55,7 +55,7 @@ end
 local function recipient_pairs(recipients)
 	local players = recipient_iterable(recipients)
 
-	assert(istable(players), "ID10T-14: Bad argument #1 to 'recipient_pairs' (true, table, Player, or CRecipientFilter expected, got " .. type(recipients) .. ")")
+	assert(istable(players), "Bad argument #1 to 'recipient_pairs' (true, table, Player, or CRecipientFilter expected, got " .. type(recipients) .. ")")
 
 	return ipairs(players), players, 0
 end
@@ -86,11 +86,11 @@ end
 local function write_enumerated_string(namespace, text, recipients)
 	local enumerations = net_enumerations[namespace]
 
-	assert(enumerations, "ID10T-3/S: Attempt to write enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
+	assert(enumerations, "Attempt to write enumerated string using non-existent namespace '" .. tostring(namespace) .. "'")
 
 	local enumeration = enumerations[text]
 
-	assert(enumeration, "ID10T-3.1: Attempt to write enumerated string using non-existent enumeration '" .. tostring(text) .. "'")
+	assert(enumeration, "Attempt to write enumerated string using non-existent enumeration '" .. tostring(text) .. "'")
 
 	return track_enumerations(namespace, enumeration, recipients), text, enumeration, net_enumeration_bits[namespace]
 end

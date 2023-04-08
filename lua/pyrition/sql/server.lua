@@ -152,7 +152,7 @@ function PYRITION:SQLCommit(completion_callback) --Stop queuing SQLQuery calls, 
 		if queued[1] then return commit_queued(queued, completion_callback) end
 
 		--otherwise call the developer an idiot and discard the queue
-		ErrorNoHaltWithStack("ID10T-22: Blocking attempt to start an empty SQL transaction.")
+		ErrorNoHaltWithStack("Blocking attempt to start an empty SQL transaction.")
 		self:SQLDiscard()
 
 		return false

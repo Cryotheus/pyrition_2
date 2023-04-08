@@ -5,7 +5,7 @@ local bits = PYRITION._Bits
 function PYRITION:PlayerStorageRead(stream, ply, key)
 	local stream_methods = self.PlayerStorageStreamMethods[key]
 
-	assert(stream_methods, "ID10T-23/C: Missing stream methods for syncing storage " .. tostring(key))
+	assert(stream_methods, "Missing stream methods for syncing storage " .. tostring(key))
 
 	local player_storage = self.PlayerStoragePlayers[ply][key]
 
