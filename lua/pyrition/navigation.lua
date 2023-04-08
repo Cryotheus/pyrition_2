@@ -25,6 +25,3 @@ end
 
 --hooks
 hook.Add("InitPostEntity", "PyritionNavigationSetup", function() PYRITION:NavigationSetup() end)
-
---post
-PYRITION:GlobalHookCreate("NavigationSetup", true)
