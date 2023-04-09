@@ -1,15 +1,22 @@
 --locals
 local area_indices = PYRITION.NavigationAreaIndices or {}
 local area_list = PYRITION.NavigationAreaList or {}
+local setup_patience = 60 --how long until we timeout for doing navmesh setup
+local setup_wait
 
 --globals
 PYRITION.NavigationAreaIndices = area_indices
 PYRITION.NavigationAreaList = area_list
 
 --pyrition functions
+function PYRITION:NavigationSetupTimeout()
+	--LOCALIZE: navmesh timeout message
+	self:LanguageDisplay("navigation", "The navigation mesh failed to load in time. Did you forget to generate it?")
+end
+
 function PYRITION:NavigationSetup()
-	--the navmesh must be loaded for us to get the areas
-	if not navmesh.IsLoaded() then navmesh.Load() end
+	table.Empty(area_indices)
+	table.Empty(area_list)
 
 	for index = 1, navmesh.GetNavAreaCount() do
 		local area = navmesh.GetNavAreaByID(index)
@@ -24,4 +31,16 @@ function PYRITION:NavigationSetup()
 end
 
 --hooks
-hook.Add("InitPostEntity", "PyritionNavigationSetup", function() PYRITION:NavigationSetup() end)
+if not next(PYRITION.NavigationAreaList) or navmesh.IsLoaded() and navmesh.GetNavAreaCount() == 0 then
+	hook.Add("Tick", "PyritionNavigationSetup", function()
+		if navmesh.IsLoaded() then
+			hook.Remove("Tick", "PyritionNavigationSetup")
+			PYRITION:NavigationSetup()
+		elseif setup_wait then
+			if CurTime() > setup_wait then
+				hook.Remove("Tick", "PyritionNavigationSetup")
+				PYRITION:NavigationSetupTimeout()
+			end
+		else setup_wait = CurTime() + setup_patience end
+	end)
+end
