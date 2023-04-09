@@ -12,6 +12,9 @@ local function create_hooked_functions(self, key, hook_key, post)
 	if post == nil then post = self["_GlobalHookPost_" .. key]
 	else self["_GlobalHookPost_" .. key] = post end
 
+	--migrate the function to the hooked version
+	if not self[hook_key] and self[key] then self[hook_key] = self[key] end
+
 	if post then
 		local post_key = "PyritionPost" .. key
 
