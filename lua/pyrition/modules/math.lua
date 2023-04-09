@@ -86,6 +86,21 @@ function math.CompileBezier(point_count) --return a bezier function for the give
 	return bezier
 end
 
+function math.IntersectionByPoints(alpha_start_x, alpha_start_y, alpha_end_x, alpha_end_y, bravo_start_x, bravo_start_y, bravo_end_x, bravo_end_y)
+	local x_difference_x, x_difference_y = alpha_start_x - alpha_end_x, bravo_start_x - bravo_end_x
+	local y_difference_x, y_difference_y = alpha_start_y - alpha_end_y, bravo_start_y - bravo_end_y
+	local dividend = x_difference_x * y_difference_y - x_difference_y * y_difference_x
+
+	if dividend == 0 then return false end
+
+	local line_x = alpha_start_x * alpha_end_y - alpha_start_y * alpha_end_x
+	local line_y = bravo_start_x * bravo_end_y - bravo_start_y * bravo_end_x
+
+	return
+		(line_x * x_difference_y - line_y * x_difference_x) / dividend,
+		(line_x * y_difference_y - line_y * y_difference_x) / dividend
+end
+
 function math.PascalRow(line)
 	local line = line - 1
 	local row = {1}
