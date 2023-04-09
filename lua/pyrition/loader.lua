@@ -303,6 +303,7 @@ local config = {
 local branding = "Pyrition"
 local color = Color(255, 128, 64) --color representing your project
 local color_generic = Color(240, 240, 240) --most frequently used color
+local load_extensions = true
 local silent = CLIENT --disable console messages
 
 do --do not touch
@@ -319,7 +320,12 @@ do --do not touch
 	--local functions
 	local function build_list(include_list, prefix, tree) --recursively explores to build load order
 		for name, object in pairs(tree) do
-			local trimmed_path = name == 1 and string.sub(prefix, 1, -2) or prefix .. name
+			local trimmed_path
+
+			if name == 1 then
+				name = select(3, string.find(prefix, "[/]*([^/]-)/?$"))
+				trimmed_path = string.sub(prefix, 1, -2)
+			else trimmed_path = prefix .. name end
 
 			if istable(object) then build_list(include_list, trimmed_path .. "/", object)
 			elseif object then
@@ -354,7 +360,6 @@ do --do not touch
 	local function grab_extensions(directory)
 		local files, folders = file.Find(directory .. "*", "LUA")
 
-		--file.Exists is not reliable for directories on client
 		if files then
 			for index, folder_name in ipairs(folders) do
 				local directory = directory .. folder_name .. "/"
@@ -510,17 +515,7 @@ do --do not touch
 	--post
 	if load_extensions then
 		local loader = debug.getinfo(1, "S").short_src
-		--local loader_substring
-		local _start, finish
-
-		if GM then
-			_start, finish = string.find(loader, "/.-/gamemodes/")
-			--loader_substring = string.sub(loader, finish + 1)
-			--loader_substring =
-		else
-			_start, finish = string.find(loader, "/?lua/", 1, true)
-			--loader_substring = string.sub(loader, start + 4, finish)
-		end
+		local _start, finish = string.find(loader, GM and "/.-/gamemodes/" or "/?lua/")
 
 		local loader_path = string.sub(loader, finish + 1)
 		local loader_extensions_directory = string.GetPathFromFilename(loader_path) .. "extensions/"
@@ -572,7 +567,7 @@ do --do not touch
 				return next_structure, table.insert(config, next_structure), true
 			else index = #config end
 
-			return config[index], config, false
+			return config[index], index, false
 		end,
 
 		Before = function(path, dont_create_table)

@@ -16,7 +16,7 @@ local enumerations = {
 		"SUCCEEDED",
 	},
 
-	{
+	{ --https://developer.valvesoftware.com/wiki/Valve_Texture_Format#VTF_enumerations
 		DontBrand = true,
 		Prefix = "IMAGE_FORMAT",
 
@@ -46,6 +46,16 @@ local enumerations = {
 		"RGBA16161616F",
 		"RGBA16161616",
 		"UVLX8888",
+	},
+
+	{ --https://wiki.facepunch.com/gmod/Enums/NavDir
+		Offset = -1,
+		Prefix = "NAV_DIR",
+
+		"EAST",
+		"NORTH",
+		"SOUTH",
+		"WEST",
 	},
 
 	{
@@ -90,6 +100,7 @@ end
 
 --post
 for _, enumerations in ipairs(enumerations) do
+	local offset = enumerations.Offset or 0
 	local prefix = enumerations.Prefix
 
 	if enumerations.DontBrand then
@@ -100,5 +111,5 @@ for _, enumerations in ipairs(enumerations) do
 		else prefix = "PYRITION_" end
 	end
 
-	for value, name in ipairs(enumerations) do _G[prefix .. name] = value end
+	for value, name in ipairs(enumerations) do _G[prefix .. name] = value + offset end
 end

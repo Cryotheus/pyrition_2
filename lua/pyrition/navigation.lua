@@ -8,8 +8,8 @@ PYRITION.NavigationAreaList = area_list
 
 --pyrition functions
 function PYRITION:NavigationSetup()
-	table.Empty(area_indices)
-	table.Empty(area_list)
+	--the navmesh must be loaded for us to get the areas
+	if not navmesh.IsLoaded() then navmesh.Load() end
 
 	for index = 1, navmesh.GetNavAreaCount() do
 		local area = navmesh.GetNavAreaByID(index)
@@ -19,7 +19,7 @@ function PYRITION:NavigationSetup()
 
 			area_list[area] = index
 			area_list[index] = area
-		else area_list[index] = false end
+		else area_list[index] = false end --we don't want gaps
 	end
 end
 
