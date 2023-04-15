@@ -12,8 +12,8 @@ function path_follower_meta:GetDeduplicatedSegments()
 	local segments_count = #segments
 
 	if segments_count > 1 and segments[segments_count].area == segments[segments_count - 1].area then
-		segments_count = segments_count - 1
 		segments[segments_count] = nil
+		segments_count = segments_count - 1
 	end
 
 	while index <= segments_count do
