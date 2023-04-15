@@ -57,14 +57,27 @@ end
 
 --global functions
 function math.Approach(current, target, increment)
-	--removing this could break things
-	--but no one is dumb enough to give a NEGATIVE approach increment... right?
-	--increment = math.abs(increment)
+	---Same as it is in the [Garry's Mod Wiki](https://wiki.facepunch.com/gmod/math.Approach)
+	--because the source does this, we must keep it in case other addons rely on it
+	if increment < 0 then increment = -increment end
 
 	if current < target then return math_min(current + increment, target)
 	elseif current > target then return math_max(current - increment, target) end
 
 	return target
+end
+
+function math.ApproachPA(current, target, increment)
+	---Proof-abiding version of `math.Approach`, this will let the value "run away" if given a negative increment.
+	---This behavior will not happen if `current` is equal to `target`.
+	if current == target then return target
+	elseif increment < 0 then
+		if current < target then return current + increment
+		else return current - increment end
+	else
+		if current < target then return math_min(current + increment, target)
+		else return math_max(current - increment, target) end
+	end
 end
 
 function math.CompileBezier(point_count) --return a bezier function for the given point count
@@ -124,6 +137,7 @@ function math.PascalRow(line)
 end
 
 function math.Remap(value, in_minimum, in_maximum, out_minimum, out_maximum)
+	---Same as it is in the [Garry's Mod Wiki](https://wiki.facepunch.com/gmod/math.Remap)
 	--rewrote to use less parenthesis
 	return out_minimum + (value - in_minimum) / (in_maximum - in_minimum) * (out_maximum - out_minimum)
 end
@@ -132,6 +146,7 @@ function math.Sign(value) return value > 0 and 1 or value < 0 and -1 or 0 end
 function math.SignBiased(value) return value < 0 and -1 or 1 end
 
 function math.Truncate(number, digits)
+	---Same as it is in the [Garry's Mod Wiki](https://wiki.facepunch.com/gmod/math.Truncate)
 	--rewrote to use one less local
 	local multiplier = 10 ^ (digits or 0)
 
