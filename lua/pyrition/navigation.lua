@@ -15,18 +15,22 @@ function PYRITION:NavigationSetupTimeout()
 end
 
 function PYRITION:NavigationSetup()
+	local last_index = 1
+	--navmesh.GetAllNavAreas
 	table.Empty(area_indices)
 	table.Empty(area_list)
 
-	for index = 1, navmesh.GetNavAreaCount() do
-		local area = navmesh.GetNavAreaByID(index)
+	for index, area in ipairs(navmesh.GetAllNavAreas()) do
+		local area_index = area:GetID()
+		area_list[area] = area_index
+		area_list[area_index] = area
 
-		if area then
-			table.insert(area_indices, index)
+		table.insert(area_indices, area_index)
 
-			area_list[area] = index
-			area_list[index] = area
-		else area_list[index] = false end --we don't want gaps
+		--we don't want gaps
+		for fill_index = area_index - 1, last_index + 1, -1 do area_list[fill_index] = false end
+
+		last_index = area_index
 	end
 end
 

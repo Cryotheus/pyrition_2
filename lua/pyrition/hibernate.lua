@@ -12,7 +12,10 @@ end
 PYRITION.HibernateRegistry = hibernation_registry
 
 --pyrition functions
-function PYRITION:Hibernate(key, state) --Toggles hibernation thinking
+function PYRITION:Hibernate(key, state)
+	---TYPES: string, boolean=nil
+	---Disables hibernation thinking once this has been called for all keys.
+	---Setting state to false (not nil!) is the same as calling HibernateWake.
 	if state ~= false then
 		hibernation_registry[key] = nil
 
@@ -27,8 +30,8 @@ function PYRITION:Hibernate(key, state) --Toggles hibernation thinking
 	RunConsoleCommand("sv_hibernate_think", 1)
 end
 
-function PYRITION:HibernateWake(key) self:Hibernate(key, false) end --Enables hibernation thinking
-function PYRITION:Hibernating() return next(hibernation_registry) == nil end
+function PYRITION:HibernateWake(key) self:Hibernate(key, false) end ---Enables hibernation thinking.
+function PYRITION:Hibernating() return next(hibernation_registry) == nil end ---Returns true if hibernation thinking is enabled.
 
 --convars
 cvars.AddChangeCallback("pyrition_hibernate_think", update_hibernate_think, "PyritionHibernate")
