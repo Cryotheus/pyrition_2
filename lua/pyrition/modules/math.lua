@@ -2,6 +2,8 @@
 --local double_epsilon = 4.94065645841246544176568792868E-324
 --local float_epsilon = 1.175494e-38
 local math_ceil = math.ceil
+local math_max = math.max
+local math_min = math.min
 local math_floor = math.floor
 
 --local functions
@@ -54,6 +56,17 @@ local function bezier_point_regression_formula(point_count)
 end
 
 --global functions
+function math.Approach(current, target, increment)
+	--removing this could break things
+	--but no one is dumb enough to give a NEGATIVE approach increment... right?
+	--increment = math.abs(increment)
+
+	if current < target then return math_min(current + increment, target)
+	elseif current > target then return math_max(current - increment, target) end
+
+	return target
+end
+
 function math.CompileBezier(point_count) --return a bezier function for the given point count
 	--3 is quadratic, 4 is cubic, 5 is quartic, and so on
 	--you only need to call this once, ever

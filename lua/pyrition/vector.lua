@@ -102,6 +102,17 @@ function vector_meta:AbsoluteDot(right)
 	return math_abs(self:Dot(right))
 end
 
+function vector_meta:Approach(target, distance)
+	---Returns a vector that is moved `distance` units closer to `target`.
+	if self:Distance(target) <= distance then return target end
+
+	local direction = target - self
+
+	direction:Normalize()
+
+	return direction * distance + self
+end
+
 function vector_meta:Bounds(target)
 	---Returns a minimum position and maximum position between two vectors.
 	local maximum_x, maximum_y, maximum_z
@@ -282,8 +293,6 @@ function vector_meta:MultiBounds(...)
 	local minimums = huge_vector:Clone()
 
 	for index, vector in ipairs{self, ...} do
-		--debugoverlay.Cross(vector, 10, 5, color_white, true)
-
 		for axis = 1, 3 do
 			local component = vector[axis]
 
