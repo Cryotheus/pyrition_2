@@ -192,11 +192,11 @@ function PYRITION:Wikify()
 		SourceURL = default_source_url,
 	}))
 
-	self:WikifyCollectFunctions(collect_functions(FindMetaTable("Vector"), {
+	self:WikifyCollectFunctions(collect_functions(FindMetaTable("PathFollower"), {
 		Category = PYRITION_WIKIFY_CLASSES,
-		Name = "class_vector",
+		Name = "class_path_follower",
 		Owner = "Pyrition",
-		Parent = "Vector",
+		Parent = "PathFollower",
 		SourcePattern = default_pattern,
 		SourceURL = default_source_url,
 	}))
@@ -206,6 +206,15 @@ function PYRITION:Wikify()
 		Name = "class_player",
 		Owner = "Pyrition",
 		Parent = "Player",
+		SourcePattern = default_pattern,
+		SourceURL = default_source_url,
+	}))
+
+	self:WikifyCollectFunctions(collect_functions(FindMetaTable("Vector"), {
+		Category = PYRITION_WIKIFY_CLASSES,
+		Name = "class_vector",
+		Owner = "Pyrition",
+		Parent = "Vector",
 		SourcePattern = default_pattern,
 		SourceURL = default_source_url,
 	}))

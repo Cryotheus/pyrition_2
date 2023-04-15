@@ -50,6 +50,11 @@ local config = {
 	},
 
 	{
+		classes = {
+			path_follower = "server",
+			vector = "shared",
+		},
+
 		hibernate = "server",
 
 		net = {
@@ -72,7 +77,6 @@ local config = {
 		},
 
 		string = "shared",
-		vector = "shared",
 	},
 
 	{
