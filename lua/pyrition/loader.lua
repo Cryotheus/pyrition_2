@@ -170,6 +170,8 @@ local config = {
 			},
 		},
 
+		shared = true,
+
 		sql = {
 			client = true,
 		},
