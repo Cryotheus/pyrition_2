@@ -195,14 +195,16 @@ function PYRITION:Wikify()
 		SourceURL = default_source_url,
 	}))
 
-	self:WikifyCollectFunctions(collect_functions(FindMetaTable("PathFollower"), {
-		Category = PYRITION_WIKIFY_CLASSES,
-		Name = "class_path_follower",
-		Owner = "Pyrition",
-		Parent = "PathFollower",
-		SourcePattern = default_pattern,
-		SourceURL = default_source_url,
-	}))
+	if SERVER then
+		self:WikifyCollectFunctions(collect_functions(FindMetaTable("PathFollower"), {
+			Category = PYRITION_WIKIFY_CLASSES,
+			Name = "class_path_follower",
+			Owner = "Pyrition",
+			Parent = "PathFollower",
+			SourcePattern = default_pattern,
+			SourceURL = default_source_url,
+		}))
+	end
 
 	self:WikifyCollectFunctions(collect_functions(FindMetaTable("Player"), {
 		Category = PYRITION_WIKIFY_CLASSES,
@@ -390,14 +392,18 @@ function PYRITION:WikifyCollectHooks(hook_table, hook_prefix, hook_functions, st
 end
 
 function PYRITION:WikifyCollectPanels(panel_data, prefix)
-	for panel_name, panel_table in pairs(vgui.GetControlTable()) do
-		if not prefix or string.StartWith(panel_name, prefix) then
+	if SERVER then return end
+
+	prefix = prefix or ""
+
+	for class_name in pairs(derma.GetControlList()) do
+		if string.StartWith(class_name, prefix) then
 			local panel_list = table.Copy(panel_data)
 
-			panel_list.Name = prefix .. string.gsub(panel_name, "[^%w%s_]", "_") .. "_" .. panel_list.Name
-			panel_list.Parent = panel_name
+			panel_list.Name = prefix .. string.gsub(class_name, "[^%w%s_]", "_") .. "_" .. panel_list.Name
+			panel_list.Parent = class_name
 
-			PYRITION:WikifyCollectFunctions(panel_list)
+			PYRITION:WikifyCollectFunctions(collect_functions(vgui.GetControlTable(class_name), panel_list))
 		end
 	end
 end
@@ -472,7 +478,7 @@ function PYRITION:WikifyGenerate()
 
 		local documentation = info.Documentation or "No documentation found."
 		local meta_list = {"OWNER: " .. owner}
-		local meta_tags = info.MetaTags
+		local meta_tags = info.MetaTags or {}
 		local path = indicative_case(owner .. "/" .. category .. "/" .. (parent and parent .. "/" or "/") .. name .. ".txt")
 
 		--add meta tags to the list if they exist
