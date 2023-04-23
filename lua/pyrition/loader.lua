@@ -96,7 +96,7 @@ local config = {
 		},
 
 		panels = {
-			dlabel_fix = "client",
+			dlabel = "client",
 		},
 	},
 
