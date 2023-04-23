@@ -1,6 +1,6 @@
 ---DEVELOPER
 --locals
-command_prefix = SERVER and "sv_pyrition_wikify_" or "cl_pyrition_wikify_"
+local meta_tag_handles = PYRITION.WikifyMetaTagHandles or {}
 
 include("includes/entity_proxy.lua")
 
@@ -63,6 +63,8 @@ local function _common_prefix(alpha, bravo)
 
 	return string.sub(alpha, 1, finish)
 end
+
+local function default_meta_tag_handle(content) return content end
 
 local function _get_nested(tree, indexing)
 	for index, key in ipairs(indexing) do
@@ -127,6 +129,7 @@ end
 --globals
 PYRITION._WikifyCollectFunctions = collect_functions
 PYRITION._WikifyCollectMultiple = collect_multiple
+PYRITION.WikifyMetaTagHandles = meta_tag_handles
 
 --pyrition functions
 function PYRITION:Wikify()
@@ -256,6 +259,14 @@ function PYRITION:Wikify()
 			SourceURL = default_source_url,
 	}))
 
+	self:WikifyCollectPanels{
+		Category = PYRITION_WIKIFY_PANELS,
+		Name = "panel_pyrition",
+		Owner = "Pyrition",
+		SourcePattern = default_pattern,
+		SourceURL = default_source_url,
+	}
+
 	if GAMEMODE.Wikify then GAMEMODE:Wikify() end
 end
 
@@ -318,13 +329,23 @@ function PYRITION:WikifyCollectFunctions(function_list)
 			local match_name, match_arguments = select(3, string.find(code, "%s*function%s+(.-)%s*%((.-)%)"))
 
 			if match_name and match_arguments then
-				local name = table.remove(string.Split(table.remove(string.Split(match_name, ".")), ":"))
 				local arguments = string.Explode("%s*,%s*", match_arguments, true)
+				local meta_tags = {}
+				local name = table.remove(string.Split(table.remove(string.Split(match_name, ".")), ":"))
 
 				for line_comment, block_comment in multiple_gmatch(code, 1, "%-%-%-(.-)\r?\n", "%-%-%[%[%-%s*(.-)%]%]", "%b''", "%b\"\"") do
 					local comment = line_comment or block_comment
 
-					if comment then table.insert(comments, comment) end
+					if comment then
+						local tag, tag_contents = select(3, string.find(comment, "%s*([%u_]-):(.-)"))
+						local tag_handle = meta_tag_handles[tag]
+
+						if tag_handle then
+							local result = tag_handle(tag_contents)
+
+							if result then meta_tags[tag] = result end
+						else table.insert(comments, comment) end
+					end
 				end
 
 				function_list[index] = {
@@ -332,6 +353,7 @@ function PYRITION:WikifyCollectFunctions(function_list)
 					Documentation = next(comments) and table.concat(comments, "\n"),
 					Line = start_line,
 					LineEnd = end_line,
+					MetaTags = next(meta_tags) and meta_tags,
 					Name = name,
 					SourceURL = source_url,
 				}
@@ -367,6 +389,19 @@ function PYRITION:WikifyCollectHooks(hook_table, hook_prefix, hook_functions, st
 	self:WikifyCollectFunctions(standard_functions)
 end
 
+function PYRITION:WikifyCollectPanels(panel_data, prefix)
+	for panel_name, panel_table in pairs(vgui.GetControlTable()) do
+		if not prefix or string.StartWith(panel_name, prefix) then
+			local panel_list = table.Copy(panel_data)
+
+			panel_list.Name = prefix .. string.gsub(panel_name, "[^%w%s_]", "_") .. "_" .. panel_list.Name
+			panel_list.Parent = panel_name
+
+			PYRITION:WikifyCollectFunctions(panel_list)
+		end
+	end
+end
+
 function PYRITION:WikifyGenerate()
 	local collection_files = file.Find("pyrition/wikify/*", "DATA")
 
@@ -398,6 +433,7 @@ function PYRITION:WikifyGenerate()
 					Documentation = info.Documentation,
 					Line = info.Line,
 					LineEnd = info.LineEnd,
+					MetaTags = info.MetaTags,
 					Name = info.Name,
 					Owner = owner,
 					Parent = parent,
@@ -417,8 +453,8 @@ function PYRITION:WikifyGenerate()
 	end
 
 	for signature, info in pairs(function_registry) do
-		local category = info.Category
 		local arguments = info.Arguments
+		local category = info.Category
 		local function_name = info.Name
 		local name = function_name
 		local owner = info.Owner
@@ -434,27 +470,53 @@ function PYRITION:WikifyGenerate()
 			name = tag_list .. "-" .. name
 		end
 
-		local contents = "# " .. function_name .. "\n"
-		local prefix = owner .. "/" .. category .. "/" .. (parent and parent .. "/" or "/")
-		local path = indicative_case(prefix .. name .. ".txt")
+		local documentation = info.Documentation or "No documentation found."
+		local meta_list = {"OWNER: " .. owner}
+		local meta_tags = info.MetaTags
+		local path = indicative_case(owner .. "/" .. category .. "/" .. (parent and parent .. "/" or "/") .. name .. ".txt")
 
-		if info.Documentation then contents = contents .. info.Documentation
-		else
-			local meta_list = {}
+		--add meta tags to the list if they exist
+		if info.SourceURL then table.insert(meta_list, "SOURCE: " .. info.SourceURL) end
+		if tag_list then table.insert(meta_list, "TAGS: " .. tag_list) end
 
-			if info.SourceURL then table.insert(meta_list, "SOURCE: " .. info.SourceURL) end
-			if tag_list then table.insert(meta_list, "TAGS: " .. tag_list) end
-			if arguments then table.insert(meta_list, "ARGUMENTS: " .. table.concat(arguments, " ")) end
+		if arguments then
+			local types = meta_tags.TYPES
+			meta_tags.TYPES = nil
 
-			contents = contents .. "<!--META!" .. table.concat(meta_list, "\n") .. "-->\nNo documentation found."
+			if types then
+				for index, argument_type in ipairs(string.Explode(",%s*", types, true)) do
+					local argument_name = arguments[index]
+
+					if argument_name then arguments[index] = argument_type .. ":" .. argument_name
+					else break end
+				end
+			end
+
+			table.insert(meta_list, "ARGUMENTS: " .. table.concat(arguments, " "))
 		end
 
+		--create the meta tags header
+		for meta_tag, meta_tag_content in pairs(meta_tags) do table.insert(meta_list, meta_tag .. ": " .. meta_tag_content) end
+
+		table.sort(meta_list)
+
 		file.CreateDir(root_path .. string.GetPathFromFilename(path))
-		file.Write(root_path .. path, contents)
+		file.Write(root_path .. path, "<!--META!" .. table.concat(meta_list, "\n") .. "-->\n# " .. function_name .. "\n" .. documentation)
 	end
 end
 
+function PYRITION:WikifyRegisterMetaTag(tag, handle)
+	assert(not string.find(tag, "[^%u_]"), "Wikify meta tag name can only contain uppercase letters and underscores.")
+
+	meta_tag_handles[tag] = handle or default_meta_tag_handle
+end
+
 --post
+PYRITION:WikifyRegisterMetaTag("COST")
+PYRITION:WikifyRegisterMetaTag("MEMORY")
+PYRITION:WikifyRegisterMetaTag("RETURNS")
+PYRITION:WikifyRegisterMetaTag("TYPES")
+
 concommand.Add(SERVER and "sv_pyrition_wikify" or "cl_pyrition_wikify", function(ply)
 	if SERVER and ply:IsValid() and not ply:IsListenServerHost() then return end
 
@@ -462,8 +524,6 @@ concommand.Add(SERVER and "sv_pyrition_wikify" or "cl_pyrition_wikify", function
 end, nil, "Automatically called.", FCVAR_UNREGISTERED)
 
 if CLIENT then
-	concommand.Add("cl_pyrition_wikify_generate", function() PYRITION:WikifyGenerate() end, nil, "Automatically called.", FCVAR_UNREGISTERED)
-
 	concommand.Add("pyrition_wikify", function()
 		recursive_delete("pyrition/wikify")
 
@@ -472,6 +532,6 @@ if CLIENT then
 			RunConsoleCommand("sv_pyrition_wikify")
 		end)
 
-		timer.Simple(1, function() RunConsoleCommand("cl_pyrition_wikify_generate") end)
+		timer.Simple(1, function() PYRITION:WikifyGenerate() end)
 	end, nil, "Autonomously generates the wiki.")
 end
