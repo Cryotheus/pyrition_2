@@ -121,6 +121,8 @@ function PYRITION:GFXMaterialDesignRender()
 
 	--PreRender wasn't working on all computers, so we're using HUDPaint which seems to work fine
 	hook.Add("HUDPaint", "PyritionGFXMaterialDesign", function()
+		if not PYRITION.InitPostEntity then return end
+
 		local real_time = RealTime()
 
 		--despite the html being loaded, it will still be blank for a few frames
@@ -208,7 +210,7 @@ function PYRITION:GFXMaterialDesignRender()
 end
 
 --commands
-concommand.Add("d", function()
+--[[concommand.Add("mdi_debug", function()
 	--create a dframe that is 75% of the screen's width and height
 	local frame = vgui.Create("DFrame")
 
@@ -247,4 +249,4 @@ concommand.Add("d", function()
 			render.PopFilterMin()
 		end
 	end
-end)
+end)]]
