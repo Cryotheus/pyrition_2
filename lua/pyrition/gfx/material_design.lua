@@ -121,7 +121,7 @@ function PYRITION:GFXMaterialDesignRender()
 
 	--PreRender wasn't working on all computers, so we're using HUDPaint which seems to work fine
 	hook.Add("HUDPaint", "PyritionGFXMaterialDesign", function()
-		if not PYRITION.InitPostEntity then return end
+		if not PYRITION.PastThink then return end
 
 		local real_time = RealTime()
 
