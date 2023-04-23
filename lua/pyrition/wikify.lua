@@ -502,7 +502,10 @@ function PYRITION:WikifyGenerate()
 		end
 
 		--create the meta tags header
-		for meta_tag, meta_tag_content in pairs(meta_tags) do table.insert(meta_list, meta_tag .. ": " .. meta_tag_content) end
+		for meta_tag, meta_tag_content in pairs(meta_tags) do
+			--we substitute all whitespace with a single space to prevent tabs, newlines, etc. from breaking the header
+			table.insert(meta_list, string.gsub(meta_tag .. ": " .. meta_tag_content, "%s", " "))
+		end
 
 		table.sort(meta_list)
 
