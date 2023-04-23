@@ -1,5 +1,9 @@
 --https://wiki.facepunch.com/gmod/language
---make the server have the language module! PLEASE!
+--gmod dev team (probably just rubat now lol), make the server have the language module! PLEASE!
+
+--pragma once
+if language then return end
+
 module("language", package.seeall)
 
 --locals
