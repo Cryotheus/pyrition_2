@@ -523,6 +523,7 @@ end
 --post
 PYRITION:WikifyRegisterMetaTag("COST")
 PYRITION:WikifyRegisterMetaTag("MEMORY")
+PYRITION:WikifyRegisterMetaTag("RETURN_DETAILS")
 PYRITION:WikifyRegisterMetaTag("RETURNS")
 PYRITION:WikifyRegisterMetaTag("TYPES")
 

@@ -52,6 +52,7 @@ local config = {
 
 	{
 		classes = {
+			nav_area = "server",
 			path_follower = "server",
 			vector = "shared",
 		},
