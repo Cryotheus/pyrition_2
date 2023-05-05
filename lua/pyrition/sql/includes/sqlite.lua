@@ -7,7 +7,9 @@ local function query(instruction, callback, error_callback)
 
 	if ticked then table.insert(ticked, {result, callback, error_callback, sql.LastError()})
 	else
-		timer.Simple(0, function()
+		--same as `timer.Simple(0 function() ...the code... end)`
+		--but properly wakes up and hibernates the server
+		PYRITION:HibernateSafeZeroTimer(function()
 			ticked = {{result, callback, error_callback, sql.LastError()}}
 
 			for index, variables in ipairs(ticked) do

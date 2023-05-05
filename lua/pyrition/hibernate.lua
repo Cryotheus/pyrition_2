@@ -1,6 +1,7 @@
 --locals
-local pyrition_hibernate_think = CreateConVar("pyrition_hibernate_think", "0", bit.bor(FCVAR_ARCHIVE, FCVAR_NEVER_AS_STRING), language.GetPhrase("pyrition.convars.pyrition_hibernate_think"))
 local hibernation_registry = PYRITION.HibernateRegistry or {}
+local pyrition_hibernate_think = CreateConVar("pyrition_hibernate_think", "0", bit.bor(FCVAR_ARCHIVE, FCVAR_NEVER_AS_STRING), language.GetPhrase("pyrition.convars.pyrition_hibernate_think"))
+
 
 --local functions
 local function update_hibernate_think()
@@ -10,6 +11,7 @@ end
 
 --globals
 PYRITION.HibernateRegistry = hibernation_registry
+PYRITION.HibernateTimers = PYRITION.HibernateTimers or 0
 
 --pyrition functions
 function PYRITION:Hibernate(key, state)
@@ -30,6 +32,25 @@ function PYRITION:Hibernate(key, state)
 	RunConsoleCommand("sv_hibernate_think", 1)
 end
 
+function PYRITION:HibernateSafeTimer(delay, callback)
+	if self.HibernateTimers == 0 then
+		self.HibernateTimers = 1
+
+		self:HibernateWake("HibernateSafeTimers")
+	else self.HibernateTimers = self.HibernateTimers + 1 end
+
+	timer.Simple(delay, function()
+		if self.HibernateTimers == 1 then
+			self.HibernateTimers = 0
+
+			self:Hibernate("HibernateSafeTimers")
+		else self.HibernateTimers = self.HibernateTimers - 1 end
+
+		callback()
+	end)
+end
+
+function PYRITION:HibernateSafeZeroTimer(callback) self:HibernateSafeTimer(0, callback) end
 function PYRITION:HibernateWake(key) self:Hibernate(key, false) end ---Enables hibernation thinking.
 function PYRITION:Hibernating() return next(hibernation_registry) == nil end ---Returns true if hibernation thinking is enabled.
 
