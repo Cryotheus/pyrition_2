@@ -23,7 +23,7 @@ function PYRITION:PlayerStorageRead(stream, ply, key)
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerStorageRegisterSyncs(key, stream_methods)
+function PYRITION:HOOK_PlayerStorageRegisterSyncs(key, stream_methods)
 	local count = 0
 	local fields = {}
 

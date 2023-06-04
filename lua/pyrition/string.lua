@@ -11,8 +11,11 @@ local utf8_char = utf8.char
 local utf8_codes = utf8.codes
 local utf8_len = utf8.len
 
---local functions
-local function replace_unsafe(text)
+--pyrition functions
+function PYRITION._StringReplaceUnsafe(text)
+	---ARGUMENTS: string
+	---RETURNS: string
+	---Replaces unsafe characters in the string - including line feeds and carriage returns.
 	if string_find(text, sequence) then --if there's an illegal character, reconstruct the string without it
 		local codes = {}
 
@@ -27,11 +30,12 @@ local function replace_unsafe(text)
 	return text
 end
 
-local function utf8_safe(text, limit) return utf8_len(text, 1, limit) == utf8_len(text, 1, limit - 1) end
+function PYRITION._StringUTF8Safe(text, limit)
+	---ARGUMENTS: string, number
+	---RETURNS: boolean
+	---Checks if the string is safe given the specified $limit for string length.
+	return utf8_len(text, 1, limit) == utf8_len(text, 1, limit - 1)
+end
 
---post function set up
+--post
 for index, byte in ipairs{string.byte(blacklisted_characters)} do blacklisted_bytes[byte] = true end
-
---globals
-PYRITION._StringReplaceUnsafe = replace_unsafe
-PYRITION._StringUTF8Safe = utf8_safe

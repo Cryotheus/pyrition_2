@@ -4,7 +4,7 @@ local language_options = PYRITION.LanguageOptions or {}
 local language_options_colored = PYRITION.LanguageOptionsColored or {}
 local language_kieves = PYRITION.LanguageKieves or {}
 local language_tieves = PYRITION.LanguageTieves or {}
-local local_player = SERVER and game.GetWorld() or LocalPlayer()
+local local_player = LocalPlayer()
 local nice_time = PYRITION._TimeNicefy
 
 --colors sto- "inspired" by ULX
@@ -303,21 +303,21 @@ function PYRITION:LanguageListPlayers(players)
 	})
 end
 
-function PYRITION:PyritionLanguageRegisterColor(color, ...)
+function PYRITION:HOOK_LanguageRegisterColor(color, ...)
 	if isstring(color) then color = colors[color] end
 	if not color then return end
 
 	for index, tag in ipairs{...} do language_colors[tag] = color end
 end
 
-function PYRITION:PyritionLanguageRegisterKieve(kieve_function, ...)
+function PYRITION:HOOK_LanguageRegisterKieve(kieve_function, ...)
 	if isstring(kieve_function) then kieve_function = language_kieves[kieve_function] end --copy an existing kieve
 	if not kieve_function then return end
 
 	for index, tag in ipairs{...} do language_kieves[tag] = kieve_function end
 end
 
-function PYRITION:PyritionLanguageRegisterOption(option, operation, colored) --options are the media of message delivery
+function PYRITION:HOOK_LanguageRegisterOption(option, operation, colored) --options are the media of message delivery
 	language_options[option] = operation
 	language_options_colored[option] = colored or nil
 
@@ -326,7 +326,7 @@ function PYRITION:PyritionLanguageRegisterOption(option, operation, colored) --o
 	self:NetAddEnumeratedString("LanguageOptions", option)
 end
 
-function PYRITION:PyritionLanguageRegisterTieve(tieve_function, ...)
+function PYRITION:HOOK_LanguageRegisterTieve(tieve_function, ...)
 	if isstring(tieve_function) then tieve_function = language_tieves[tieve_function] end --copy an existing tieve
 	if not tieve_function then return end
 
@@ -334,7 +334,7 @@ function PYRITION:PyritionLanguageRegisterTieve(tieve_function, ...)
 end
 
 --hooks
-hook.Add("InitPostEntity", "PyritionLanguage", function() local_player = SERVER and game.GetWorld() or LocalPlayer() end)
+hook.Add("InitPostEntity", "PyritionLanguage", function() local_player = LocalPlayer() end)
 
 --post
 PYRITION:GlobalHookCreate("LanguageRegisterColor")

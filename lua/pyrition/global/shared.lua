@@ -4,76 +4,9 @@
 --fooplex: duplex that may be missing some entry pairs entirely
 --report: table where all values are true, or its sole purpose is to track presence
 
---please note, entries beginning with _ in the PYRITION table are local functions made global
+--please note, functions beginning with _ in the PYRITION method table should not be called as a method
+--this is typically because the function is built for caching as an upvalue
 local developer = GetConVar("developer")
-
-local enumerations = {
-	{
-		Prefix = "COMMAND",
-
-		"ERRED",
-		"MISSED",
-		"SUCCEEDED",
-	},
-
-	{ --https://developer.valvesoftware.com/wiki/Valve_Texture_Format#VTF_enumerations
-		DontBrand = true,
-		Prefix = "IMAGE_FORMAT",
-
-		"ABGR8888",
-		"RGB888",
-		"BGR888",
-		"RGB565",
-		"I8",
-		"IA88",
-		"P8",
-		"A8",
-		"RGB888_BLUESCREEN",
-		"BGR888_BLUESCREEN",
-		"ARGB8888",
-		"BGRA8888",
-		"DXT1",
-		"DXT3",
-		"DXT5",
-		"BGRX8888",
-		"BGR565",
-		"BGRX5551",
-		"BGRA4444",
-		"DXT1_ONEBITALPHA",
-		"BGRA5551",
-		"UV88",
-		"UVWQ8888",
-		"RGBA16161616F",
-		"RGBA16161616",
-		"UVLX8888",
-	},
-
-	{ --https://wiki.facepunch.com/gmod/Enums/NavDir
-		Offset = -1,
-		Prefix = "NAV_DIR",
-
-		"EAST",
-		"NORTH",
-		"SOUTH",
-		"WEST",
-	},
-
-	{
-		Prefix = "WIKIFY",
-
-		"GLOBALS",
-		"CLASSES",
-		"LIBRARIES",
-		"HOOKS",
-		"PANELS",
-		"ENUMS",
-		"STRUCTS",
-	}
-}
-
---false in MENU state
---was deprecated, but kept it because of stream models
-SHARED = CLIENT or SERVER or false
 
 if PYRITION then
 	local removing = {}
@@ -96,20 +29,4 @@ function PYRITION._drint(level, ...)
 	--pr1nt with developer only
 	--hide from d3bug searches
 	if developer:GetInt() >= level then _G["\x70rint"](...) end
-end
-
---post
-for _, enumerations in ipairs(enumerations) do
-	local offset = enumerations.Offset or 0
-	local prefix = enumerations.Prefix
-
-	if enumerations.DontBrand then
-		if prefix then prefix = prefix .. "_"
-		else prefix = "" end
-	else
-		if prefix then prefix = "PYRITION_" .. prefix .. "_"
-		else prefix = "PYRITION_" end
-	end
-
-	for value, name in ipairs(enumerations) do _G[prefix .. name] = value + offset end
 end

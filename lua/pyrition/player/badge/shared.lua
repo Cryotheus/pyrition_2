@@ -229,7 +229,7 @@ function PYRITION:PlayerBadgesGetGlint(ply)
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerBadgeRegister(class, badge, base_class)
+function PYRITION:HOOK_PlayerBadgeRegister(class, badge, base_class)
 	local base = self.PlayerBadgeRegistry[base_class]
 	local material = badge.Material or "icon16/error.png"
 

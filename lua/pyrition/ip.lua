@@ -2,18 +2,23 @@
 
 --pyrition functions
 function PYRITION._IPToString(numerical_ip)
-	local a, b, c, d =
-		bit.band(bit.rshift(numerical_ip, 24), 0xFF),
-		bit.band(bit.rshift(numerical_ip, 16), 0xFF),
-		bit.band(bit.rshift(numerical_ip, 8), 0xFF),
+	---ARGUMENTS: number "32 bit unsigned integer"
+	---RETURNS: string
+	---SEE: PYRITION._StringToIP
+	return
+		bit.band(bit.rshift(numerical_ip, 24), 0xFF) .. "." ..
+		bit.band(bit.rshift(numerical_ip, 16), 0xFF) .. "." ..
+		bit.band(bit.rshift(numerical_ip, 8), 0xFF) .. "." ..
 		bit.band(numerical_ip, 0xFF)
-	return string.format("%d.%d.%d.%d", d, c, b, a)
 end
 
 function PYRITION._StringToIP(text)
-	local alpha, bravo, charlie, delta = string.match(text, "^(%d+)%.(%d+)%.(%d+)%.(%d+)")
+	---ARGUMENTS: string "IP address"
+	---RETURNS: number
+	---SEE: PYRITION._IPToString
+	local first, second, third, fourth = string.match(text, "^(%d+)%.(%d+)%.(%d+)%.(%d+)")
 
-	if not delta then return end
+	if not fourth then return end
 
-	return ((d * 256 + charlie) * 256 + bravo) * 256 + alpha
+	return ((fourth * 0x100 + third) * 0x100 + second) * 0x100 + first
 end

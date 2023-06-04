@@ -32,9 +32,8 @@ local area_direction_forward_axes = {
 
 --meta functions
 function nav_area_meta:CalculatePortalSegment(target)
-	---RETURN_DETAILS: Right end of segment; Left end of segment
-	---RETURNS: Vector, Vector
-	---TYPES: CNavArea
+	---ARGUMENTS: CNavArea
+	---RETURNS: Vector "Left end of segment.", Vector "Right end of segment."
 	---Calculates three vectors representing a segment of the shared edge between two areas.
 	---The first vector returned is always the right end of the segment from the source area.
 	local source_center = self:GetCenter()
@@ -75,20 +74,3 @@ function nav_area_meta:CalculatePortalSegment(target)
 
 	return segment_left, segment_right
 end
-
---hooks
-hook.Add("Think", "somedebug", function()
-	local ply = LocalPlayer()
-
-	if not ply:IsValid() then return end
-
-	local source_area = navmesh.GetNearestNavArea(ply:GetPos())
-	local target_area = navmesh.GetNearestNavArea(ply:GetEyeTrace().HitPos)
-
-	if not source_area:IsValid() or not target_area:IsValid() then return end
-	if source_area == target_area then return end
-
-	local segment_left, segment_right = source_area:CalculatePortalSegment(target_area)
-
-	debugoverlay.Line(segment_left, segment_right, engine.TickInterval() * 1.5, color_white, true)
-end)

@@ -28,19 +28,19 @@ PYRITION._RemainingAxes = remaining_axes
 
 --pyrition functions
 function PYRITION:VectorCompileBezier(point_count)
+	---ARGUMENTS: number
 	---Compiles a bezier method into the Vector metatable.
 	---You only need to call this once, per point count.
 	---The created method is named Bezier# where # is the point count specified.
 	--[[-```
---only call these once, anywhere before you need to use them.
-PYRITION:VectorCompileBezier(3)
-PYRITION:VectorCompileBezier(4)
+		--only call these once, anywhere before you need to use them.
+		PYRITION:VectorCompileBezier(3)
+		PYRITION:VectorCompileBezier(4)
 
---now you can use the newly created methods
-Msg(Vector(1, 2, 3):Bezier3(0.75, Vector(4, 5, 6), Vector(7, 8, 9)))
-Msg(Vector(1, 2, 3):Bezier4(0.75, Vector(4, 5, 6), Vector(7, 8, 9), Vector(10, 11, 12)))
-```]]
-	---TYPES: number
+		--now you can use the newly created methods as much as you want
+		Msg(Vector(1, 2, 3):Bezier3(0.75, Vector(4, 5, 6), Vector(7, 8, 9)))
+		Msg(Vector(1, 2, 3):Bezier4(0.75, Vector(4, 5, 6), Vector(7, 8, 9), Vector(10, 11, 12)))
+	```]]
 
 	--if you're learning, don't learn from this
 	--it's not very readable, but the function it compiles is the fastest solution I know
@@ -88,6 +88,7 @@ function vector_meta:__le(right) return self.x <= right.x and self.y <= right.y 
 function vector_meta:__lt(right) return self.x < right.x and self.y < right.y and self.z < right.z end
 
 function vector_meta:Absolute()
+	---RETURNS: self
 	---Makes all of the components of the vector positive.
 	---This modifies the vector.
 	self.x = math_abs(self.x)
@@ -98,12 +99,16 @@ function vector_meta:Absolute()
 end
 
 function vector_meta:AbsoluteDot(right)
-	---Returns the absolute dot product of two vectors.
+	---ARGUMENTS: Vector
+	---RETURNS: number
+	---Returns the absolute value of the dot product of two vectors.
 	return math_abs(self:Dot(right))
 end
 
 function vector_meta:Approach(target, distance)
-	---Returns a vector that is moved `distance` units closer to `target`.
+	---ARGUMENTS: Vector, number
+	---RETURNS: Vector
+	---Returns a vector that is moved $distance units closer to the $target vector.
 	if self:Distance(target) <= distance then return target end
 
 	local direction = target - self
@@ -114,6 +119,8 @@ function vector_meta:Approach(target, distance)
 end
 
 function vector_meta:Bounds(target)
+	---ARGUMENTS: Vector
+	---RETURNS: Vector "Minimums.", Vector "Maximums."
 	---Returns a minimum position and maximum position between two vectors.
 	local maximum_x, maximum_y, maximum_z
 	local minimum_x, minimum_y, minimum_z
@@ -133,6 +140,7 @@ function vector_meta:Bounds(target)
 end
 
 function vector_meta:Ceil()
+	---RETURNS: self
 	---Round the vector up to the nearest integer.
 	---This modifies the vector.
 	self.x = math_ceil(self.x)
@@ -143,6 +151,9 @@ function vector_meta:Ceil()
 end
 
 function vector_meta:Clamp(minimum, maximum)
+	---ARGUMENTS: Vector, Vector
+	---ARGUMENTS: number, number
+	---RETURNS: self
 	---Clamp the vector's components to a minimum and maximum value.
 	---If provided numbers, the vector's components will be clamped to those numbers.
 	---If provided vectors, the vector's components will be clamped to the corresponding component of the vector.
@@ -249,6 +260,7 @@ function vector_meta:Dwells(minimums, maximums)
 end
 
 function vector_meta:Floor()
+	--RETURNS: self
 	---Round the vector down to the nearest integer.
 	---This modifies the vector.
 	self.x = math_floor(self.x)
@@ -259,7 +271,7 @@ function vector_meta:Floor()
 end
 
 function vector_meta:GetAxis(intolerance)
-	---TYPES: number=0.99
+	---ARGUMENTS: number=0.99
 	---RETURNS: boolean
 	---Returns the closest axis a UNIT VECTOR is aligned to, or false if it was not greater than intolerance (default of 0.99)
 	local intolerance = intolerance or 0.99
@@ -274,20 +286,21 @@ function vector_meta:GetAxis(intolerance)
 end
 
 function vector_meta:GetZeroed(zero)
-	---TYPES: number
+	---ARGUMENTS: number
 	---RETURNS: Vector
 	---Returns a vector with all components of zero set to the sepcified amount.
 	return Vector(self.x == 0 and zero, self.y == 0 and zero, self.z == 0 and zero)
 end
 
 function vector_meta:Inside(minimums, maximums)
+	---RETURNS: self
 	---Returns true if the point is contained by the two vectors (specifying bounds) (excludes surfaces)
 	return self > minimums and self < maximums
 end
 
 function vector_meta:MultiBounds(...)
 	--Same as Bounds but can take as many vectors as you want.
-	---TYPES: Vector
+	---ARGUMENTS: Vector
 	---RETURNS: Vector, Vector
 	local maximums = huge_negative_vector:Clone()
 	local minimums = huge_vector:Clone()
@@ -305,18 +318,18 @@ function vector_meta:MultiBounds(...)
 end
 
 function vector_meta:SetLength(magnitude)
+	---ARGUMENTS: number
+	---RETURNS: self
 	---Sets the vector's length.
 	---This modifies the vector.
-	---TYPES: number
-	---RETURNS: Vector
 	self:Mul(magnitude / self:Length())
 
 	return self 
 end
 
 function vector_meta:SetZeroes(zero)
-	---TYPES: number
-	---RETURNS: Vector
+	---ARGUMENTS: number
+	---RETURNS: self
 	---Sets all components of zero to the sepcified amount.
 	---Unlike GetZeroed, this modifies the vector.
 	for axis = 1, 3 do if self[axis] == 0 then self[axis] = zero end end
@@ -325,7 +338,7 @@ function vector_meta:SetZeroes(zero)
 end
 
 function vector_meta:TriangleNormal(second, third)
-	---TYPES: Vector, Vector
+	---ARGUMENTS: Vector, Vector
 	---RETURNS: Vector
 	---Given two additional points, returns the normal of the created triangle.
 	local normal = (second - self):Cross(third - self)
@@ -336,8 +349,8 @@ function vector_meta:TriangleNormal(second, third)
 end
 
 function vector_meta:Truncate(digits)
-	---TYPES: number=0
-	---RETURNS: Vector
+	---ARGUMENTS: number=0
+	---RETURNS: self
 	---Round components towards zero.
 	---This modifies the vector.
 	digits = digits or 0
@@ -350,8 +363,8 @@ function vector_meta:Truncate(digits)
 end
 
 function vector_meta:WithMagnitude(magnitude)
-	---TYPES: number
-	---RETURNS: Vector
+	---ARGUMENTS: number
+	---RETURNS: self
 	---Returns a copied vector with the specified magnitude.
 	return self * magnitude / self:Length()
 end

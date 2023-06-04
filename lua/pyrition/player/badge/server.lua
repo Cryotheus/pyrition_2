@@ -77,7 +77,7 @@ function PYRITION:PlayerBadgesSave(ply, transaction)
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerBadgeLevelChanged(ply, badge, old_level, level, old_tier, tier)
+function PYRITION:HOOK_PlayerBadgeLevelChanged(ply, badge, old_level, level, old_tier, tier)
 	if old_tier then
 		if tier < 1 or tier <= old_tier then return end
 

@@ -5,7 +5,9 @@ local kick_queue_reasons = {} --patchy table of reasons
 
 --local functions
 local function kick_think()
-	for index, ply in ipairs(kick_queue) do ply:Kick(kick_queue_reasons[index] or "") end
+	for index, ply in ipairs(kick_queue) do
+		ply:Kick(kick_queue_reasons[index] or "")
+	end
 
 	kick_queue = nil
 

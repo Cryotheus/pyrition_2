@@ -1,42 +1,85 @@
 --https://github.com/Cryotheus/cryotheums_loader
 --going to use this when ready
 local config = {
-	{ --only the most essential should go here
+	{ --methods table and loader
 		global = {
 			shared = true,
-			texture_flags = "shared",
 		},
 
 		loader = "download",
 	},
 
-	{
+	{ --global component and modules
 		global = {
+			enumerations = "shared",
 			hook = "shared",
-			client = true,
 			server = true,
 		},
 
 		modules = {
 			duplex = "shared",
+			language = "server",
 			math = "shared",
 		},
 	},
 
-	{
-		client = true,
-		convention = "shared",
-		download = "shared",
-		gradient = "shared",
-		html = "shared",
-		ip = "server",
+	{ --dependency free files
+		classes = {
+			nav_area = "server",
+			path_follower = "server",
+			vector = "shared",
+		},
 
-		modules = {
-			language = "server",
+		client = true,
+
+		command = {
+			argument = "shared",
+			client = true,
+			shared = true,
+		},
+
+		convention = "shared",
+		conversion = "shared",
+
+		gfx = {
+			material_design = "client",
+			translucent_entities = "client",
+		},
+
+		gradient = "shared",
+		hibernate = "server",
+		html = "shared",
+
+		hud = {
+			declutter = {
+				blocks = "client",
+				crosshair = "client",
+			},
+		},
+
+		ip = "shared",
+
+		net = {
+			shared = true,
+		},
+
+		panels = {
+			command_palette = "client",
+			emergency_exit = "client",
 		},
 
 		player = {
+			credation = "shared",
+			find = "shared",
+
 			identity = {
+				client = true,
+			},
+
+			kick = "server",
+			landing = "server",
+
+			message = {
 				client = true,
 			},
 
@@ -45,268 +88,186 @@ local config = {
 				server = true,
 				shared = true,
 			},
-		},
-
-		time = "shared",
-	},
-
-	{
-		classes = {
-			nav_area = "server",
-			path_follower = "server",
-			vector = "shared",
-		},
-
-		hibernate = "server",
-
-		net = {
-			debug = "shared",
-			shared = true,
-		},
-
-		player = {
-			credation = "shared",
-			find = "shared",
-			kick = "server",
-			landing = "server",
-
-			message = {
-				client = true,
-				server = true,
-			},
 
 			slap = "server",
-		},
 
-		string = "shared",
-	},
-
-	{
-		gfx = {
-			material_design = "client",
-		},
-
-		hud_declutter = {
-			blocks = "client",
-			crosshair = "client",
-		},
-
-		net = {
-			client = true,
-			server = true,
-		},
-
-		panels = {
-			dlabel = "client",
-		},
-	},
-
-	{
-		language = {
-			debug = "shared",
-			server = true,
-			shared = true,
-		},
-
-		net = {
-			stream = {
-				model = {
-					shared = true,
-				},
-
-				shared = true,
-			},
-		},
-	},
-
-	{
-		console = {
-			chat = {
-				--client = true,
-			},
-
-			shared = true,
-		},
-
-		language = {
-			client = true,
-		},
-
-		net = {
-			stream = {
-				model = {
-					client = true,
-				},
-			},
-		},
-	},
-
-	{
-		console = {
-			chat = {
-				--server = true,
-			},
-		},
-
-		language = {
-			stream = "shared",
-		},
-
-		navigation = "server",
-
-		net = {
-			debug = "client",
-			enumeration_bits = "shared",
-
-			stream = {
-				client = true,
-				debug = "client",
-
-				model = {
-					server = true,
-				},
-
-				server = true,
-			},
-		},
-
-		player = {
-			teleport = {
+			storage = {
 				shared = true,
 			},
 		},
 
 		shared = true,
 
-		sql = {
+		spawnmenu = {
 			client = true,
 		},
+
+		sql = {
+			server = true,
+		},
+
+		string = "shared",
+		time = "shared",
 	},
 
 	{
-		console = {
-			chat = {
-				--calculator = "client",
-			},
-
-			command = "shared",
-			command_argument = "shared",
-			--server = true,
-
-			stream = {
-				--command = "shared",
-				--commands = "shared",
+		command = {
+			arguments = {
+				integer = "shared",
+				player = "shared",
 			},
 		},
 
-		map = {
-			shared = true,
+		navigation = "server",
+
+		net = {
+			client = true,
+			debug = "client",
+			server = true,
 		},
 
 		player = {
+			message = {
+				server = true,
+			},
+
 			storage = {
 				client = true,
 				server = true,
+			},
+
+			teleport = {
 				shared = true,
-				stream = "shared",
+			}
+		},
+	},
+
+	{ --net stream & language
+		command = {
+			commands = {
+				heal = "server",
+			},
+		},
+
+		language = {
+			debug = "shared",
+			client = true,
+			shared = true,
+			server = true,
+		},
+
+		net = {
+			stream = {
+				client = true,
+				shared = true,
+			},
+		},
+
+		player = {
+			identity = {
+				server = true,
 			},
 
 			teleport = {
 				client = true,
 				server = true,
-				stream = "shared",
 			},
-		},
 
-		sql = {
-			server = true,
-		},
+			time = {
+				client = true,
+				server = true,
+			},
+		}
 	},
 
-	{
-		console = {
-			command_arguments = {
-				integer = "shared",
-				--map = "shared",
-				--number = "shared",
-				player = "shared",
-				--string = "shared",
-				--time = "shared",
-			},
+	{ --net stream model
+		map = {
+			shared = true,
 		},
 
-		map = {
-			client = true,
-			server = true,
-			stream = "shared",
+		net = {
+			stream = {
+				debug = "client",
+
+				model = {
+					shared = true,
+				},
+
+				server = true,
+			},
 		},
 
 		player = {
 			badge = {
 				shared = true,
-				stream = "shared",
-			},
-
-			identity = {
 				server = true,
 			},
 
 			time = {
-				server = true,
 				shared = true,
 			},
-		},
-
-		spawnmenu = {
-			client = true,
 		},
 	},
 
 	{
-		console = {
-			commands = {
-				--["goto"] = "server",
-				--["return"] = "server",
-				--bring = "server",
-				--cleanup = "server",
-				heal = "server",
-				health = "server",
-				--kick = "server",
-				--map = "server",
-				--message = "server",
-				--noclip = "server",
-				--respawn = "server",
-				--send = "server",
-				--slap = "server",
-				--slay = "server",
-				--sql = "server",
-				--strip = "server",
+		map = {
+			client = true,
+			server = true,
+		},
+
+		net = {
+			stream = {
+				model = {
+					client = true,
+					server = true,
+				},
 			},
 		},
 
 		player = {
 			badge = {
 				client = true,
-				server = true,
 			},
 		},
 	},
 
-	{
+	{ --stream model registration
+		--starting from this load order, all net functionality is available
+		language = {
+			stream = "shared",
+		},
+
+		map = {
+			stream = "shared",
+		},
+
+		net = {
+			enumeration_bits = "shared",
+		},
+
 		player = {
+			badge = {
+				stream = "shared",
+			},
+
 			badges = {
 				anniversary = "shared",
 				bot = "shared",
 				killer = "shared",
+				pyrition_contributor = "shared",
 				pyrition_developer = "shared",
 				rosette = "shared",
 				victim = "shared",
 			},
-		},
-	},
 
-	{
-		wikify = "shared developer",
+			storage = {
+				stream = "shared",
+			},
+
+			teleport = {
+				stream = "shared",
+			},
+		},
 	},
 
 	{global = {hooks = "shared"}} --this should always be the last script included

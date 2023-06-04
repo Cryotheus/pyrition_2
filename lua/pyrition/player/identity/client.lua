@@ -9,4 +9,6 @@ local chat_filter = {
 }
 
 --hooks
-hook.Add("ChatText", "PyritionPlayerIdentity", function(index, name, text, id) if chat_filter[id] then return true end end)
+hook.Add("ChatText", "PyritionPlayerIdentity", function(_index, _name, _text, id)
+	if chat_filter[id] then return true end
+end)

@@ -191,13 +191,13 @@ function PYRITION:SQLQuery(instruction, callback, error_callback) --Perform or q
 end
 
 --pyrition hooks
-function PYRITION:PyritionSQLCreateTables(_database_name) --Setup your tables in here
+function PYRITION:HOOK_SQLCreateTables(_database_name) --Setup your tables in here
 	--database_name is nil if we are using SQLite, meaning you should prefix the table name with pyrition_
 	--if database_name is a string, then use that as the database in which the table is a member of
 	self:SQLCommit()
 end
 
-function PYRITION:PyritionSQLInitialize() --Called before PyritionSQLInitialized from InitPostEntity, attemtps to connect to the MySQL server
+function PYRITION:HOOK_SQLInitialize() --Called before PyritionSQLInitialized from InitPostEntity, attemtps to connect to the MySQL server
 	if self.SQLInitializing then return false end
 
 	local connect
@@ -207,7 +207,7 @@ function PYRITION:PyritionSQLInitialize() --Called before PyritionSQLInitialized
 	self.SQLInitializing = true
 
 	--we need thinking!
-	self:Hibernate("MySQL", false)
+	self:Hibernate("PyritionMySQL", false)
 	timer.Remove("PyritionSQL")
 
 	if enabled and file.Exists("bin/gmsv_mysqloo_*.dll", "LUA") then query, escape, connect = include("pyrition/sql/includes/mysqloo.lua")
@@ -232,11 +232,11 @@ function PYRITION:PyritionSQLInitialize() --Called before PyritionSQLInitialized
 	return true
 end
 
-function PYRITION:PyritionSQLInitialized(_database, database_name) --Called when MySQL connects, or immediately from PyritionSQLInitialized if MySQL is unavailable
+function PYRITION:HOOK_SQLInitialized(_database, database_name) --Called when MySQL connects, or immediately from PyritionSQLInitialized if MySQL is unavailable
 	self.SQLDatabaseName = database_name or nil
 	self.SQLInitializing = false
 
-	self:Hibernate("MySQL")
+	self:Hibernate("PyritionMySQL")
 	self:LanguageDisplay("sql_init", database_name and "pyrition.mysql.initialized" or "pyrition.sql.initialized")
 	self:SQLBegin()
 	self:SQLCreateTables(database_name or false)

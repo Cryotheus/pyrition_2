@@ -38,7 +38,18 @@ local function grammar(quantity, unit)
 	return unit .. "s"
 end
 
-local function nice_time(seconds, recursions, use_grammar, thresholds, units, unit_seperator, block_seperator) --the built in nice time sucks
+local function nice_time(seconds, recursions, use_grammar, thresholds, units, unit_seperator, block_seperator)
+	--[[-ARGUMENTS:
+		number "Time to format in seconds.",
+		number "How many different units at the maximum should we use to represent the time.",
+		boolean=true "Append the letter s to the end of the unit (unless the unit has a value of 1).",
+		table=PYRITION.TimeThresholds "Use nil.",
+		table=PYRITION.TimeUnits "Use nil.",
+		string=" ",
+		string=" "]]
+	---RETURNS: string "Formatted text."
+	---SEE: PYRITION._TimeShorthand
+	---Formats seconds into an easier-to-read format.
 	local block_seperator = block_seperator or " "
 	local count = seconds
 	local flooring = seconds
@@ -74,6 +85,9 @@ local function nice_time(seconds, recursions, use_grammar, thresholds, units, un
 end
 
 local function parse_time(text, default_unit)
+	---ARGUMENTS: string, number
+	---RETURNS: number "Parsed time in seconds."
+	---RETURNS: boolean "This will only ever be false and represents the conversion's failure."
 	local default = time_units[default_unit] or time_unit_shorthand[default_unit] or TIME_SECOND
 	local text = string.lower(string.gsub(text, "%-+", ""))
 
@@ -104,7 +118,13 @@ local function parse_time(text, default_unit)
 	return time
 end
 
-local function shorthand_time(seconds, recursions) return nice_time(seconds, recursions, false, nil, time_unit_shorthand, "", "") end
+local function shorthand_time(seconds, recursions)
+	---ARGUMENTS: number, number=1 "How many time units should we use to represent the time?"
+	---RETURNS: string
+	---SEE: PYRITION._TimeNicefy
+	---Formats $seconds into a more human-readable string.
+	return nice_time(seconds, recursions, false, nil, time_unit_shorthand, "", "")
+end
 
 --globals
 PYRITION.TimeDay = TIME_DAY
@@ -119,15 +139,21 @@ PYRITION.TimeWeek = TIME_WEEK
 PYRITION.TimeYear = TIME_YEAR
 
 PYRITION._TimeNicefy = nice_time
-PYRITION._TimeShorthand = shorthand_time
 PYRITION._TimeParse = parse_time
+PYRITION._TimeShorthand = shorthand_time
 
---post function set up
+--post
 table.Empty(time_thresholds)
 
-for threshold, unit in pairs(time_units) do if isnumber(threshold) then table.insert(time_thresholds, threshold) end end
+for threshold, unit in pairs(time_units) do
+	if isnumber(threshold) then
+		table.insert(time_thresholds, threshold)
+	end
+end
 
-time_thresholds = table.Reverse(table.sort(time_thresholds) or time_thresholds)
+table.sort(time_thresholds)
+
+time_thresholds = table.Reverse(time_thresholds)
 
 --duplex_make(time_thresholds, true)
 duplex_make_fooplex(time_unit_shorthand, true)

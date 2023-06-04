@@ -209,7 +209,7 @@ function PYRITION:PlayerStorageWrite(stream, ply, key, fields)
 end
 
 --pyrition hooks
-function PYRITION:PyritionPlayerStorageLoadAll(ply)
+function PYRITION:HOOK_PlayerStorageLoadAll(ply)
 	local tracker = {}
 	self.PlayerStoragePlayers[ply] = {_ShortSteamID = short_steam_id(ply)}
 
@@ -225,7 +225,7 @@ function PYRITION:PyritionPlayerStorageLoadAll(ply)
 	self.PlayerStoragesLoading[ply] = self:SQLCommit()
 end
 
-function PYRITION:PyritionPlayerStorageLoadDiscard(ply)
+function PYRITION:HOOK_PlayerStorageLoadDiscard(ply)
 	local load_coroutine = self.PlayerStoragesLoading[ply]
 
 	if load_coroutine then
@@ -239,7 +239,7 @@ function PYRITION:PyritionPlayerStorageLoadDiscard(ply)
 	return false
 end
 
-function PYRITION:PyritionPlayerStorageLoaded(ply, key, player_datum, success, tracker)
+function PYRITION:HOOK_PlayerStorageLoaded(ply, key, player_datum, success, tracker)
 	hook.Call("PyritionPlayerStorageLoaded" .. key, self, ply, player_datum, success)
 
 	if tracker then
@@ -249,7 +249,7 @@ function PYRITION:PyritionPlayerStorageLoaded(ply, key, player_datum, success, t
 	end
 end
 
-function PYRITION:PyritionPlayerStorageLoadFinished(ply, player_data)
+function PYRITION:HOOK_PlayerStorageLoadFinished(ply, player_data)
 	local chronology = player_data.Time
 	local identity = player_data.Identity
 	local name = identity.name
@@ -267,7 +267,7 @@ function PYRITION:PyritionPlayerStorageLoadFinished(ply, player_data)
 	else PYRITION:LanguageQueue(true, "pyrition.player.load.first", {executor = ply}) end
 end
 
-function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
+function PYRITION:HOOK_PlayerStorageRegister(key, table_name, ...)
 	local field_instructions = {}
 	local fields = {...}
 	local type_names_builder = {}
@@ -312,7 +312,7 @@ function PYRITION:PyritionPlayerStorageRegister(key, table_name, ...)
 	}
 end
 
-function PYRITION:PyritionPlayerStorageRegisterSyncs(key, stream_methods)
+function PYRITION:HOOK_PlayerStorageRegisterSyncs(key, stream_methods)
 	local count = 0
 	local fields = {}
 
@@ -336,7 +336,7 @@ function PYRITION:PyritionPlayerStorageRegisterSyncs(key, stream_methods)
 	stream_methods._Fields = fields
 end
 
-function PYRITION:PyritionPlayerStorageRegistration(database_name)
+function PYRITION:HOOK_PlayerStorageRegistration(database_name)
 	for key, meta_data in pairs(self.PlayerStorages) do
 		local fields = table.Copy(meta_data.Fields)
 		local table_name = database_name and database_name .. "`.`" .. meta_data.TableName or self.SQLSettings.MySQLDatabaseName .. meta_data.TableName
@@ -346,7 +346,7 @@ function PYRITION:PyritionPlayerStorageRegistration(database_name)
 	end
 end
 
-function PYRITION:PyritionPlayerStorageSaveAll(ply)
+function PYRITION:HOOK_PlayerStorageSaveAll(ply)
 	self:SQLBegin()
 
 	for key, storage_data in pairs(self.PlayerStorages) do self:PlayerStorageSave(ply, key) end
@@ -354,7 +354,7 @@ function PYRITION:PyritionPlayerStorageSaveAll(ply)
 	self:SQLCommitOrDiscard()
 end
 
-function PYRITION:PyritionPlayerStorageSaveEveryone(everyone)
+function PYRITION:HOOK_PlayerStorageSaveEveryone(everyone)
 	self:SQLBegin()
 
 	for key, storage_data in pairs(self.PlayerStorages) do

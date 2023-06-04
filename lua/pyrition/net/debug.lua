@@ -4,8 +4,6 @@ local originals = PYRITION.NetDebugOriginals or {}
 --globals
 PYRITION.NetDebugOriginals = originals
 
---pyrition functions
-
 --hooks
 hook.Add("PopulateToolMenu", "PyritionNetDebug", function()
 	spawnmenu.AddToolMenuOption("Utilities", "PyritionDevelopers", "NetDebug", "#pyrition.spawnmenu.categories.developer.net_debug", "", "", function(form)
@@ -17,7 +15,7 @@ hook.Add("PopulateToolMenu", "PyritionNetDebug", function()
 
 		form:AddItem(category_list)
 
-		function form:PerformLayout(width, height) category_list:SetTall(height - 4) end
+		function form:PerformLayout(_width, height) category_list:SetTall(height - 4) end
 
 		do --selection category
 			local category = vgui.Create("DCollapsibleCategory", category_list)
@@ -78,6 +76,8 @@ hook.Add("PopulateToolMenu", "PyritionNetDebug", function()
 					for index, network_string in ipairs(monitor_duplex) do
 						--the space is to prevent localization
 						local category = self:Add(" " .. network_string)
+
+						--TODO: finish net debug
 					end
 				end
 			end

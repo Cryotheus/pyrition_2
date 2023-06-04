@@ -5,13 +5,10 @@ local initial_radius = 1
 local max_ascension = 256
 local max_ascension_vector = Vector(0, 0, max_ascension)
 local max_attempts = 20
-local max_distance = 256
 local max_drop = -256
 local max_drop_attempts = 5
 local max_drop_vector = Vector(0, 0, max_drop - max_ascension)
 local pi = math.pi
-local pi_half = pi * 0.5
-local pi_quarter = pi * 0.25
 local tau = pi * 2
 
 --local tables
@@ -49,7 +46,7 @@ end
 
 local function calculate_radian_max(radius, radian_increment, first_apparition_radius) return tau - (first_apparition_radius / radius + radian_increment) end
 
-local function destination_suitable(apparition, position, bounding_mins, bounding_maxs)
+local function destination_suitable(_apparition, position, bounding_mins, bounding_maxs)
 	--check if we can put a player there without them suffering
 	local success
 	position, success = calculate_drop(0, position + max_ascension_vector, position, position + max_drop_vector, bounding_mins, bounding_maxs)
@@ -158,4 +155,4 @@ local function find_suitable_landings(target, apparitions, force)
 end
 
 --pyrition functions
-function PYRITION:PyritionPlayerLanding(target, apparitions) return find_suitable_landings(target, apparitions) end
+function PYRITION:HOOK_PlayerLanding(target, apparitions) return find_suitable_landings(target, apparitions) end

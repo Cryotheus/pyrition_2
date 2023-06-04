@@ -129,19 +129,34 @@ end
 
 --pyrition functions
 function PYRITION:HTMLParseAsync(body, callback, budget)
+	---ARGUMENTS: string, function, number=nil
 	---Parses an XHTML string asynchronously, calling the `callback` function with a table of the elements when finished.
 	local budget = budget or 0.001
-	local proxy = {IsValid = function(self) return coroutine.status(self.Thread) ~= "dead" end}
-	proxy.Thread = coroutine.create(function() xhtml_parse(body, callback) end)
+	local reference = {} --not caching tostring to prevent szers optimization
+
+	local thread = coroutine.create(function()
+		xhtml_parse(body, function(deserialized)
+			hook.Remove("Think", tostring(reference))
+			self:Hibernate(tostring(reference))
+
+			--in case it errors
+			callback(deserialized)
+		end)
+	end)
+
+	self:HibernateWake(tostring(reference))
 
 	hook.Add("Think", proxy, function()
 		local finish = SysTime() + budget
-		local thread = proxy.Thread
 
 		while SysTime() < finish do
 			local alive, message = coroutine.resume(thread)
 
-			if not alive then return error("thread error: " .. message) end
+			if not alive then
+				error("thread error: " .. message)
+
+				break
+			end
 		end
 	end)
 end

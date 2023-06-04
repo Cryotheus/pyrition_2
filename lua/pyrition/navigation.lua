@@ -36,7 +36,7 @@ end
 
 --hooks
 if not next(PYRITION.NavigationAreaList) or navmesh.IsLoaded() and navmesh.GetNavAreaCount() == 0 then
-	PYRITION:HibernateWake("Navigation")
+	PYRITION:HibernateWake("PyritionNavigation")
 
 	--PYRITION.InitPostEntity
 	hook.Add("Tick", "PyritionNavigation", function()
@@ -44,7 +44,7 @@ if not next(PYRITION.NavigationAreaList) or navmesh.IsLoaded() and navmesh.GetNa
 		elseif navmesh.IsLoaded() then
 			hook.Remove("Tick", "PyritionNavigation")
 
-			PYRITION:Hibernate("Navigation")
+			PYRITION:Hibernate("PyritionNavigation")
 			PYRITION:NavigationSetup()
 		elseif setup_wait then
 			if CurTime() > setup_wait then

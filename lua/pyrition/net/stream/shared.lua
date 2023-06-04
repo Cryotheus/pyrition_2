@@ -1052,7 +1052,7 @@ function PYRITION:NetStreamWrite(stream_queue)
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetStreamRegisterClass(class, realm, _enumerated) stream_classes[class] = realm end
+function PYRITION:HOOK_NetStreamRegisterClass(class, realm, _enumerated) stream_classes[class] = realm end
 
 --cvars
 cvars.AddChangeCallback("pyrition_net_stream_bytes", function(_name, _old, _new)

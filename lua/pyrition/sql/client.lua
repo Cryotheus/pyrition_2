@@ -1,2 +1,0 @@
---nothing now
---maybe let admins see the status of sql stuff

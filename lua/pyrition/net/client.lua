@@ -61,7 +61,7 @@ function PYRITION:NetWriteEnumeratedString(namespace, text)
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetClientInitialized(_ply) end
+function PYRITION:HOOK_NetClientInitialized(_ply) end
 
 --console commands
 concommand.Add("pd", function(_ply, _command, _arguments, _arguments_string)

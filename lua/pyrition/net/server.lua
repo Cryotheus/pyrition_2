@@ -198,7 +198,7 @@ function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
+function PYRITION:HOOK_NetAddEnumeratedString(namespace, ...)
 	local duplex = net_enumerations[namespace]
 	local last_bits = 0
 	local texts = {...}
@@ -237,7 +237,7 @@ function PYRITION:PyritionNetAddEnumeratedString(namespace, ...)
 	if last_bits ~= new_bits and player.GetCount() > 0 then net_enumeration_updates[namespace] = new_bits end
 end
 
-function PYRITION:PyritionNetPlayerInitialized(ply, _emulated) PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply}) end
+function PYRITION:HOOK_NetPlayerInitialized(ply, _emulated) PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply}) end
 
 --hooks
 hook.Add("PlayerDisconnected", "PyritionNet", function(ply)

@@ -1,4 +1,8 @@
 ---DEVELOPER
+---DEPRECATED
+--this file is DEPRECATED!
+--I will be making an in-game wiki instead
+
 --locals
 local meta_tag_handles = PYRITION.WikifyMetaTagHandles or {}
 

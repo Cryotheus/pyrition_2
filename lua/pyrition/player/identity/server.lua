@@ -2,7 +2,7 @@
 local player_storage_players = PYRITION.PlayerStoragePlayers
 
 --pyrition hooks
-function PYRITION:PyritionPlayerStorageLoadedIdentity(ply, player_data)
+function PYRITION:HOOK_PlayerStorageLoadedIdentity(ply, player_data)
 	local steam_community_id = ply:SteamID64()
 
 	if steam_community_id then --multirun copies have a nil community steam id

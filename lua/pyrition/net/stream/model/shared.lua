@@ -105,7 +105,7 @@ function PYRITION:NetStreamModelGetExisting(class, ply) --get an existing model 
 end
 
 --pyrition hooks
-function PYRITION:PyritionNetStreamModelRegister(class, realm, model, base_class)
+function PYRITION:HOOK_NetStreamModelRegister(class, realm, model, base_class)
 	local base = base_class and stream_model_methods[base_class]
 	local enumerate = model.EnumerateClass
 
