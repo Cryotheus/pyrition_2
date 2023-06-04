@@ -1,8 +1,12 @@
+--local functions
+local function camel_case_to_snake_case_substitution(upper) return "_" .. string.lower(upper) end
+local function snake_case_to_camel_case_substitution(first, remaining) return string.upper(first) .. remaining end 
+
 --pyrition functions
 function PYRITION._SignificantDigitSteamID(steam_id)
 	---ARGUMENTS: string/Player
 	---RETURNS: string
-	---Trims a Steam ID down into only the significant parts.
+	---Trims a Steam ID down into only the significant digits.
 	---`STEAM_0:1:72956761` becomes `172956761`.
 	---A bot with entity index 4 will return `bot_4`.
 	if IsEntity(steam_id) then
@@ -14,15 +18,18 @@ function PYRITION._SignificantDigitSteamID(steam_id)
 	return steam_id[9] .. string.sub(steam_id, 11)
 end
 
-function PYRITION._SnakeCaseToCamelCase(snake_case) --turns some_class_name into SomeClassName
+function PYRITION._SnakeCaseToCamelCase(snake_case)
 	---ARGUMENTS: string
 	---RETURNS: string
 	---Converts snake_case to CamelCase.
-	local camel_case = ""
+	--necessary parenthesis remove second return
+	return (string.gsub(snake_case, "(%a)(%a+)(_?)", snake_case_to_camel_case_substitution))
+end
 
-	for index, word in ipairs(string.Split(snake_case, "_")) do
-		camel_case = camel_case .. string.upper(string.Left(word, 1)) .. string.lower(string.sub(word, 2))
-	end
-
-	return camel_case
+function PYRITION._CamelCaseToSnakeCase(camel_case)
+	---ARGUMENTS: string
+	---RETURNS: string
+	---Converts CamelCase to snake_case.
+	--necessary parenthesis remove second return
+	return (string.gsub(camel_case, "(%u)", camel_case_to_snake_case_substitution))
 end
