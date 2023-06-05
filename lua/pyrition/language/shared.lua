@@ -354,6 +354,6 @@ PYRITION:LanguageRegisterOption("Chat", function(formatted_table, _key, _phrases
 PYRITION:LanguageRegisterOption("Console", function(formatted_table)
 	table.insert(formatted_table, "\n")
 	MsgC(unpack(formatted_table))
-end)
+end, true)
 
 PYRITION:LanguageRegisterTieve(tieve_time, "time")
