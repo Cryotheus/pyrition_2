@@ -5,21 +5,24 @@ local PANEL = {}
 function PANEL:DoClick() self:GetParent():Remove() end
 
 function PANEL:Init()
-	button:SetAutoStretchVertical(true)
-	button:SetFont("DermaLarge")
-	button:SetText("Emergency Exit")
-	button:SetTextColor(color_white)
-	button:SetZPos(32767)
+	self:SetFont("DermaLarge")
+	self:SetText("EMERGENCY EXIT")
+	self:SetZPos(32767)
+
+	local text_width, text_height = self:GetTextSize()
+	self:SetSize(text_width * 1.5, text_height * 2)
 end
 
 function PANEL:Paint(width, height)
-	if self.Hover then
-		surface.DrawRect(0, 0, width, height)
-		surface.SetDrawColor(255, 0, 0)
+	if self.Hovered then
+		self:SetTextColor(color_white)
 
+		surface.SetDrawColor(255, 0, 0)
+		surface.DrawRect(0, 0, width, height)
+
+		surface.SetDrawColor(255, 255, 255)
 		surface.DrawOutlinedRect(0, 0, width, height, 2)
-		surface.SetDrawColor(128, 0, 0)
-	end
+	else self:SetTextColor(color_transparent) end
 end
 
 --post
