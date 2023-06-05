@@ -1,10 +1,10 @@
 --locals
 local ARGUMENT = {
 	ParseSettingMacros = {
-		Default = PYRITION_COMMAND_ARGUMENT_SETTING_PRESENT,
-		Selfless = PYRITION_COMMAND_ARGUMENT_SETTING_PRESENT,
-		Single = PYRITION_COMMAND_ARGUMENT_SETTING_PRESENT,
-	}
+		Default = "Present",
+		Selfless = "Present",
+		Single = "Present",
+	},
 }
 
 --[[

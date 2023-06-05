@@ -33,7 +33,6 @@ local config = {
 		client = true,
 
 		command = {
-			argument = "shared",
 			client = true,
 			shared = true,
 		},
@@ -144,9 +143,7 @@ local config = {
 
 	{ --net stream & language
 		command = {
-			commands = {
-				heal = "server",
-			},
+			argument = "shared",
 		},
 
 		language = {
@@ -181,6 +178,12 @@ local config = {
 	},
 
 	{ --net stream model
+		command = {
+			commands = {
+				heal = "server",
+			},
+		},
+
 		map = {
 			shared = true,
 		},

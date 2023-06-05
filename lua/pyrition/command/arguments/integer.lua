@@ -1,11 +1,11 @@
 --locals
 local ARGUMENT = {
 	ParseSettingMacros = {
-		Default = PYRITION_COMMAND_ARGUMENT_SETTING_NUMERICAL,
-		Maximum = PYRITION_COMMAND_ARGUMENT_SETTING_NUMERICAL,
-		Minimum = PYRITION_COMMAND_ARGUMENT_SETTING_NUMERICAL,
-		Signed = PYRITION_COMMAND_ARGUMENT_SETTING_PRESENT,
-	}
+		Default = "Numerical",
+		Maximum = "Numerical",
+		Minimum = "Numerical",
+		Signed = "Present",
+	},
 }
 
 --post

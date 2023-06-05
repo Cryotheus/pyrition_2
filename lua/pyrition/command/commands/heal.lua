@@ -42,4 +42,4 @@ function COMMAND:Execute(_executor, targets)
 end
 
 --post
-PYRITION:CommandRegister("heal", COMMAND)
+PYRITION:CommandRegister("Heal", COMMAND)

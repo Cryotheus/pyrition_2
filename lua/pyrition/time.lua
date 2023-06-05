@@ -38,7 +38,7 @@ local function grammar(quantity, unit)
 	return unit .. "s"
 end
 
-local function nice_time(seconds, recursions, use_grammar, thresholds, units, unit_seperator, block_seperator)
+local function nice_time(seconds, recursions, use_grammar, thresholds, units, unit_separator, block_separator)
 	--[[-ARGUMENTS:
 		number "Time to format in seconds.",
 		number "How many different units at the maximum should we use to represent the time.",
@@ -50,12 +50,12 @@ local function nice_time(seconds, recursions, use_grammar, thresholds, units, un
 	---RETURNS: string "Formatted text."
 	---SEE: PYRITION._TimeShorthand
 	---Formats seconds into an easier-to-read format.
-	local block_seperator = block_seperator or " "
+	local block_separator = block_separator or " "
 	local count = seconds
 	local flooring = seconds
 	local recursions = recursions or 0
 	local thresholds = thresholds or time_thresholds
-	local unit_seperator = unit_seperator or " "
+	local unit_separator = unit_separator or " "
 	local units = units or time_units
 	local use_grammar = use_grammar or use_grammar == nil
 
@@ -73,12 +73,12 @@ local function nice_time(seconds, recursions, use_grammar, thresholds, units, un
 		end
 	end
 
-	local text = count .. unit_seperator .. unit
+	local text = count .. unit_separator .. unit
 
 	if recursions > 0 then
 		local difference = seconds - flooring
 
-		if difference > 0 then text = text .. block_seperator .. nice_time(difference, recursions - 1, use_grammar, thresholds, units, unit_seperator, block_seperator) end
+		if difference > 0 then text = text .. block_separator .. nice_time(difference, recursions - 1, use_grammar, thresholds, units, unit_separator, block_separator) end
 	end
 
 	return text

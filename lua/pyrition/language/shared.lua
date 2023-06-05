@@ -281,7 +281,7 @@ function PYRITION:LanguageList(items)
 	elseif count == 2 then return self:LanguageFormat("pyrition.list.duo", {alpha = items[1], bravo = items[2]}) end
 
 	return self:LanguageFormat("pyrition.list", {
-		items = table.concat(items, language.GetPhrase("pyrition.list.seperator"), 1, count - 1),
+		items = table.concat(items, language.GetPhrase("pyrition.list.separator"), 1, count - 1),
 		last_item = items[count]
 	})
 end
@@ -299,7 +299,7 @@ function PYRITION:LanguageListPlayers(players)
 
 	return self:LanguageFormat("pyrition.player.list", {
 		last_name = names[count],
-		names = table.concat(names, language.GetPhrase("pyrition.player.list.seperator"), 1, count - 1)
+		names = table.concat(names, language.GetPhrase("pyrition.player.list.separator"), 1, count - 1)
 	})
 end
 

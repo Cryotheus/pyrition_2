@@ -1,3 +1,6 @@
+--locals
+local rebuild_camel_case = PYRITION._RebuildCamelCase
+
 --local functions
 function finds_sorter(alpha, bravo)
 	local alpha_score, bravo_score = alpha[3], bravo[3]
@@ -77,14 +80,36 @@ function PYRITION:CommandFindSignatures(needle, namespace)
 end
 
 function PYRITION:HOOK_CommandRegister(name, command_table)
+	assert(not string.find(name, "%s"), "CommandRegister cannot accept a name with whitespace.")
+	assert(string.find(name, "%u") and not string.find(name, "[^%a%d]"), "CommandRegister cannot accept a name that is not CamelCase (digits allowed).")
+
 	--"soft" update for the command palette's cache
 	if next(self.CommandHaystackCache) then table.Empty(self.CommandHaystackCache) end
 
-	if SERVER then
-		--PYRITION:NetAddEnumeratedString("Command", "")
+	local argument_signature
+
+	if command_table.Arguments then
+		local argument_settings = command_table.Arguments
+		local argument_signatures = {}
+
+		for index, settings in ipairs(argument_settings) do
+			local new_settings = self:CommandArgumentParseSettings(settings)
+			argument_settings[index] = new_settings
+			argument_signatures[index] = new_settings.Signature
+		end
+
+		argument_signature = table.concat(argument_signatures)
+	else
+		argument_signature = ""
+		command_table.Arguments = {}
 	end
 
-	self:CommandArgumentParseSettings("Integer Default = A Minimum = 2 Maximum = 10 Unsigned")
+	local command_signature = name .. "~" .. argument_signature
+	command_table.LocalizationKey = "pyrition.commands." .. rebuild_camel_case(name, ".")
+	command_table.Name = name
+	command_table.Signature = command_signature
+
+	self.CommandRegistry[command_signature] = command_table
 end
 
 --post
