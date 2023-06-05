@@ -3,6 +3,13 @@ local function camel_case_to_snake_case_substitution(upper) return "_" .. string
 local function snake_case_to_camel_case_substitution(first, remaining) return string.upper(first) .. remaining end 
 
 --pyrition functions
+function PYRITION._CamelCaseToSnakeCase(camel_case)
+	---ARGUMENTS: string
+	---RETURNS: string
+	---Converts CamelCase to snake_case.
+	return string.sub(string.gsub(camel_case, "(%u)", camel_case_to_snake_case_substitution), 2)
+end
+
 function PYRITION._SignificantDigitSteamID(steam_id)
 	---ARGUMENTS: string/Player
 	---RETURNS: string
@@ -26,10 +33,9 @@ function PYRITION._SnakeCaseToCamelCase(snake_case)
 	return (string.gsub(snake_case, "(%a)(%a+)(_?)", snake_case_to_camel_case_substitution))
 end
 
-function PYRITION._CamelCaseToSnakeCase(camel_case)
+function PYRITION._RebuildCamelCase(camel_case, separator)
 	---ARGUMENTS: string
 	---RETURNS: string
-	---Converts CamelCase to snake_case.
-	--necessary parenthesis remove second return
-	return (string.gsub(camel_case, "(%u)", camel_case_to_snake_case_substitution))
+	---Converts CamelCase to snake_case but with a custom $separator.
+	return string.sub(string.gsub(camel_case, "(%u)", function(upper) return separator .. string.lower(upper) end), string.len(separator) + 1)
 end
