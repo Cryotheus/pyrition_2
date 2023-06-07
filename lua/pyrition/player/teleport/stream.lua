@@ -1,9 +1,7 @@
---locals
 local MODEL = {}
 local teleport_history = PYRITION.PlayerTeleportHistory
 local teleport_history_length_bits = PYRITION.PlayerTeleportHistoryLengthBits
 
---stream model functions
 function MODEL:Read()
 	table.Empty(teleport_history)
 
@@ -43,5 +41,4 @@ function MODEL:Write(ply)
 	self:Complete()
 end
 
---post
 PYRITION:NetStreamModelRegister("Teleport", CLIENT, MODEL)

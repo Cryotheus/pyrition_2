@@ -3,5 +3,4 @@ local forced = {
 	
 }
 
---post
 for key, phrase in pairs(forced) do language.Add("pyrition." .. key, phrase) end

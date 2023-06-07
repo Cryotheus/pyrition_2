@@ -7,5 +7,11 @@ function PYRITION:CommandOpenPalette()
 	end
 end
 
---commands
+
+function PYRITION:HOOK_CommandDownload(name, command_table)
+	command_table.Downloaded = true
+
+	self:HOOK_CommandRegister(name, command_table)
+end
+
 concommand.Add("pyrition_command_palette", function(ply) if ply:IsValid() then PYRITION:CommandOpenPalette() end end)

@@ -1,9 +1,7 @@
---locals
-local dequeue_model = PYRITION.__DequeueModel
+local dequeue_model = PYRITION._NetStreamDequeueModel
 local model_queue = PYRITION.NetStreamModelsQueued
 local stream_models_active = PYRITION.NetStreamModelsActive
 
---pyrition functions
 function PYRITION:NetStreamModelAdd(class, _target, post, ...) --here for shared safety
 	if post then post(self:NetStreamModelCreate(class), ...)
 	else self:NetStreamModelCreate(class) end

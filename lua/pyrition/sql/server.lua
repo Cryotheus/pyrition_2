@@ -1,18 +1,14 @@
---locals
 local safety_flags = bit.bor(FCVAR_ARCHIVE, FCVAR_DONTRECORD, FCVAR_PROTECTED)
 
---localized functions
 local commit_queued
 local escape = PYRITION.SQLFunctionEscape
 local query = PYRITION.SQLFunctionQuery
 
---globals
 PYRITION.SQLCoroutines = PYRITION.SQLCoroutines or {}
 PYRITION.SQLSettings = PYRITION.SQLSettings or {}
 PYRITION.SQLFunctionEscape = escape
 PYRITION.SQLFunctionQuery = query
 
---local functions
 local function associate_convar(name, key, default, flags, type_key, callback)
 	local type_key = type_key or "String"
 
@@ -126,7 +122,6 @@ function commit_queued(queued, completion_callback) --creates a coroutine for co
 	return routine
 end
 
---pyrition functions
 function PYRITION:SQLBegin(queue) --Starts queuing all SQLQuery calls
 	--returns the queue discarded, or false if no queue was started
 	local queued = self.SQLQueued
@@ -190,7 +185,6 @@ function PYRITION:SQLQuery(instruction, callback, error_callback) --Perform or q
 	query(instruction, callback, error_callback)
 end
 
---pyrition hooks
 function PYRITION:HOOK_SQLCreateTables(_database_name) --Setup your tables in here
 	--database_name is nil if we are using SQLite, meaning you should prefix the table name with pyrition_
 	--if database_name is a string, then use that as the database in which the table is a member of
@@ -242,13 +236,11 @@ function PYRITION:HOOK_SQLInitialized(_database, database_name) --Called when My
 	self:SQLCreateTables(database_name or false)
 end
 
---hooks
 hook.Add("InitPostEntity", "PyritionSQL", function()
 	PYRITION:LanguageDisplay("sql_init", "pyrition.sql.start")
 	PYRITION:SQLInitialize()
 end)
 
---post
 associate_convar("pyrition_mysql_database", "MySQLDatabaseName", "pyrition", safety_flags)
 associate_convar("pyrition_mysql_host", "MySQLHost", "localhost", safety_flags)
 associate_convar("pyrition_mysql_password", "MySQLPassword", "password", safety_flags)

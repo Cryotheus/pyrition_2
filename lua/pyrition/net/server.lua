@@ -1,7 +1,6 @@
 util.AddNetworkString("pyrition")
 util.AddNetworkString("pyrition_teach")
 
---locals
 local bits = PYRITION._Bits
 local duplex_insert = duplex.Insert
 local duplex_remove = duplex.Remove
@@ -10,10 +9,10 @@ local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace]
 local net_enumeration_players = PYRITION.NetEnumerationPlayers or {} --dictionary[ply] = dictionary[namespace] = report[string]
 local net_enumeration_updates = PYRITION.NetEnumerationUpdates or {}
 local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] = duplex[string]
+local recipient_iterable = PYRITION._RecipientIterable
 local sv_allowcslua = GetConVar("sv_allowcslua")
 local teaching_queue = {}
 
---local functions
 local function read_enumerated_string(namespace, ply, text, enumeration)
 	local enumerations = net_enumerations[namespace]
 
@@ -43,14 +42,6 @@ local function read_enumerated_string(namespace, ply, text, enumeration)
 	return enumerations[enumeration]
 end
 
-local function recipient_iterable(object)
-	if object == true then return player.GetAll()
-	elseif IsEntity(object) then return {object}
-	elseif type(recipients) == "CRecipientFilter" then return recipients:GetPlayers()
-	elseif istable(object) then return object end
-
-	return false
-end
 
 local function recipient_pairs(recipients)
 	local players = recipient_iterable(recipients)
@@ -95,18 +86,15 @@ local function write_enumerated_string(namespace, text, recipients)
 	return track_enumerations(namespace, enumeration, recipients), text, enumeration, net_enumeration_bits[namespace]
 end
 
---globals
 PYRITION.NetHackingPlayers = PYRITION.NetHackingPlayers or {}
 PYRITION.NetLoadedPlayers = PYRITION.NetLoadedPlayers or {} --duplex of players
 PYRITION.NetLoadingPlayers = PYRITION.NetLoadingPlayers or {} --dictionary[ply] = ply:TimeConnected false if message emulated
 PYRITION.NetEnumerationPlayers = net_enumeration_players
 PYRITION.NetEnumerationUpdates = net_enumeration_updates
 PYRITION._ReadEnumeratedString = read_enumerated_string
-PYRITION._RecipientIterable = recipient_iterable --internal
 PYRITION._RecipientPairs = recipient_pairs --internal
 PYRITION._WriteEnumeratedString = write_enumerated_string
 
---pyrition functions
 function PYRITION:NetIsEnumerated(namespace, index)
 	local enumerations = net_enumerations[namespace]
 
@@ -197,7 +185,6 @@ function PYRITION:NetWriteEnumeratedString(namespace, text, recipients)
 	net.WriteUInt(enumeration -1, enumeration_bits)
 end
 
---pyrition hooks
 function PYRITION:HOOK_NetAddEnumeratedString(namespace, ...)
 	local duplex = net_enumerations[namespace]
 	local last_bits = 0
@@ -239,7 +226,6 @@ end
 
 function PYRITION:HOOK_NetPlayerInitialized(ply, _emulated) PYRITION:LanguageDisplay("player_loaded", "pyrition.net.load", {player = ply}) end
 
---hooks
 hook.Add("PlayerDisconnected", "PyritionNet", function(ply)
 	if ply == nil then return end
 
@@ -264,7 +250,6 @@ hook.Add("PlayerInitialSpawn", "PyritionNet", function(ply)
 	end
 end)
 
---net
 net.Receive("pyrition", function(_length, ply)
 	local loading_players = PYRITION.NetLoadingPlayers
 
@@ -294,5 +279,4 @@ net.Receive("pyrition", function(_length, ply)
 	end
 end)
 
---post
 PYRITION:GlobalHookCreate("NetAddEnumeratedString")

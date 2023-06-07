@@ -1,7 +1,5 @@
---locals
 local MODEL = {}
 
---stream model functions
 function MODEL:Initialize()
 	if SERVER then
 		self.Badges = {}
@@ -50,5 +48,4 @@ function MODEL:WriteInitialSync(target_player)
 	end
 end
 
---post
 PYRITION:NetStreamModelRegister("Badge", CLIENT, MODEL)

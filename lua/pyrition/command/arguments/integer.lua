@@ -1,4 +1,3 @@
---locals
 local ARGUMENT = {
 	ParseSettingMacros = {
 		Default = "Numerical",
@@ -8,5 +7,4 @@ local ARGUMENT = {
 	},
 }
 
---post
 PYRITION:CommandArgumentRegister("Integer", ARGUMENT)

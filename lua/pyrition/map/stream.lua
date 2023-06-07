@@ -1,11 +1,9 @@
---locals
 local duplex_set = duplex.Set
 local map_status = PYRITION.MapStatus
 local map_votes = PYRITION.MapVotes
 local max_players_bits = PYRITION.NetMaxPlayerBits
 local MODEL = {CopyOptimization = true, Priority = 20}
 
---local function
 local function read_map(self, index)
 	local map = self:ReadEnumeratedString("Map")
 	map_status[index] = self:ReadBool()
@@ -22,7 +20,6 @@ local function write_map(self, _update_maps, map)
 	self:WriteUInt(map_votes[map] or 0, max_players_bits)
 end
 
---stream model functions
 function MODEL:InitialSync() return next(PYRITION.MapList) and true or false end
 
 function MODEL:Read()
@@ -61,5 +58,4 @@ function MODEL:WriteInitialSync()
 	for index, map in ipairs(PYRITION.MapList) do write_map(self, update_maps, map) end
 end
 
---post
 PYRITION:NetStreamModelRegister("Map", CLIENT, MODEL)

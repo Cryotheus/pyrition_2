@@ -1,4 +1,3 @@
---locals
 local prefix_functions = {
 	["@"] = function(_needle, _supplicant) --player you're looking at
 		--POST: this!
@@ -28,10 +27,8 @@ local prefix_functions = {
 	["*"] = function(_needle, _supplicant) return player.GetAll() end --everyone
 }
 
---globals
 PYRITION.PlayerFindPrefixes = prefix_functions
 
---pyrition functions
 function PYRITION:PlayerFindByUserGroup(user_group, _supplicant)
 	local players = {}
 
@@ -83,7 +80,6 @@ function PYRITION:PlayerFindWithFallback(needle, supplicant, fallback, single, e
 	}
 end
 
---pyrition hooks
 function PYRITION:HOOK_PlayerFind(needle, supplicant, single, exclude_supplicant, allow_empty)
 	if allow_empty then needle = needle or ""
 	elseif not needle or needle == "" then return false, "pyrition.player.find.targetless" end

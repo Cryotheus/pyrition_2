@@ -1,6 +1,5 @@
 util.AddNetworkString("pyrition_map")
 
---locals
 local duplex_inherit_entry = duplex.InheritEntry
 local duplex_insert = duplex.Insert
 local map_vote_percentage = 0.5 --RELEASE: ConVar this!
@@ -9,11 +8,9 @@ local map_votes = PYRITION.MapVotes
 local maps = PYRITION.MapList
 local player_votes = PYRITION.MapPlayerVotes or {}
 
---globals
 PYRITION.MapPlayerVotes = player_votes
 PYRITION.MapVotes = map_votes
 
---pyrition functions
 function PYRITION:MapBuildList()
 	table.Empty(maps)
 
@@ -136,6 +133,5 @@ function PYRITION:MapVoteRetract(ply)
 	return false
 end
 
---post
 PYRITION:MapBuildList()
 PYRITION:NetAddEnumeratedString("Map")

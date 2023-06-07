@@ -1,11 +1,7 @@
---locals
---local badges = PYRITION.PlayerBadges
 local short_steam_id = PYRITION._SignificantDigitSteamID
 
---globals
 PYRITION.PlayerBadgeLoading = PYRITION.PlayerBadgeLoading or {}
 
---pyrition functions
 function PYRITION:PlayerBadgeLoaded(ply, class, level) return self:PlayerBadgeExists(class) and self:PlayerBadgeGive(ply, class, level, true) end
 
 function PYRITION:PlayerBadgeSave(ply, class)
@@ -76,7 +72,6 @@ function PYRITION:PlayerBadgesSave(ply, transaction)
 	if not transaction then self:SQLCommitOrDiscard() end
 end
 
---pyrition hooks
 function PYRITION:HOOK_PlayerBadgeLevelChanged(ply, badge, old_level, level, old_tier, tier)
 	if old_tier then
 		if tier < 1 or tier <= old_tier then return end
@@ -97,7 +92,6 @@ function PYRITION:HOOK_PlayerBadgeLevelChanged(ply, badge, old_level, level, old
 	end
 end
 
---hooks
 hook.Add("PyritionSQLCreateTables", "PyritionPlayerBadge", function(database_name)
 	if database_name then PYRITION:SQLQuery("create table if not exists `" .. database_name .. "`.badges (steam_id varchar(12) not null, class varchar(255) not null, level int unsigned not null, constraint badge_id primary key (steam_id, class));")
 	else PYRITION:SQLQuery("create table if not exists pyrition_badges (steam_id varchar(12) not null, class varchar(255) not null, level int unsigned not null, primary key (steam_id, class));") end

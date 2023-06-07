@@ -1,7 +1,6 @@
 --pragma once
 if duplex then return end
 
---locals
 local assert = assert
 local ipairs = ipairs
 local isnumber = isnumber
@@ -16,7 +15,6 @@ local type = type
 --no need for package.seall, we're not using many globals
 module("duplex")
 
---module functions
 function Destroy(duplex) --turn a duplex into a list
 	---ARGUMENTS: table
 	---RETURNS: table

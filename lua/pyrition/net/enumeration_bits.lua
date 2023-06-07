@@ -1,10 +1,8 @@
---locals
 local MODEL = {
 	EnumerateClass = false,
 	Priority = 65535
 }
 
---stream model functions
 function MODEL:InitialSync() return true end
 
 function MODEL:Read()
@@ -49,5 +47,4 @@ function MODEL:Write()
 	self:Complete()]]
 end
 
---post
 PYRITION:NetStreamModelRegister("EnumerationBits", CLIENT, MODEL)

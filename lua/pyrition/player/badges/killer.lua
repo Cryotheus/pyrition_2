@@ -1,4 +1,3 @@
---locals
 local BADGE = {
 	Level = 0,
 
@@ -19,7 +18,6 @@ language.Add("pyrition.badges.killer.tier_3", "Executor")
 language.Add("pyrition.badges.killer.tier_4", "Exterminator")
 language.Add("pyrition.badges.killer.tier_5", "Genocider")
 
---local functions
 local function attempt_increment(victim, attacker)
 	if attacker:IsNPC() then return end --ignore npcs
 	if victim == attacker then return end --no suicides
@@ -51,7 +49,6 @@ local function attempt_increments(victim, attacker)
 	end
 end
 
---badge functions
 function BADGE:Initialize() self:BakeTiers() end
 function BADGE:OnReloaded() self:BakeTiers() end
 
@@ -83,7 +80,6 @@ if SERVER then --we should only have these two server side
 	end)
 end
 
---post
 PYRITION:LanguageRegisterOption("killer_badge", function(formatted, _key, _phrases)
 	--RELEASE: make this show up as a really cool tooltip instead of a chat message
 	chat.AddText(Color(255, 192, 0), "[killer_badge] ", color_white, formatted)

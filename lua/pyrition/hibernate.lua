@@ -3,21 +3,17 @@ When anything needs hibernation thinking (see console variable `sv_hibernate_thi
 you can use $$PYRITION:HibernateWake to inform Pyrition hibernation thinking is needed.
 When your code no longer needs hibernation thinking, call $$PYRITION:Hibernate with the same key to allow the server to hibernate.]]
 
---locals
 local hibernation_registry = PYRITION.HibernateRegistry or {}
 local pyrition_hibernate_think = CreateConVar("pyrition_hibernate_think", "0", bit.bor(FCVAR_ARCHIVE, FCVAR_NEVER_AS_STRING), language.GetPhrase("pyrition.convars.pyrition_hibernate_think"))
 
---local functions
 local function update_hibernate_think()
 	if pyrition_hibernate_think:GetBool() then RunConsoleCommand("sv_hibernate_think", 1)
 	else RunConsoleCommand("sv_hibernate_think", PYRITION:Hibernating() and 0 or 1) end
 end
 
---globals
 PYRITION.HibernateRegistry = hibernation_registry
 PYRITION.HibernateTimers = PYRITION.HibernateTimers or 0
 
---pyrition functions
 function PYRITION:Hibernate(key, state)
 	---ARGUMENTS: string, boolean=nil
 	---SEE: PYRITION:HibernateWake
@@ -79,8 +75,6 @@ function PYRITION:Hibernating()
 	return next(hibernation_registry) == nil
 end
 
---convars
 cvars.AddChangeCallback("pyrition_hibernate_think", update_hibernate_think, "PyritionHibernate")
 
---post
 update_hibernate_think()

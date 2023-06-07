@@ -1,7 +1,6 @@
 local language_options = PYRITION.LanguageOptions or {}
 local language_options_colored = PYRITION.LanguageOptionsColored or {}
 
---pyrition functions
 function PYRITION:LanguageDisplay(option, key, phrases)
 	local operation = language_options[option]
 

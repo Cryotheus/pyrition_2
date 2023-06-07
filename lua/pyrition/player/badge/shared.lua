@@ -1,12 +1,9 @@
---locals
 local _R = debug.getregistry()
 
---local tables
 local badge_meta = PYRITION.PlayerBadgeMeta or {}
 local badge_public = _R.PyritionBadge or {__index = badge_meta, __name = "PyritionBadge"}
 local badge_tier_meta = {TierFunctionsInstalled = true}
 
---local functions
 local function kieve_badge(_index, text, _text_data, _texts, _key_values, phrases)
 	local ply = phrases.player
 
@@ -17,14 +14,12 @@ local function kieve_badge(_index, text, _text_data, _texts, _key_values, phrase
 	end
 end
 
---globals
 PYRITION.PlayerBadgeRegistry = PYRITION.PlayerBadgeRegistry or {}
 PYRITION.PlayerBadges = PYRITION.PlayerBadges or {}
 PYRITION.PlayerBadgeTieredMeta = badge_tier_meta
 PYRITION.PlayerBadgeMeta = badge_meta
 _R.PyritionBadge = badge_public
 
---badge meta functions
 function badge_public:__tostring()
 	local level = self.Level
 	local ply = self.Player
@@ -79,7 +74,6 @@ function badge_meta:ShouldDisplay() if self.Level > 0 then return true end end
 function badge_meta:Sync(who) if SERVER then PYRITION:PlayerBadgeSync(who or true, self) end end
 function badge_meta:UpdateLevel(level) return self.Level ~= level and self:SetLevel(level) end
 
---badge tier meta functions
 function badge_tier_meta:BakeTier(tier, level, material_path)
 	self.TierLevels[tier] = level
 	self.TierMaterials[tier] = Material(material_path)
@@ -132,7 +126,6 @@ function badge_tier_meta:SetLevel(level, initial)
 	return level
 end
 
---pyrition functions
 function PYRITION:PlayerBadgeExists(class) return self.PlayerBadgeRegistry[class] and true or false end
 
 function PYRITION:PlayerBadgeGet(ply, class) --Returns the player's badge (if they have it, returns false for revoked badges)
@@ -228,7 +221,6 @@ function PYRITION:PlayerBadgesGetGlint(ply)
 	return record_glint
 end
 
---pyrition hooks
 function PYRITION:HOOK_PlayerBadgeRegister(class, badge, base_class)
 	local base = self.PlayerBadgeRegistry[base_class]
 	local material = badge.Material or "icon16/error.png"
@@ -258,7 +250,6 @@ function PYRITION:HOOK_PlayerBadgeRegister(class, badge, base_class)
 	return badge
 end
 
---post
 PYRITION:GlobalHookCreate("PlayerBadgeRegister")
 PYRITION:LanguageRegisterColor("misc", "badge", "level", "tier")
 PYRITION:LanguageRegisterKieve(kieve_badge, "badge")

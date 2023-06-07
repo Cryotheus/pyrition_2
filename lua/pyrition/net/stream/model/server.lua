@@ -1,11 +1,9 @@
---locals
-local dequeue_model = PYRITION.__DequeueModel
+local dequeue_model = PYRITION._NetStreamDequeueModel
 local model_queue = PYRITION.NetStreamModelsQueued
 local recipient_iterable = PYRITION._RecipientIterable
-local stream_model_methods = PYRITION.NetStreamModelMethods
+local stream_model_classes = PYRITION.NetStreamModelClasses
 local stream_models_active = PYRITION.NetStreamModelsActive
 
---pyrition functions
 function PYRITION:NetStreamModelAdd(class, target, post, ...) --create stream models for recipients
 	if target and not IsEntity(target) then
 		local targets = recipient_iterable(target)
@@ -56,7 +54,7 @@ end
 
 function PYRITION:NetStreamModelThink() --only called if model_queue has values
 	for class, model_arguments in pairs(model_queue) do
-		if stream_model_methods[class].CopyOptimization then
+		if stream_model_classes[class].CopyOptimization then
 			local players = recipient_iterable(model_arguments.Target)
 			local target = table.remove(players)
 			local source_model = self:NetStreamModelCreate(class, target)

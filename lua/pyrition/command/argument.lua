@@ -12,12 +12,10 @@ local function numerical_list(value)
 	return numbers
 end
 
---globals
 PYRITION.CommandArgumentMacroRegistry = PYRITION.CommandArgumentMacroRegistry or {}
 PYRITION.CommandArgumentRegistry = PYRITION.CommandArgumentRegistry or {}
 PYRITION.CommandArgumentSignatureLookup = PYRITION.CommandArgumentSignatureLookup or {}
 
---pyrition functions
 function PYRITION:CommandArgumentParseSettings(settings)
 	if isstring(settings) then
 		local class
@@ -97,7 +95,6 @@ end
 
 function PYRITION:HOOK_CommandArgumentRegisterMacro(name, conversion_function) self.CommandArgumentMacroRegistry[name] = conversion_function end
 
---post
 PYRITION:GlobalHookCreate("CommandArgumentRegister")
 PYRITION:GlobalHookCreate("CommandArgumentRegisterMacro")
 

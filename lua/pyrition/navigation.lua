@@ -1,14 +1,11 @@
---locals
 local area_indices = PYRITION.NavigationAreaIndices or {}
 local area_list = PYRITION.NavigationAreaList or {}
 local setup_patience = 60 --how long until we timeout for doing navmesh setup
 local setup_wait
 
---globals
 PYRITION.NavigationAreaIndices = area_indices
 PYRITION.NavigationAreaList = area_list
 
---pyrition functions
 function PYRITION:NavigationSetup()
 	local last_index = 1
 
@@ -34,7 +31,6 @@ function PYRITION:NavigationSetupTimeout()
 	self:LanguageDisplay("navigation", "The navigation mesh failed to load in time. Did you forget to generate it?")
 end
 
---hooks
 if not next(PYRITION.NavigationAreaList) or navmesh.IsLoaded() and navmesh.GetNavAreaCount() == 0 then
 	PYRITION:HibernateWake("PyritionNavigation")
 

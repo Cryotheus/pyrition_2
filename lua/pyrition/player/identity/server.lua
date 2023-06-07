@@ -1,7 +1,5 @@
---locals
 local player_storage_players = PYRITION.PlayerStoragePlayers
 
---pyrition hooks
 function PYRITION:HOOK_PlayerStorageLoadedIdentity(ply, player_data)
 	local steam_community_id = ply:SteamID64()
 
@@ -14,7 +12,6 @@ function PYRITION:HOOK_PlayerStorageLoadedIdentity(ply, player_data)
 	end
 end
 
---hooks
 hook.Add("player_changename", "PyritionPlayerIdentity", function(data)
 	local ply = Player(data.userid)
 
@@ -25,7 +22,6 @@ hook.Add("player_changename", "PyritionPlayerIdentity", function(data)
 	end
 end)
 
---post
 gameevent.Listen("player_changename")
 
 PYRITION:PlayerStorageRegister("Identity", "identity",

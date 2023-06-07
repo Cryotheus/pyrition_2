@@ -1,4 +1,3 @@
---locals
 local direction_planes = {}
 local directions = {}
 local directions_bilateral = {}
@@ -7,7 +6,6 @@ local huge_negative_vector = Vector(-math.huge, -math.huge, -math.huge)
 local huge_vector = Vector(math.huge, math.huge, math.huge)
 local vector_meta = FindMetaTable("Vector")
 
---localized functions
 local math_abs = math.abs
 local math_ceil = math.ceil
 local math_Clamp = math.Clamp
@@ -16,17 +14,14 @@ local math_min = math.min
 local math_Truncate = math.Truncate
 local Vector = Vector
 
---local functions
 local function remaining_axes(axis)
 	if axis < 0 then return -axis % 3 + 1, (1 - axis) % 3 + 1 end
 
 	return axis % 3 + 1, (axis + 1) % 3 + 1
 end
 
---globals
 PYRITION._RemainingAxes = remaining_axes
 
---pyrition functions
 function PYRITION:VectorCompileBezier(point_count)
 	---ARGUMENTS: number
 	---Compiles a bezier method into the Vector metatable.
@@ -83,7 +78,6 @@ function PYRITION:VectorCompileBezier(point_count)
 	PyritionBezierFunction = nil
 end
 
---vector meta functions, a preceding ! in comments indicates that the <self> vector is modified
 function vector_meta:__le(right) return self.x <= right.x and self.y <= right.y and self.z <= right.z end
 function vector_meta:__lt(right) return self.x < right.x and self.y < right.y and self.z < right.z end
 
@@ -369,7 +363,6 @@ function vector_meta:WithMagnitude(magnitude)
 	return self * magnitude / self:Length()
 end
 
---post
 for axis = 1, 3 do
 	local direction = Vector()
 	local plane = Vector(1, 1, 1)

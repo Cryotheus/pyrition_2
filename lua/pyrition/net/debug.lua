@@ -1,10 +1,7 @@
---locals
 local originals = PYRITION.NetDebugOriginals or {}
 
---globals
 PYRITION.NetDebugOriginals = originals
 
---hooks
 hook.Add("PopulateToolMenu", "PyritionNetDebug", function()
 	spawnmenu.AddToolMenuOption("Utilities", "PyritionDevelopers", "NetDebug", "#pyrition.spawnmenu.categories.developer.net_debug", "", "", function(form)
 		form:ClearControls()

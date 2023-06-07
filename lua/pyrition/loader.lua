@@ -33,19 +33,14 @@ local config = {
 		client = true,
 
 		command = {
+			argument = "shared",
 			client = true,
-			shared = true,
 		},
-
-		convention = "shared",
-		conversion = "shared",
 
 		gfx = {
 			material_design = "client",
-			translucent_entities = "client",
 		},
 
-		gradient = "shared",
 		hibernate = "server",
 		html = "shared",
 
@@ -56,14 +51,18 @@ local config = {
 			},
 		},
 
-		ip = "shared",
-
 		net = {
 			shared = true,
 		},
 
 		panels = {
-			command_palette = "client",
+			command_palette = {"client",
+				card = "client",
+				card_commands = "client",
+				card_options = "client",
+				stage = "client",
+			},
+
 			emergency_exit = "client",
 		},
 
@@ -95,6 +94,7 @@ local config = {
 			},
 		},
 
+		server = true,
 		shared = true,
 
 		spawnmenu = {
@@ -105,7 +105,6 @@ local config = {
 			server = true,
 		},
 
-		string = "shared",
 		time = "shared",
 	},
 
@@ -115,6 +114,8 @@ local config = {
 				integer = "shared",
 				player = "shared",
 			},
+
+			shared = true,
 		},
 
 		navigation = "server",
@@ -143,7 +144,10 @@ local config = {
 
 	{ --net stream & language
 		command = {
-			argument = "shared",
+			commands = {
+				heal = "server",
+				health = "server",
+			},
 		},
 
 		language = {
@@ -178,12 +182,6 @@ local config = {
 	},
 
 	{ --net stream model
-		command = {
-			commands = {
-				heal = "server",
-			},
-		},
-
 		map = {
 			shared = true,
 		},

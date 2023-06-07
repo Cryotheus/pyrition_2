@@ -1,7 +1,5 @@
---locals
 local path_follower_meta = FindMetaTable("PathFollower")
 
---meta functions
 function path_follower_meta:GetDeduplicatedSegments()
 	---RETURNS: table
 	---Same as PathFollower:GetAllSegments, but removes any segments that are in the same area as the previous segment.

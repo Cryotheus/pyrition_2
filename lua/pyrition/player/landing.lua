@@ -1,4 +1,3 @@
---locals
 local drop_trace = {}
 local escape_vector = Vector(0, 0, 0.1) --we have a problem with the spot left solid being start solid
 local initial_radius = 1
@@ -11,7 +10,6 @@ local max_drop_vector = Vector(0, 0, max_drop - max_ascension)
 local pi = math.pi
 local tau = pi * 2
 
---local tables
 local drop_trace_data = { --hash-map-uh!
 	endpos = vector_origin,
 	filter = NULL,
@@ -22,7 +20,6 @@ local drop_trace_data = { --hash-map-uh!
 	start = vector_origin
 }
 
---local functions
 local function calculate_drop(attempts, start_position, level_position, end_position, bounding_mins, bounding_maxs)
 	--try to get a position that is not in a wall, nor in the air
 	drop_trace_data.endpos = end_position
@@ -154,5 +151,4 @@ local function find_suitable_landings(target, apparitions, force)
 	return destinations, destination_count
 end
 
---pyrition functions
 function PYRITION:HOOK_PlayerLanding(target, apparitions) return find_suitable_landings(target, apparitions) end

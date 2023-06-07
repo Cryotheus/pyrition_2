@@ -1,7 +1,5 @@
---locals
 local MODEL = {CopyOptimization = true}
 
---stream model functions
 function MODEL:InitialSync() return false end --TODO: fix this stream model before enabling this
 
 function MODEL:Read()
@@ -73,5 +71,4 @@ function MODEL:WriteInitialSync()
 	end
 end
 
---post
 PYRITION:NetStreamModelRegister("Storage", CLIENT, MODEL)

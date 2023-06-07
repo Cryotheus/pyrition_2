@@ -1,4 +1,3 @@
---locals
 local BADGE = {
 	DontSave = false,
 	Glint = Color(255, 128, 64),
@@ -23,10 +22,8 @@ local BADGE = {
 language.Add("pyrition.badges.pyrition_contributor", "Pyrition Contributor")
 language.Add("pyrition.badges.pyrition_contributor.description", "I contributed to the development of Pyrition!")
 
---badge functions
 function BADGE:Initialize() self:BakeTiers() end
 function BADGE:Name() return language.GetPhrase("pyrition.badges.pyrition_contributor") end
 function BADGE:OnReloaded() self:BakeTiers() end
 
---post
 PYRITION:PlayerBadgeRegister("pyrition_contributor", BADGE)

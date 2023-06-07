@@ -7,7 +7,6 @@ local TIME_SECOND = 1
 local TIME_WEEK = 604800
 local TIME_YEAR = 31556926 --365.2422 days rounded up
 
---locals
 local duplex_make_fooplex = duplex.MakeFooplex
 local time_thresholds = PYRITION.TimeThresholds or {}
 
@@ -31,7 +30,6 @@ local time_units = PYRITION.TimeUnits or {
 	[TIME_YEAR] = "year"
 }
 
---local functions
 local function grammar(quantity, unit)
 	if quantity == 1 then return unit end
 
@@ -126,7 +124,6 @@ local function shorthand_time(seconds, recursions)
 	return nice_time(seconds, recursions, false, nil, time_unit_shorthand, "", "")
 end
 
---globals
 PYRITION.TimeDay = TIME_DAY
 PYRITION.TimeHour = TIME_HOUR
 PYRITION.TimeMinute = TIME_MINUTE
@@ -142,7 +139,6 @@ PYRITION._TimeNicefy = nice_time
 PYRITION._TimeParse = parse_time
 PYRITION._TimeShorthand = shorthand_time
 
---post
 table.Empty(time_thresholds)
 
 for threshold, unit in pairs(time_units) do
@@ -155,6 +151,5 @@ table.sort(time_thresholds)
 
 time_thresholds = table.Reverse(time_thresholds)
 
---duplex_make(time_thresholds, true)
 duplex_make_fooplex(time_unit_shorthand, true)
 duplex_make_fooplex(time_units, true)

@@ -1,8 +1,6 @@
---locals
 local blocks = {}
 local replace_unsafe = PYRITION._StringReplaceUnsafe
 
---local functions
 local function messaging_blocked(ply, target)
 	local blocks = blocks[target]
 
@@ -11,7 +9,6 @@ end
 
 local function messaging_disabled(ply) return ply:GetInfoNum("pyrition_messaging_enabled", 2) == 0 end
 
---pyrition functions
 function PYRITION:PlayerMessage(ply, targets, message) --send a private message to another player
 	if messaging_disabled(ply) then return false, "pyrition.player.message.disabled.self" end
 

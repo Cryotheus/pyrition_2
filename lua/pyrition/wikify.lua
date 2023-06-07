@@ -3,12 +3,10 @@
 --this file is DEPRECATED!
 --I will be making an in-game wiki instead
 
---locals
 local meta_tag_handles = PYRITION.WikifyMetaTagHandles or {}
 
 include("includes/entity_proxy.lua")
 
---local functions
 local function best_match(hay_stack, pattern_start, patterns)
 	local best_index
 	local best_capture
@@ -130,12 +128,10 @@ local function recursive_delete(path)
 	file.Delete(path)
 end
 
---globals
 PYRITION._WikifyCollectFunctions = collect_functions
 PYRITION._WikifyCollectMultiple = collect_multiple
 PYRITION.WikifyMetaTagHandles = meta_tag_handles
 
---pyrition functions
 function PYRITION:Wikify()
 	local default_pattern = "pyrition/.+%.lua"
 	local default_source_url = "https://github.com/Cryotheus/pyrition_2/blob/main/"
@@ -524,7 +520,6 @@ function PYRITION:WikifyRegisterMetaTag(tag, handle)
 	meta_tag_handles[tag] = handle or default_meta_tag_handle
 end
 
---post
 PYRITION:WikifyRegisterMetaTag("COST")
 PYRITION:WikifyRegisterMetaTag("MEMORY")
 PYRITION:WikifyRegisterMetaTag("RETURN_DETAILS")

@@ -24,7 +24,6 @@ if PYRITION then
 	MsgC("\nDone.\n")
 else PYRITION = {} end
 
---pyrition functions
 function PYRITION._drint(level, ...)
 	--pr1nt with developer only
 	--hide from d3bug searches

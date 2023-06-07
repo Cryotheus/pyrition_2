@@ -1,9 +1,7 @@
---locals
 local short_steam_id = PYRITION._SignificantDigitSteamID
 
---globals
 PYRITION.Credation = {
-	BOT = {Badges = {"bot"}}, --bots for just being amazing, thank you for making testers almost irrelevant
+	BOT = {Badges = {"bot"}}, --bots for just being amazing, literally making testers almost irrelevant
 	["172956761"] = {Badges = {"pyrition_developer"}}, --me (Cryotheum) the developer of Pyrition
 	["166057978"] = {Badges = {{"pyrition_contributor", 9}}}, --Yogpod for giving me sources to resolve many issues
 	["1100559239"] = {Badges = {{"pyrition_contributor", 7}}}, --Gin for lots of localizations
@@ -12,11 +10,9 @@ PYRITION.Credation = {
 	["091921853"] = {Badges = {"pyrition_contributor"}}, --PCrafterZ previous server dev, gave input on code
 }
 
---Color(243, 105, 23) --orange! orange
---Color(76, 254, 83) --lime scout green
---Color(252, 42, 55) --dishonorable red
+--Color(76, 254, 83) --lime scout green --sprice
+--Color(252, 42, 55) --dishonorable red --dagaz
 
---pyrition functions
 function PYRITION:PlayerCredationGet(ply) return self.Credation[ply:IsBot() and "BOT" or short_steam_id(ply)] or false end
 
 function PYRITION:PlayerCredationGetBadges(ply)
@@ -25,7 +21,6 @@ function PYRITION:PlayerCredationGetBadges(ply)
 	return credation and credation.Badges
 end
 
---hooks
 hook.Add("PyritionPlayerBadgesLoaded", "PyritionPlayerCredation", function(ply)
 	local badges = PYRITION:PlayerCredationGetBadges(ply)
 

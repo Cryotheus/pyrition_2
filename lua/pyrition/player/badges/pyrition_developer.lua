@@ -1,4 +1,3 @@
---locals
 local BADGE = {
 	DontSave = false,
 	Glint = Color(255, 128, 64),
@@ -11,5 +10,4 @@ local BADGE = {
 language.Add("pyrition.badges.pyrition_developer", "Pyrition Developer")
 language.Add("pyrition.badges.pyrition_developer.description", "I made Pyrition!")
 
---post
 PYRITION:PlayerBadgeRegister("pyrition_developer", BADGE)

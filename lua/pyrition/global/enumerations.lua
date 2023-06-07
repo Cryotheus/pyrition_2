@@ -1,4 +1,3 @@
---locals
 local enumerations = {
 	{
 		Prefix = "COMMAND",
@@ -105,11 +104,6 @@ local enumerations = {
 	},
 }
 
---false in MENU state
---was deprecated, but kept it because of stream models
-SHARED = CLIENT or SERVER or false
-
---post
 for _, enumerations in ipairs(enumerations) do
 	local exponent_base = enumerations.ExponentBase
 	local offset = enumerations.Offset or 0

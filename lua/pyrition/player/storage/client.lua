@@ -1,7 +1,5 @@
---locals
 local bits = PYRITION._Bits
 
---pyrition functions
 function PYRITION:PlayerStorageRead(stream, ply, key)
 	local stream_methods = self.PlayerStorageStreamMethods[key]
 
@@ -22,7 +20,6 @@ function PYRITION:PlayerStorageRead(stream, ply, key)
 	end
 end
 
---pyrition hooks
 function PYRITION:HOOK_PlayerStorageRegisterSyncs(key, stream_methods)
 	local count = 0
 	local fields = {}
@@ -42,5 +39,4 @@ function PYRITION:HOOK_PlayerStorageRegisterSyncs(key, stream_methods)
 	stream_methods._Fields = fields
 end
 
---post
 PYRITION:GlobalHookCreate("PlayerStorageRegisterSyncs")

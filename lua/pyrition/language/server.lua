@@ -2,10 +2,8 @@ local color_broadcast = Color(255, 255, 0)
 local color_silent = Color(0, 0, 255)
 local log_filter = PYRITION.LanguageLogFilter or {}
 
---globals
 PYRITION.LanguageLogFilter = log_filter
 
---pyrition functions
 function PYRITION:LanguageDisplay(log, key, phrases, broadcast)
 	if isstring(log) then log = log_filter[log] and true or false end
 
@@ -59,5 +57,4 @@ end
 function PYRITION:LanguageRegister(key) self:NetAddEnumeratedString("Language", key) end
 function PYRITION:LanguageRegisterLogFilter(key, enabled) log_filter[key] = enabled end
 
---post
 PYRITION:NetAddEnumeratedString("Language")

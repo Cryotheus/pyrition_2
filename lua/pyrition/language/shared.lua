@@ -1,4 +1,3 @@
---locals
 local language_colors = PYRITION.LanguageColors or {}
 local language_options = PYRITION.LanguageOptions or {}
 local language_options_colored = PYRITION.LanguageOptionsColored or {}
@@ -17,7 +16,6 @@ local color_player = Color(255, 224, 0)
 local color_self = SERVER and color_console or Color(75, 0, 130)
 local color_unknown = Color(192, 0, 0)
 
---local tables
 local colors = {
 	command = color_command,
 	console = color_console,
@@ -36,7 +34,6 @@ local global_kieves = {
 	prefix = true
 }
 
---local functions
 local function build_medial_text(accumulator, text, last_finish, current_start)
 	local medial_text = string.sub(text, last_finish + 1, current_start)
 
@@ -215,7 +212,6 @@ local function replace_tags(self, text, phrases, colored)
 	return colored and texts or table.concat(texts, "")
 end
 
---kieve functions
 local function kieve_player(_index, text, _text_data, _texts, key_values, _phrases)
 	if text == local_player then return key_values.you, color_self
 	elseif text == game.GetWorld() then return key_values.console, color_console end
@@ -256,7 +252,6 @@ local function tieve_time(_index, text, _text_data, _texts, _key_values, _phrase
 	if time then return nice_time(time, 1) end
 end
 
---globals
 PYRITION.LanguageColors = language_colors
 PYRITION.LanguageOptions = language_options
 PYRITION.LanguageOptionsColored = language_options_colored
@@ -264,7 +259,6 @@ PYRITION.LanguageKieves = language_kieves
 PYRITION.LanguageTieves = language_tieves
 PYRITION._LanguagePhraseExists = phrase_exists
 
---pyrition functions
 function PYRITION:LanguageFormat(key, phrases) return phrases and replace_tags(self, language.GetPhrase(key), phrases) or language.GetPhrase(key) end
 function PYRITION:LanguageFormatColor(key, phrases) return phrases and replace_tags(self, language.GetPhrase(key), phrases, true) or {color_default, language.GetPhrase(key)} end
 function PYRITION:LanguageFormatColorTranslated(text, phrases) return phrases and replace_tags(self, text, phrases, true) or {color_default, text} end
@@ -333,10 +327,8 @@ function PYRITION:HOOK_LanguageRegisterTieve(tieve_function, ...)
 	for index, tag in ipairs{...} do language_tieves[tag] = tieve_function end
 end
 
---hooks
 hook.Add("InitPostEntity", "PyritionLanguage", function() local_player = LocalPlayer() end)
 
---post
 PYRITION:GlobalHookCreate("LanguageRegisterColor")
 PYRITION:GlobalHookCreate("LanguageRegisterOption")
 PYRITION:GlobalHookCreate("LanguageRegisterKieve")

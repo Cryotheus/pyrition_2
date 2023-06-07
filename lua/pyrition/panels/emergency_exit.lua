@@ -1,7 +1,5 @@
---locals
 local PANEL = {}
 
---panel functions
 function PANEL:DoClick() self:GetParent():Remove() end
 
 function PANEL:Init()
@@ -25,7 +23,6 @@ function PANEL:Paint(width, height)
 	else self:SetTextColor(color_transparent) end
 end
 
---post
 derma.DefineControl(
 	"PyritionEmergencyExit",
 	"DButton with the sole purpose of closing the parent. Used for developing panels. The button is invisible until hovered.",

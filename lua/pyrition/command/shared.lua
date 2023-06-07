@@ -1,7 +1,5 @@
---locals
 local rebuild_camel_case = PYRITION._RebuildCamelCase
 
---local functions
 function finds_sorter(alpha, bravo)
 	local alpha_score, bravo_score = alpha[3], bravo[3]
 
@@ -11,21 +9,11 @@ function finds_sorter(alpha, bravo)
 	return alpha_score > bravo_score
 end
 
---globals
 PYRITION.CommandHaystack = PYRITION.CommandHaystack or {}
 PYRITION.CommandHaystackCache = PYRITION.CommandHaystackCache or {}
 PYRITION.CommandLastHaystackNeedle = PYRITION.CommandLastHaystackNeedle or {}
 PYRITION.CommandRegistry = PYRITION.CommandRegistry or {}
 
---[[
-PYRITION:ConsoleCommandRegister("heal", {
-	Arguments = {"Player Default"},
-	Console = true,
-
-	Execute = function(ply, targets)
-]]
-
---pyrition functions
 function PYRITION:Command(command_signature, arguments)
 
 end
@@ -104,13 +92,19 @@ function PYRITION:HOOK_CommandRegister(name, command_table)
 		command_table.Arguments = {}
 	end
 
+	local command_haystack = self.CommandHaystack[name]
 	local command_signature = name .. "~" .. argument_signature
+	command_table.ArgumentSignature = argument_signature
 	command_table.LocalizationKey = "pyrition.commands." .. rebuild_camel_case(name, ".")
 	command_table.Name = name
 	command_table.Signature = command_signature
 
+	if command_haystack then duplex.Insert(command_haystack, command_signature)
+	else self.CommandHaystack[name] = {command_signature, [command_signature] = 1} end
+
 	self.CommandRegistry[command_signature] = command_table
+
+	return command_table
 end
 
---post
 PYRITION:GlobalHookCreate("CommandRegister")

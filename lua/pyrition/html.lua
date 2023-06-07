@@ -2,7 +2,6 @@
 local string_find = string.find
 local string_sub = string.sub
 
---local tables
 local void_types = {
 	area = true,
 	base = true,
@@ -22,7 +21,6 @@ local void_types = {
 	wbr = true,
 }
 
---local functions
 local function find(march, body, pattern)
 	local start, stop = string_find(body, pattern, march)
 
@@ -127,7 +125,6 @@ local function xhtml_parse(body, callback, limit)
 	callback(deserialized)
 end
 
---pyrition functions
 function PYRITION:HTMLParseAsync(body, callback, budget)
 	---ARGUMENTS: string, function, number=nil
 	---Parses an XHTML string asynchronously, calling the `callback` function with a table of the elements when finished.

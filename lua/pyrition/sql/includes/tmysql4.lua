@@ -1,9 +1,7 @@
 require("tmysql4")
 
---locals
 local database
 
---local functions
 local function connect(settings, callback, reconnection, retry)
 	local database_name = settings.MySQLDatabaseName
 	local error_message
@@ -46,5 +44,4 @@ local function query(instruction, callback, error_callback)
 	end)
 end
 
---post
 return query, escape, connect

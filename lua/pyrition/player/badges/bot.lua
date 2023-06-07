@@ -1,4 +1,3 @@
---locals
 local BADGE = {
 	DontSave = true,
 	Material = "icon16/cog.png",
@@ -8,7 +7,6 @@ local BADGE = {
 language.Add("pyrition.badges.bot", "Bot")
 language.Add("pyrition.badges.bot.description", "This player is a bot.")
 
---badge function
 function BADGE:Initialize()
 	local ply = self.Player
 
@@ -18,5 +16,4 @@ function BADGE:Initialize()
 	PYRITION:PlayerBadgeRemove(ply, "bot")
 end
 
---post
 PYRITION:PlayerBadgeRegister("bot", BADGE)

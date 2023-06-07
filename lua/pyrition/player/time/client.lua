@@ -1,7 +1,6 @@
 --globals
 PYRITION.PlayerTimeTotals = PYRITION.PlayerTimeTotals or {}
 
---pyrition functions
 function PYRITION:PlayerTimeGetFirst(ply)
 	local player_data = player_storage_players[ply]
 

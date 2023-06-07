@@ -1,7 +1,5 @@
---locals
 local ticked
 
---local functions
 local function query(instruction, callback, error_callback)
 	local result = sql.Query(instruction)
 
@@ -33,5 +31,4 @@ local function query(instruction, callback, error_callback)
 	end
 end
 
---post
 return query, sql.SQLStr

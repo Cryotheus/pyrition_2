@@ -1,19 +1,10 @@
---locals
 local COMMAND = {
 	Arguments = {"Player Default"},
 	Console = true,
 }
 
---command methods
 function COMMAND:Execute(_executor, targets)
-	--[[
-		return
-			success: boolean
-			localization_phrases = nil: table
-			reason: number/string
-	]]
-
-	local healed_targets = {}
+	local healed_targets = {IsPlayerList = true}
 
 	for index, target in ipairs(targets) do
 		local healed = false
@@ -41,5 +32,4 @@ function COMMAND:Execute(_executor, targets)
 	else return false, nil, PYRITION_COMMAND_MISSED end
 end
 
---post
 PYRITION:CommandRegister("Heal", COMMAND)

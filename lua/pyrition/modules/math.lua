@@ -1,4 +1,3 @@
---locals
 --local double_epsilon = 4.94065645841246544176568792868E-324
 --local float_epsilon = 1.175494e-38
 local math_ceil = math.ceil
@@ -6,7 +5,6 @@ local math_max = math.max
 local math_min = math.min
 local math_floor = math.floor
 
---local functions
 local function bezier_nomial(point_index, point_count)
 	local point_local = "p" .. point_index
 	local inverse_power = point_count - point_index
@@ -55,7 +53,6 @@ local function bezier_point_regression_formula(point_count)
 	return string.sub(table.concat(nomials, " + "), 1, -9)
 end
 
---global functions
 function math.Approach(current, target, increment)
 	---Same as it is in the [Garry's Mod Wiki](https://wiki.facepunch.com/gmod/math.Approach)
 	--because the source does this, we must keep it in case other addons rely on it

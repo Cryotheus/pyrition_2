@@ -1,7 +1,5 @@
---locals
 local nav_area_meta = FindMetaTable("CNavArea")
 
---local tables
 local area_direction_rights = {
 	[PYRITION_NAV_DIR_EAST] = Vector(-1, 0, 0),
 	[PYRITION_NAV_DIR_NORTH] = Vector(0, -1, 0),
@@ -30,7 +28,6 @@ local area_direction_forward_axes = {
 	[PYRITION_NAV_DIR_WEST] = 1,
 }
 
---meta functions
 function nav_area_meta:CalculatePortalSegment(target)
 	---ARGUMENTS: CNavArea
 	---RETURNS: Vector "Left end of segment.", Vector "Right end of segment."

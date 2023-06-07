@@ -38,7 +38,6 @@ If you are calling your function that needs to be hooked before `METHODS:GlobalH
 you can do `METHODS:GlobalHookCreate("SomethingCool")` to create the hooked functions instantly.]]
 
 
---local functions
 local function create(method_table, short_key, post_hook)
 	--[[-ARGUMENTS:
 		table "The table which contains your methods with and without the `HOOK_` prefix.",
@@ -96,7 +95,6 @@ local function refresh(method_table)
 	end
 end
 
---pyrition functions
 function PYRITION:GlobalHookInstall(prefix, method_table)
 	--[[-ARGUMENTS:
 		string "The text to prefix the hook calls with.",
@@ -109,5 +107,4 @@ function PYRITION:GlobalHookInstall(prefix, method_table)
 	method_table.GlobalHookRefresh = refresh
 end
 
---post
 PYRITION:GlobalHookInstall("Pyrition", PYRITION)

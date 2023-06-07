@@ -18,7 +18,6 @@ local function week_lapse(time, player_data)
 	end
 end
 
---pyrition functions
 function PYRITION:PlayerTimeGetFirst(ply)
 	local player_data = self.PlayerStoragePlayers[ply]
 
@@ -41,7 +40,6 @@ function PYRITION:PlayerTimeGetSession(ply)
 	return ply:TimeConnected()
 end
 
---pyrition hooks
 function PYRITION:HOOK_PlayerStorageLoadedTime(ply, player_data)
 	local time = os.time()
 
@@ -87,7 +85,6 @@ function PYRITION:HOOK_PlayerTimePassedWeek(_ply, week_time)
 	return week_time / 3600 > 2.5
 end
 
---post
 PYRITION:PlayerStorageRegister("Time", "time",
 	{ --the unix (day) of when the player first visited
 		Key = "first",

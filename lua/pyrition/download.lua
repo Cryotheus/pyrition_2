@@ -1,4 +1,3 @@
---local tables
 local valid_extensions = {
 	csv = true, dat = true,
 	jpeg = true, jpg = true,
@@ -9,7 +8,6 @@ local valid_extensions = {
 	xml = true
 }
 
---local fucntions
 local function download_loop(routine, url_list, prefix, path_prefix)
 	local prefix = "^" .. string.PatternSafe(prefix)
 	local url = table.remove(url_list)
@@ -40,7 +38,6 @@ local function download_loop(routine, url_list, prefix, path_prefix)
 	end
 end
 
---pyrition functions
 function PYRITION:DownloadFiles(url_list, prefix, path_prefix)
 	---Called by DownloadList to download the files in the list fetched.
 	local routine

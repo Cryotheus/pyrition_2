@@ -1,13 +1,10 @@
---locals
 local render_delay = 0.25
 local render_target_size = 512
 
---globals
 PYRITION.GFXMaterialDesignRenderQueue = PYRITION.GFXMaterialDesignRenderQueue or {}
 PYRITION.GFXMaterialDesignRenderTargetRepository = PYRITION.GFXMaterialDesignRenderTargetRepository or {}
 PYRITION.GFXMaterialDesignRenderTargets = PYRITION.GFXMaterialDesignRenderTargets or {}
 
---gamemode functions
 function PYRITION:GFXMaterialDesignCreate(icon_name, size)
 	local first
 	local material
@@ -209,7 +206,6 @@ function PYRITION:GFXMaterialDesignRender()
 	end)
 end
 
---commands
 --[[concommand.Add("mdi_debug", function()
 	--create a dframe that is 75% of the screen's width and height
 	local frame = vgui.Create("DFrame")

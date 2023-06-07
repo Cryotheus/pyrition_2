@@ -1,4 +1,3 @@
---locals
 local chat_filter = {
 	chat = false, --(Obsolete?) Player chat? Seems to trigger when server console uses the say command
 	joinleave = true, --Player join and leave messages
@@ -8,7 +7,6 @@ local chat_filter = {
 	teamchange = false, --Team changes?
 }
 
---hooks
 hook.Add("ChatText", "PyritionPlayerIdentity", function(_index, _name, _text, id)
 	if chat_filter[id] then return true end
 end)

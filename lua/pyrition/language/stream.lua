@@ -1,7 +1,5 @@
---locals
 local MODEL = {Priority = 10}
 
---stream model functions
 function MODEL:Initialize() if SERVER then self:Send() end end
 
 function MODEL:Read()
@@ -72,5 +70,4 @@ function MODEL:Write(_ply, key, phrases, option)
 	self:WriteBool(false)
 end
 
---post
 PYRITION:NetStreamModelRegister("Language", CLIENT, MODEL)

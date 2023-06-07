@@ -1,10 +1,8 @@
 require("mysqloo")
 
---locals
 local database
 local reconnecting
 
---local functions
 local function connect(settings, callback, reconnection, retry)
 	local database_name = settings.MySQLDatabaseName
 	local retry = retry or 0

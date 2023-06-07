@@ -1,4 +1,3 @@
---locals
 local BADGE = {
 	Level = 0,
 
@@ -19,9 +18,7 @@ language.Add("pyrition.badges.victim.tier_3", "Victim")
 language.Add("pyrition.badges.victim.tier_4", "Targetted Victim")
 language.Add("pyrition.badges.victim.tier_5", "Death Enthusiast")
 
---badge functions
 function BADGE:Initialize() self:BakeTiers() end
 function BADGE:OnReloaded() self:BakeTiers() end
 
---post
 PYRITION:PlayerBadgeRegister("victim", BADGE)

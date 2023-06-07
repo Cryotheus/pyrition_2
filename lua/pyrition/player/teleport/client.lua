@@ -1,13 +1,11 @@
 local teleport_history = PYRITION.PlayerTeleportHistory
 
---pyrition functions
 function PYRITION:PlayerTeleportRefreshGUI()
 	local list_view = self.PlayerTeleportHistoryList
 
 	if IsValid(list_view) then list_view:Refresh() end
 end
 
---hooks
 hook.Add("PopulateToolMenu", "PyritionPlayerTeleport", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Pyrition", "Teleport", "#pyrition.spawnmenu.categories.user.teleport", "", "", function(form)
 		local button

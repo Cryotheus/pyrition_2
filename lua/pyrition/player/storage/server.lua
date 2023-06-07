@@ -1,4 +1,3 @@
---locals
 local bits = PYRITION._Bits
 local duplex_insert = duplex.Insert
 local read_only = false --RELEASE: convar this
@@ -30,7 +29,6 @@ local valid_type_names = {
 	varchar = 1,
 }
 
---local functions
 local function escape_string(text) return PYRITION:SQLEscape(text) end
 local function to_bool_string(state) return state and "true" or "false" end
 
@@ -40,7 +38,6 @@ local function to_numerical_string(number)
 	return number and tostring(number) or "0"
 end
 
---post function setup
 local type_name_conversion_functions = {
 	bigint = tonumber,
 	boolean = tobool,
@@ -91,12 +88,10 @@ local type_name_instruction_functions = {
 	varchar = escape_string,
 }
 
---globals
 PYRITION.PlayerStorages = PYRITION.PlayerStorages or {}
 PYRITION.PlayerStoragesLoadFinished = PYRITION.PlayerStoragesLoadFinished or {}
 PYRITION.PlayerStoragesLoading = PYRITION.PlayerStoragesLoading or {}
 
---pyrition functions
 function PYRITION:PlayerStorageLoad(ply, key, tracker)
 	---Loads a specific storage for the specified player, overwriting any existing data.
 	---This calls `PlayerStorageLoaded` when finished.
@@ -208,7 +203,6 @@ function PYRITION:PlayerStorageWrite(stream, ply, key, fields)
 	end
 end
 
---pyrition hooks
 function PYRITION:HOOK_PlayerStorageLoadAll(ply)
 	local tracker = {}
 	self.PlayerStoragePlayers[ply] = {_ShortSteamID = short_steam_id(ply)}
@@ -365,7 +359,6 @@ function PYRITION:HOOK_PlayerStorageSaveEveryone(everyone)
 	self:SQLCommitOrDiscard()
 end
 
---hooks
 hook.Add("PlayerDisconnected", "PyritionPlayerStorage", function(ply)
 	--save the storage if we were not loading their storage (and we previously loaded it)
 	if not PYRITION:PlayerStorageLoadDiscard(ply) and PYRITION.PlayerStoragesLoadFinished[ply] then
@@ -381,6 +374,5 @@ end)
 hook.Add("PyritionNetPlayerInitialized", "PyritionPlayerStorage", function(ply) PYRITION:PlayerStorageLoadAll(ply) end)
 hook.Add("PyritionSQLCreateTables", "PyritionPlayerStorage", function(database_name) PYRITION:PlayerStorageRegistration(database_name) end)
 
---post
 PYRITION:GlobalHookCreate("PlayerStorageRegister")
 PYRITION:GlobalHookCreate("PlayerStorageRegisterSyncs")

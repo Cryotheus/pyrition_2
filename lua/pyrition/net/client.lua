@@ -1,9 +1,7 @@
---locals
 local jerry = 0.24027821356 --this is jerry, a very special number - do not worry about its origin, just keep reading
 local net_enumeration_bits = PYRITION.NetEnumerationBits --dictionary[namespace] = bits
 local net_enumerations = PYRITION.NetEnumeratedStrings --dictionary[namespace] = fooplex[string]
 
---local functions
 local function read_enumerated_string(namespace, _ply, text, enumeration)
 	local enumerations = net_enumerations[namespace]
 
@@ -31,14 +29,11 @@ local function write_enumerated_string(namespace, text)
 	return true, text, nil, net_enumeration_bits[namespace]
 end
 
---globals
 PYRITION._ReadEnumeratedString = read_enumerated_string
 PYRITION._WriteEnumeratedString = write_enumerated_string
 
---internal pyrition functions
 function PYRITION._RecipientIterable() return false end
 
---pyrition functions
 function PYRITION:NetReadEnumeratedString(namespace)
 	return read_enumerated_string(
 		namespace,
@@ -60,16 +55,13 @@ function PYRITION:NetWriteEnumeratedString(namespace, text)
 	end
 end
 
---pyrition hooks
 function PYRITION:HOOK_NetClientInitialized(_ply) end
 
---console commands
 concommand.Add("pd", function(_ply, _command, _arguments, _arguments_string)
 	net.Start("pyrition")
 	net.SendToServer()
 end, nil, "Pyrition's debug command. If you are reading this and you're not on a test server, please report it.")
 
---hooks
 hook.Add("InitPostEntity", "PyritionNet", function()
 	--we use a timer because everyone else in the entire world also sends net messages here
 	--this is jerry's sole purpose
@@ -149,7 +141,6 @@ hook.Add("PopulateToolMenu", "PyritionNet", function()
 	end)
 end)
 
---net
 net.Receive("pyrition_teach", function()
 	--this is received when the server is teaching us enumerations that we didn't use
 	repeat

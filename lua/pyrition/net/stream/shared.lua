@@ -1,6 +1,5 @@
---credits:
---	Nak2 for showing a better way to handle floats
---	https://github.com/Nak2/NikNaks/blob/6269e40979ff8e51177eacab4b853c0ec01889cc/lua/niknaks/modules/sh_bytebuffer.lua#L596-L643
+--sources:
+--https://github.com/Nak2/NikNaks/blob/6269e40979ff8e51177eacab4b853c0ec01889cc/lua/niknaks/modules/sh_bytebuffer.lua#L596-L643
 
 --1st class function nation :D
 local block_convar
@@ -9,7 +8,6 @@ local read_enumerated_string = PYRITION._ReadEnumeratedString
 local wordless
 local write_enumerated_string = PYRITION._WriteEnumeratedString
 
---local globals
 local active_streams = PYRITION.NetStreamsActive or {} --table[ply][class][uid] = stream, but on CLIENT its table[class][uid]
 local max_players_bits = PYRITION.NetMaxPlayerBits
 local max_clients_bits = PYRITION.NetMaxClientBits
@@ -17,21 +15,17 @@ local net_enumeration_bits = PYRITION.NetEnumerationBits
 local stream_classes = PYRITION.NetStreamClasses or {} --table[class] = bool: should we recieve it?
 local stream_counters = PYRITION.NetStreamCounters or {} --table[class] = uid
 local stream_send_queue = PYRITION.NetStreamQueue or {} --list of streams, on server its table[ply] = list
-local _R = debug.getregistry()
 
---convars
 local convar_flags = bit.bor(SERVER and FCVAR_ARCHIVE or 0, FCVAR_REPLICATED)
 local pyrition_net_stream_bytes = CreateConVar("pyrition_net_stream_bytes", "64000", convar_flags, "string helptext", 1024, 64000)
 local pyrition_net_stream_channels = CreateConVar("pyrition_net_stream_channels", "8", convar_flags, "string helptext", 1)
 local pyrition_net_stream_size = CreateConVar("pyrition_net_stream_size", "16000", convar_flags, "string helptext", 1024, 16000)
 
---cached convars
 local maximum_bytes_sent = pyrition_net_stream_bytes:GetInt()
 local maximum_layer_size = pyrition_net_stream_channels:GetInt()
 local maximum_stream_size = pyrition_net_stream_size:GetInt() * 1024
 
---local tables
-local stream_meta = {
+local stream_methods = {
 	BitsWritten = 0,
 	Byte = 0,
 	Class = "none",
@@ -43,7 +37,18 @@ local stream_meta = {
 	Sending = false
 }
 
-local stream_public = {__index = stream_meta, __name = "PyritionStream"}
+local stream_meta = {
+	__index = stream_methods,
+	__name = "PyritionStream",
+
+	__tostring = function(self)
+		local uid = self.UID
+
+		if uid then return "PyritionStream [" .. self.Class .. ":" .. uid .. "]["  .. self:Size() ..  "][" .. self.Target .. self.Name .. "]" end
+
+		return "PyritionStream [" .. self.Class .. "]["  .. self:Size() ..  "][" .. self.Target .. self.Name .. "]"
+	end
+}
 
 ----constants
 	local char_limit = 0x320 --0d8000, the limit for string_byte and string_char
@@ -93,13 +98,12 @@ local stream_public = {__index = stream_meta, __name = "PyritionStream"}
 	local Vector = Vector
 ----
 
---local functions
 local function benchmark(key, samples, max_tries, try, generation)
 	local stream = setmetatable({
 		Data = "",
 		Name = string.Replace(tostring(SysTime()), ".", "_"),
 		Target = target
-	}, stream_public)
+	}, stream_meta)
 
 	local generated = {}
 	local method = stream[key]
@@ -218,7 +222,6 @@ local function write_float(float)
 	)
 end
 
---sided local functions
 if CLIENT then function block_convar() return false end
 else
 	function block_convar(convar, internal, new)
@@ -233,28 +236,17 @@ else
 	end
 end
 
---globals
-PYRITION.NetStreamsActive = active_streams
+debug.getregistry().PyritionStream = stream_meta
 PYRITION.NetStreamClasses = stream_classes
 PYRITION.NetStreamCounters = stream_counters
-PYRITION.NetStreamQueue = stream_send_queue
 PYRITION.NetStreamMeta = stream_meta
-_R.PyritionStream = stream_public
+PYRITION.NetStreamMethods = stream_methods
+PYRITION.NetStreamQueue = stream_send_queue
+PYRITION.NetStreamsActive = active_streams
 
---meta functions
-function stream_public:__call(...) return self:Call(...) end
+function stream_methods:Distance() return self.Pointer * 8 + self.PointerBit - 8 end
 
-function stream_public:__tostring()
-	local uid = self.UID
-
-	if uid then return "PyritionStream [" .. self.Class .. ":" .. uid .. "]["  .. self:Size() ..  "][" .. self.Target .. self.Name .. "]" end
-
-	return "PyritionStream [" .. self.Class .. "]["  .. self:Size() ..  "][" .. self.Target .. self.Name .. "]"
-end
-
-function stream_meta:Distance() return self.Pointer * 8 + self.PointerBit - 8 end
-
-function stream_meta:Dump(zeros)
+function stream_methods:Dump(zeros)
 	local data = self.Data
 	local dump = {}
 	local target = self.Target
@@ -283,7 +275,7 @@ function stream_meta:Dump(zeros)
 	else file.Write(target .. self.Name .. ".dmp.dat", data) end
 end
 
-function stream_meta:NetRead()
+function stream_methods:NetRead()
 	local length = net_ReadUInt(16) + 1
 	local received_length = (self.ReceivedLength or 0) + length
 
@@ -302,7 +294,7 @@ function stream_meta:NetRead()
 	return net_ReadBool()
 end
 
-function stream_meta:NetWrite(length)
+function stream_methods:NetWrite(length)
 	local bytes_sent = self.BytesSent
 	local segment = string_sub(self.Data, bytes_sent + 1)
 	local segment_length = #segment
@@ -348,18 +340,18 @@ function stream_meta:NetWrite(length)
 	return false, write_length
 end
 
-function stream_meta:Read(_ply) end
+function stream_methods:Read(_ply) end
 
-function stream_meta:ReadAlign() --adjusts the read pointer to the next byte
+function stream_methods:ReadAlign() --adjusts the read pointer to the next byte
 	if self.PointerBit == 0 then return end
 
 	self.Pointer = self.Pointer + 1
 	self.PointerBit = 0
 end
 
-function stream_meta:ReadAngle() return Angle(self:ReadFloat(), self:ReadFloat(), self:ReadFloat()) end
+function stream_methods:ReadAngle() return Angle(self:ReadFloat(), self:ReadFloat(), self:ReadFloat()) end
 
-function stream_meta:ReadBit()
+function stream_methods:ReadBit()
 	local read_bit = self.PointerBit
 
 	if read_bit == 7 then
@@ -376,7 +368,7 @@ function stream_meta:ReadBit()
 	end
 end
 
-function stream_meta:ReadBits(bits) --for reading less than a byte
+function stream_methods:ReadBits(bits) --for reading less than a byte
 	local bit_pointer = self.PointerBit
 	local byte_pointer = self.Pointer
 	local new_bits = bit_pointer + bits
@@ -402,10 +394,10 @@ function stream_meta:ReadBits(bits) --for reading less than a byte
 	return bit_rshift(bit_band(byte_safe(self.Data, byte_pointer), get_right_mask(remaining_bits)), remaining_bits - bits)
 end
 
-function stream_meta:ReadBool() return self:ReadBit() == 1 end
-function stream_meta:ReadBoolNot() return self:ReadBit() == 0 end --because "repeat ... until not ReadBool" is done a lot, this eliminates an op
+function stream_methods:ReadBool() return self:ReadBit() == 1 end
+function stream_methods:ReadBoolNot() return self:ReadBit() == 0 end --because "repeat ... until not ReadBool" is done a lot, this eliminates an op
 
-function stream_meta:ReadByte()
+function stream_methods:ReadByte()
 	local bit_pointer = self.PointerBit
 	local byte_pointer = self.Pointer
 
@@ -420,10 +412,10 @@ function stream_meta:ReadByte()
 	end
 end
 
-function stream_meta:ReadCharacter() return string_char(self:ReadByte()) end
-function stream_meta:ReadClient() return Entity(self:ReadUInt(max_clients_bits) + 1) end
+function stream_methods:ReadCharacter() return string_char(self:ReadByte()) end
+function stream_methods:ReadClient() return Entity(self:ReadUInt(max_clients_bits) + 1) end
 
-function stream_meta:ReadEnumeratedString(namespace, ply)
+function stream_methods:ReadEnumeratedString(namespace, ply)
 	return read_enumerated_string(
 		namespace,
 		ply or self.Player,
@@ -432,15 +424,15 @@ function stream_meta:ReadEnumeratedString(namespace, ply)
 	)
 end
 
-function stream_meta:ReadFloat() return read_float(self:ReadULong()) end
+function stream_methods:ReadFloat() return read_float(self:ReadULong()) end
 
-function stream_meta:ReadInt(bits)
+function stream_methods:ReadInt(bits)
 	if self:ReadBool() then return -self:ReadUInt(bits) end
 
 	return self:ReadUInt(bits)
 end
 
-function stream_meta:ReadList(bits, method, ...)
+function stream_methods:ReadList(bits, method, ...)
 	local items = {}
 
 	for index = 0, self:ReadUInt(bits) do table_insert(items, method(self, ...)) end
@@ -448,31 +440,31 @@ function stream_meta:ReadList(bits, method, ...)
 	return items
 end
 
-function stream_meta:ReadLong()
+function stream_methods:ReadLong()
 	if self:ReadBool() then return -self:ReadULong() end
 
 	return self:ReadULong()
 end
 
-function stream_meta:ReadMaybe(method, ...) if self:ReadBool() then return method(self, ...) end end
-function stream_meta:ReadNullableTerminatedList(method, ...) return self:ReadBool() and self:ReadTerminatedList(method, ...) or {} end
-function stream_meta:ReadPlayer() return Entity(self:ReadUInt(max_players_bits)) end
+function stream_methods:ReadMaybe(method, ...) if self:ReadBool() then return method(self, ...) end end
+function stream_methods:ReadNullableTerminatedList(method, ...) return self:ReadBool() and self:ReadTerminatedList(method, ...) or {} end
+function stream_methods:ReadPlayer() return Entity(self:ReadUInt(max_players_bits)) end
 
-function stream_meta:ReadShort()
+function stream_methods:ReadShort()
 	if self:ReadBool() then return -self:ReadUShort() end
 
 	return self:ReadUShort()
 end
 
-function stream_meta:ReadSignedByte()
+function stream_methods:ReadSignedByte()
 	if self:ReadBool() then return -self:ReadByte() end
 
 	return self:ReadByte()
 end
 
-function stream_meta:ReadString() return self:ReadStringRaw(self:ReadUShort()) end
+function stream_methods:ReadString() return self:ReadStringRaw(self:ReadUShort()) end
 
-function stream_meta:ReadStringRaw(length)
+function stream_methods:ReadStringRaw(length)
 	local bytes_to_read = length
 	local output = ""
 
@@ -485,7 +477,7 @@ function stream_meta:ReadStringRaw(length)
 	return output
 end
 
-function stream_meta:ReadStringRawInternal(length)
+function stream_methods:ReadStringRawInternal(length)
 	local read_bit = self.PointerBit
 	local read_byte = self.Pointer
 	local read_target = read_byte + length
@@ -512,7 +504,7 @@ function stream_meta:ReadStringRawInternal(length)
 	end
 end
 
-function stream_meta:ReadTerminatedList(method, ...)
+function stream_methods:ReadTerminatedList(method, ...)
 	local items = {}
 
 	repeat table_insert(items, method(self, ...))
@@ -521,7 +513,7 @@ function stream_meta:ReadTerminatedList(method, ...)
 	return items
 end
 
-function stream_meta:ReadTerminatedString()
+function stream_methods:ReadTerminatedString()
 	local byte
 	local characters = {}
 
@@ -538,7 +530,7 @@ function stream_meta:ReadTerminatedString()
 	return rete
 end
 
-function stream_meta:ReadUInt(bits)
+function stream_methods:ReadUInt(bits)
 	local bits_modulo = bits % 8
 	local integer = 0
 
@@ -553,7 +545,7 @@ function stream_meta:ReadUInt(bits)
 	return integer + self:ReadBits(bits_modulo)
 end
 
-function stream_meta:ReadULong()
+function stream_methods:ReadULong()
 	local first, second, third, fourth
 	local read_bit = self.PointerBit
 	local read_byte = self.Pointer
@@ -574,7 +566,7 @@ function stream_meta:ReadULong()
 	return bit_lshift(first, 24) + bit_lshift(second, 16) + bit_lshift(third, 8) + fourth
 end
 
-function stream_meta:ReadUShort()
+function stream_methods:ReadUShort()
 	local first, second
 	local read_bit = self.PointerBit
 	local read_byte = self.Pointer
@@ -593,18 +585,18 @@ function stream_meta:ReadUShort()
 	return second and bit_lshift(first, 8) + second or 0
 end
 
-function stream_meta:ReadVector() return Vector(self:ReadFloat(), self:ReadFloat(), self:ReadFloat()) end
-function stream_meta:Size() return #self.Data * 8 + self.BitsWritten end
-function stream_meta:Send() PYRITION:NetStreamSend(self) end
-function stream_meta:SendFinished() end
+function stream_methods:ReadVector() return Vector(self:ReadFloat(), self:ReadFloat(), self:ReadFloat()) end
+function stream_methods:Size() return #self.Data * 8 + self.BitsWritten end
+function stream_methods:Send() PYRITION:NetStreamSend(self) end
+function stream_methods:SendFinished() end
 
-function stream_meta:WriteAngle(angle)
+function stream_methods:WriteAngle(angle)
 	self:WriteFloat(angle.p)
 	self:WriteFloat(angle.y)
 	self:WriteFloat(angle.r)
 end
 
-function stream_meta:WriteBit(digit)
+function stream_methods:WriteBit(digit)
 	local bits_written = self.BitsWritten
 
 	if bits_written == 7 then
@@ -621,9 +613,9 @@ function stream_meta:WriteBit(digit)
 	end
 end
 
-function stream_meta:WriteBool(boolean) self:WriteBit(boolean and 1 or 0) end
+function stream_methods:WriteBool(boolean) self:WriteBit(boolean and 1 or 0) end
 
-function stream_meta:WriteByte(byte)
+function stream_methods:WriteByte(byte)
 	local bits_written = self.BitsWritten
 
 	if bits_written == 0 then
@@ -638,10 +630,10 @@ function stream_meta:WriteByte(byte)
 	self.Byte = wordless(bit_lshift(byte, 8 - bits_written))
 end
 
-function stream_meta:WriteCharacter(character) self:WriteByte(string_byte(character)) end
-function stream_meta:WriteClient(ply) self:WriteUInt(ply:EntIndex() - 1, max_clients_bits) end
+function stream_methods:WriteCharacter(character) self:WriteByte(string_byte(character)) end
+function stream_methods:WriteClient(ply) self:WriteUInt(ply:EntIndex() - 1, max_clients_bits) end
 
-function stream_meta:WriteEndBits() --write 0 for the remaining bits, completing the current byte
+function stream_methods:WriteEndBits() --write 0 for the remaining bits, completing the current byte
 	if self.BitsWritten == 0 then return end
 
 	self.Data = self.Data .. string_char(self.Byte)
@@ -652,7 +644,7 @@ function stream_meta:WriteEndBits() --write 0 for the remaining bits, completing
 	return true
 end
 
-function stream_meta:WriteEnumeratedString(namespace, text, recipients)
+function stream_methods:WriteEnumeratedString(namespace, text, recipients)
 	local send_raw, text, enumeration, enumeration_bits = write_enumerated_string(namespace, text, recipients or self.Player)
 
 	if send_raw then
@@ -667,14 +659,14 @@ function stream_meta:WriteEnumeratedString(namespace, text, recipients)
 	self:WriteUInt(enumeration - 1, enumeration_bits)
 end
 
-function stream_meta:WriteFloat(float) self:WriteULong(write_float(float)) end
+function stream_methods:WriteFloat(float) self:WriteULong(write_float(float)) end
 
-function stream_meta:WriteInt(integer, bits) --maximum effort
+function stream_methods:WriteInt(integer, bits) --maximum effort
 	self:WriteBool(integer < 0)
 	self:WriteUInt(math.abs(integer), bits)
 end
 
-function stream_meta:WriteList(items, bits, method, ...)
+function stream_methods:WriteList(items, bits, method, ...)
 	if not istable(items) then items = {items} end
 
 	self:WriteUInt(#items - 1, bits)
@@ -682,12 +674,12 @@ function stream_meta:WriteList(items, bits, method, ...)
 	for index, item in ipairs(items) do method(self, item, ...) end
 end
 
-function stream_meta:WriteLong(long)
+function stream_methods:WriteLong(long)
 	self:WriteBool(long < 0)
 	self:WriteULong(math.abs(long))
 end
 
-function stream_meta:WriteMaybe(method, value, ...)
+function stream_methods:WriteMaybe(method, value, ...)
 	if value == nil then return self:WriteBool(false) end
 
 	self:WriteBool(true)
@@ -695,31 +687,31 @@ function stream_meta:WriteMaybe(method, value, ...)
 	return method(self, value, ...)
 end
 
-function stream_meta:WriteNullableTerminatedList(items, ...)
+function stream_methods:WriteNullableTerminatedList(items, ...)
 	if table.IsEmpty(items) then return self:WriteBool(false) end
 
 	self:WriteBool(true)
 	self:WriteTerminatedList(items, ...)
 end
 
-function stream_meta:WritePlayer(ply) self:WriteUInt(ply:EntIndex(), max_players_bits) end
+function stream_methods:WritePlayer(ply) self:WriteUInt(ply:EntIndex(), max_players_bits) end
 
-function stream_meta:WriteShort(short)
+function stream_methods:WriteShort(short)
 	self:WriteBool(short < 0)
 	self:WriteUShort(math.abs(short))
 end
 
-function stream_meta:WriteSignedByte(byte)
+function stream_methods:WriteSignedByte(byte)
 	self:WriteBool(byte < 0)
 	self:WriteByte(math.abs(byte))
 end
 
-function stream_meta:WriteString(text)
+function stream_methods:WriteString(text)
 	self:WriteUShort(#text)
 	self:WriteStringRaw(text)
 end
 
-function stream_meta:WriteStringRaw(text)
+function stream_methods:WriteStringRaw(text)
 	local text_count = #text
 
 	if self.BitsWritten == 0 then self.Data = self.Data .. text
@@ -744,7 +736,7 @@ function stream_meta:WriteStringRaw(text)
 	end
 end
 
-function stream_meta:WriteTerminatedList(items, method, ...)
+function stream_methods:WriteTerminatedList(items, method, ...)
 	local passed = false
 
 	for index, item in ipairs(items) do
@@ -757,12 +749,12 @@ function stream_meta:WriteTerminatedList(items, method, ...)
 	self:WriteBool(false)
 end
 
-function stream_meta:WriteTerminatedString(text)
+function stream_methods:WriteTerminatedString(text)
 	self:WriteStringRaw(text)
 	self:WriteByte(0)
 end
 
-function stream_meta:WriteUInt(integer, bits)
+function stream_methods:WriteUInt(integer, bits)
 	local bits_written = self.BitsWritten
 
 	if bits_written == 0 then write_bits(self, {}, integer, bits)
@@ -799,7 +791,7 @@ function stream_meta:WriteUInt(integer, bits)
 	end
 end
 
-function stream_meta:WriteULong(long)
+function stream_methods:WriteULong(long)
 	local bits_written = self.BitsWritten
 
 	if bits_written == 0 then
@@ -821,7 +813,7 @@ function stream_meta:WriteULong(long)
 	end
 end
 
-function stream_meta:WriteUShort(short)
+function stream_methods:WriteUShort(short)
 	local bits_written = self.BitsWritten
 
 	if bits_written == 0 then
@@ -839,18 +831,17 @@ function stream_meta:WriteUShort(short)
 	end
 end
 
-function stream_meta:WriteVector(vector)
+function stream_methods:WriteVector(vector)
 	self:WriteFloat(vector.x)
 	self:WriteFloat(vector.y)
 	self:WriteFloat(vector.z)
 end
 
-stream_meta.ReadDouble = stream_meta.ReadFloat
-stream_meta.ReadEndBits = stream_meta.ReadAlign
-stream_meta.WriteDouble = stream_meta.WriteFloat --this is our little secret
-stream_meta.WriteFooter = stream_meta.WriteEndBits
+stream_methods.ReadDouble = stream_methods.ReadFloat --this is our little secret
+stream_methods.ReadEndBits = stream_methods.ReadAlign
+stream_methods.WriteDouble = stream_methods.WriteFloat
+stream_methods.WriteFooter = stream_methods.WriteEndBits
 
---pyrition functions
 function PYRITION:NetStreamBenchmark()
 	local max_tries = 5
 	local samples = 10000
@@ -932,7 +923,7 @@ function PYRITION:NetStreamCreate(class, ply)
 		Name = string.Replace(tostring(SysTime()), ".", "_"),
 		Player = SERVER and ply or game.GetWorld,
 		Target = target
-	}, stream_public)
+	}, stream_meta)
 
 	if class then stream.Class = class end
 
@@ -977,7 +968,7 @@ function PYRITION:NetStreamIncoming(class, uid, ply)
 			stream.UID = uid
 			active_streams_classed[uid] = stream
 
-			if self.NetStreamModelMethods[class] then self:NetStreamModel(stream) end
+			if self.NetStreamModelClasses[class] then self:NetStreamModel(stream) end
 		end
 
 		if stream:NetRead() then
@@ -1051,10 +1042,8 @@ function PYRITION:NetStreamWrite(stream_queue)
 	net_WriteBool(false)
 end
 
---pyrition hooks
 function PYRITION:HOOK_NetStreamRegisterClass(class, realm, _enumerated) stream_classes[class] = realm end
 
---cvars
 cvars.AddChangeCallback("pyrition_net_stream_bytes", function(_name, _old, _new)
 	local new = pyrition_net_stream_bytes:GetInt()
 
@@ -1079,10 +1068,8 @@ cvars.AddChangeCallback("pyrition_net_stream_size", function(_name, _old, _new)
 	maximum_stream_size = new
 end, "PyritionNetStream")
 
---hook
 hook.Add("Think", "PyritionNetStream", function() if next(stream_send_queue) then PYRITION:NetStreamThink() end end)
 
---net
 net.Receive("pyrition_stream", function(_length, ply)
 	local streams_completed = {}
 
@@ -1103,11 +1090,9 @@ net.Receive("pyrition_stream", function(_length, ply)
 	end
 end)
 
---post
 PYRITION:GlobalHookCreate("NetStreamRegisterClass")
 
---debug
-if false then
+if false then --TODO: remove debug!
 	local banned = {
 		ReadBit = true,
 		ReadByte = true,
@@ -1119,13 +1104,13 @@ if false then
 		WriteStringRaw = true,
 	}
 
-	for key, method in pairs(stream_meta) do
+	for key, method in pairs(stream_methods) do
 		if banned[key] then drint(drint_level, " ignoring", key)
 		elseif isfunction(method) and (string.StartWith(key, "Write") or string.StartWith(key, "Read")) then
-			local original = stream_meta[key]
+			local original = stream_methods[key]
 
 			drint(drint_level, "debugging", key)
-			stream_meta[key] = function(self, ...)
+			stream_methods[key] = function(self, ...)
 				local returns = {original(self, ...)}
 
 				drint(drint_level, key, ...)

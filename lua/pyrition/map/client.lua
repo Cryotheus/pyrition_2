@@ -3,10 +3,8 @@ local map_status = PYRITION.MapStatus
 local map_votes = PYRITION.MapVotes
 local maps = PYRITION.MapList
 
---local functions
 local function lead_zeros(number, width) return string.rep("0", width - math.floor(math.log10(number))) .. number end
 
---hooks
 hook.Add("PopulateToolMenu", "PyritionMap", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Pyrition", "Map", "#pyrition.spawnmenu.categories.user.map", "", "", function(form)
 		local button
@@ -201,7 +199,6 @@ hook.Add("PopulateToolMenu", "PyritionMap", function()
 	end)
 end)
 
---net
 net.Receive("pyrition_map", function()
 	if net.ReadBool() then
 		local change_time = net.ReadFloat()
