@@ -5,12 +5,13 @@ function PANEL:Init()
 end
 
 function PANEL:OnRemove() PYRITION:CommandClearHaystackCache(self.CardID) end
+function PANEL:OnSubmit() PYRITION:CommandClearHaystackCache(self.CardID) end
 
 function PANEL:Search(needle)
+	local finds = PYRITION:CommandFindSignatures(needle, self.CardID)
 	local results = {}
-	local signatures = PYRITION:CommandFindSignatures(needle, self.CardID)
 
-	for index, signature in ipairs(signatures) do table.insert(results, {key, key}) end
+	for index, finding in ipairs(finds) do table.insert(results, {finding[1], finding[1]}) end
 
 	return results
 end
@@ -21,11 +22,6 @@ function PANEL:Submit(choice)
 
 		if not choice then return end
 	end
-
-end
-
-function PANEL:OnSubmit()
-	PYRITION:CommandClearHaystackCache(self.CardID)
 end
 
 derma.DefineControl(

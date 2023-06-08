@@ -23,12 +23,9 @@ function PYRITION:CommandClearHaystackCache(namespace)
 	self.CommandLastHaystackNeedle[namespace] = nil
 end
 
-function PYRITION:CommandCreateSignature(command_table)
-
-end
-
 function PYRITION:CommandFindSignatures(needle, namespace)
 	local finds = {}
+	local upper_needle = string.upper(needle)
 
 	if namespace then --progressively optimizing search
 		local haystack
@@ -49,16 +46,20 @@ function PYRITION:CommandFindSignatures(needle, namespace)
 		else haystack = self.CommandHaystackCache[namespace] or table.Copy(self.CommandHaystack) end
 
 		for key, signatures in pairs(haystack) do
-			if key == needle then table.insert(finds, {key, signatures, 100})
-			elseif string.StartsWith(key, needle) then table.insert(finds, {key, signatures, 50})
+			local upper_key = string.upper(key)
+
+			if upper_key == upper_needle then table.insert(finds, {key, signatures, 100})
+			elseif string.StartsWith(upper_key, upper_needle) then table.insert(finds, {key, signatures, 50})
 			else table.insert(removals, key) end
 		end
 
 		for index, key in ipairs(removals) do haystack[key] = nil end
 	else --simple search
 		for key, signatures in pairs(self.CommandHaystack) do
-			if key == needle then table.insert(finds, {key, signatures, 100})
-			elseif string.StartsWith(key, needle) then table.insert(finds, {key, signatures, 50})  end
+			local upper_key = string.upper(key)
+
+			if upper_key == upper_needle then table.insert(finds, {key, signatures, 100})
+			elseif string.StartsWith(upper_key, upper_needle) then table.insert(finds, {key, signatures, 50})  end
 		end
 	end
 
@@ -67,12 +68,23 @@ function PYRITION:CommandFindSignatures(needle, namespace)
 	return finds
 end
 
+function PYRITION:CommandSplitSignature(command_signature)
+	local tilde = string.find(command_signature, "~", 1, true)
+
+	if tilde then
+		local argument_signature = string.sub(command_signature, tilde + 1, -1)
+		local command_name = string.sub(command_signature, 1, tilde - 1)
+
+		return command_name, string.Explode("_", argument_signature), argument_signature
+	end
+
+	return nil, string.Explode("_", command_signature), command_signature
+end
+
 function PYRITION:HOOK_CommandRegister(name, command_table)
 	assert(not string.find(name, "%s"), "CommandRegister cannot accept a name with whitespace.")
 	assert(string.find(name, "%u") and not string.find(name, "[^%a%d]"), "CommandRegister cannot accept a name that is not CamelCase (digits allowed).")
-
-	--"soft" update for the command palette's cache
-	if next(self.CommandHaystackCache) then table.Empty(self.CommandHaystackCache) end
+	assert(command_table.Execute, "CommandRegister was given a command table without an Execute method.")
 
 	local argument_signature
 
@@ -83,26 +95,36 @@ function PYRITION:HOOK_CommandRegister(name, command_table)
 		for index, settings in ipairs(argument_settings) do
 			local new_settings = self:CommandArgumentParseSettings(settings)
 			argument_settings[index] = new_settings
-			argument_signatures[index] = new_settings.Signature
+			argument_signatures[index] = new_settings.Class
 		end
 
-		argument_signature = table.concat(argument_signatures)
+		argument_signature = table.concat(argument_signatures, "_")
 	else
 		argument_signature = ""
 		command_table.Arguments = {}
 	end
 
-	local command_haystack = self.CommandHaystack[name]
 	local command_signature = name .. "~" .. argument_signature
 	command_table.ArgumentSignature = argument_signature
-	command_table.LocalizationKey = "pyrition.commands." .. rebuild_camel_case(name, ".")
 	command_table.Name = name
 	command_table.Signature = command_signature
+
+	return self:CommandRegisterFinalization(name, command_signature, command_table)
+end
+
+function PYRITION:CommandRegisterFinalization(name, command_signature, command_table)
+	--"soft" update for the command palette's cache
+	if next(self.CommandHaystackCache) then table.Empty(self.CommandHaystackCache) end
+
+	local command_haystack = self.CommandHaystack[name]
+	command_table.LocalizationKey = "pyrition.commands." .. rebuild_camel_case(name, ".")
 
 	if command_haystack then duplex.Insert(command_haystack, command_signature)
 	else self.CommandHaystack[name] = {command_signature, [command_signature] = 1} end
 
 	self.CommandRegistry[command_signature] = command_table
+
+	if SERVER then self:NetAddEnumeratedString("CommandSignature", command_signature) end
 
 	return command_table
 end

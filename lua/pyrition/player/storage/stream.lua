@@ -1,4 +1,4 @@
-local MODEL = {CopyOptimization = true}
+local MODEL = {}
 
 function MODEL:InitialSync() return false end --TODO: fix this stream model before enabling this
 

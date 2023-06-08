@@ -86,9 +86,9 @@ function ARGUMENT:Write(stream, argument) --called when we are writing a command
 end
 
 function ARGUMENT:WriteSettings(stream) --called when we are writing a settings table to a stream
-	stream:WriteBool(self.Default)
-	stream:WriteBool(self.Selfless)
-	stream:WriteBool(self.Single)
+	stream:WriteBool(self.Default or false)
+	stream:WriteBool(self.Selfless or false)
+	stream:WriteBool(self.Single or false)
 end
 
 PYRITION:CommandArgumentRegister("Player", ARGUMENT)

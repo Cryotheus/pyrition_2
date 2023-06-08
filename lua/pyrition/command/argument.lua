@@ -14,13 +14,20 @@ end
 
 PYRITION.CommandArgumentMacroRegistry = PYRITION.CommandArgumentMacroRegistry or {}
 PYRITION.CommandArgumentRegistry = PYRITION.CommandArgumentRegistry or {}
-PYRITION.CommandArgumentSignatureLookup = PYRITION.CommandArgumentSignatureLookup or {}
+
+function PYRITION:CommandArgumentCreate(class)
+	local argument_meta = self.CommandArgumentRegistry[class]
+
+	return setmetatable({Class = class}, argument_meta.InstanceMetaTable)
+end
 
 function PYRITION:CommandArgumentParseSettings(settings)
+	local argument
+
 	if isstring(settings) then
+		argument = {}
 		local class
 		local fields = {}
-		local new_settings = {}
 		local presence = {}
 
 		--find key values in apostrophes
@@ -48,16 +55,17 @@ function PYRITION:CommandArgumentParseSettings(settings)
 		local argument_meta = self.CommandArgumentRegistry[class]
 
 		assert(argument_meta, "Missing command argument meta for class " .. tostring(class))
-		setmetatable(new_settings, argument_meta.InstanceMetaTable)
+		setmetatable(argument, argument_meta.InstanceMetaTable)
+
+		if argument.Initialize then argument:Initialize() end
 
 		local conversion_functions = self.CommandArgumentMacroRegistry
-		local setting_macros = new_settings.ParseSettingMacros
+		local setting_macros = argument.ParseSettingMacros
 
-		for index, key in ipairs(presence) do if setting_macros[key] == "Present" then new_settings[key] = true end end
-		for key, value in pairs(fields) do new_settings[key] = conversion_functions[setting_macros[key]](value) end
+		for index, key in ipairs(presence) do if setting_macros[key] == "Present" then argument[key] = true end end
+		for key, value in pairs(fields) do argument[key] = conversion_functions[setting_macros[key]](value) end
 
-		new_settings.Class = class
-		settings = new_settings
+		argument.Class = class
 	elseif istable(settings) then
 		local class = settings.Class
 
@@ -66,31 +74,22 @@ function PYRITION:CommandArgumentParseSettings(settings)
 		local argument_meta = self.CommandArgumentRegistry[class]
 
 		assert(argument_meta, "Missing command argument meta for class " .. tostring(class))
-		setmetatable(argument, argument_meta)
+		setmetatable(argument, argument_meta.InstanceMetaTable)
+
+		if argument.Initialize then argument:Initialize() end
 	end
 
-	return settings
+	if argument.Setup then argument:Setup() end
+
+	return argument
 end
 
 function PYRITION:HOOK_CommandArgumentRegister(name, argument_table)
 	assert(isstring(name), "CommandArgumentRegister argument #1 must be a string.")
 	assert(istable(argument_table), "CommandArgumentRegister argument #1 must be a table.")
 
-	local signature = argument_table.Signature or string.lower(name[1])
-
-	assert(string.len(signature) == utf8.len(signature), "CommandArgumentRegister \"" .. name .. "\" signature cannot contain UTF8 specific characters.")
-	assert(signature ~= "x", "CommandArgumentRegister \"" .. name .. "\" signature cannot be x.")
-	assert(signature == string.lower(signature), "CommandArgumentRegister \"" .. name .. "\" signature must be lower case.")
-	assert(signature ~= string.upper(signature), "CommandArgumentRegister \"" .. name .. "\" signature character must support an uppercase variant.")
-
-	local existing_name = self.CommandArgumentSignatureLookup[signature]
-
-	if existing_name and existing_name ~= name then error("CommandArgumentRegister found signature collision between new \"" .. name .. "\" argument signatures and existing \"" .. existing_name .. "\" argument signatures.") end
-
 	argument_table.InstanceMetaTable = {__index = argument_table}
-	argument_table.Signature = signature
 	self.CommandArgumentRegistry[name] = argument_table
-	self.CommandArgumentSignatureLookup[signature] = name
 end
 
 function PYRITION:HOOK_CommandArgumentRegisterMacro(name, conversion_function) self.CommandArgumentMacroRegistry[name] = conversion_function end

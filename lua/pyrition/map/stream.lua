@@ -2,7 +2,7 @@ local duplex_set = duplex.Set
 local map_status = PYRITION.MapStatus
 local map_votes = PYRITION.MapVotes
 local max_players_bits = PYRITION.NetMaxPlayerBits
-local MODEL = {CopyOptimization = true, Priority = 20}
+local MODEL = {Priority = 20}
 
 local function read_map(self, index)
 	local map = self:ReadEnumeratedString("Map")

@@ -234,6 +234,12 @@ local config = {
 
 	{ --stream model registration
 		--starting from this load order, all net functionality is available
+		command = {
+			streams = {
+				register = "shared",
+			},
+		},
+		
 		language = {
 			stream = "shared",
 		},

@@ -66,7 +66,7 @@ function PYRITION:NetStreamModelThink() --only called if model_queue has values
 
 			--then ctrl+v it on all the other models
 			for index, ply in ipairs(players) do
-				local model = self:NetStreamModelCreate(class, target)
+				local model = self:NetStreamModelCreate(class, ply)
 				model.Data = source_data
 
 				model:Complete()
