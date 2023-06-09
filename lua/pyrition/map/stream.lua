@@ -23,7 +23,7 @@ end
 function MODEL:InitialSync() return next(PYRITION.MapList) and true or false end
 
 function MODEL:Read()
-	local bits = PYRITION.NetEnumerationBits.Map
+	local bits = PYRITION.NetEnumerationBits.PyritionMap
 
 	--true if this is the complete list and in order
 	if self:ReadBool() then for index = 1, self:ReadUInt(bits) + 1 do read_map(self, index) end
@@ -31,7 +31,7 @@ function MODEL:Read()
 end
 
 function MODEL:Write(_ply, update_maps)
-	local bits = PYRITION.NetEnumerationBits.Map
+	local bits = PYRITION.NetEnumerationBits.PyritionMap
 
 	if update_maps == PYRITION.MapList then --reference check because I'm worried about the order
 		self:WriteBool(true) --true because the maps being written are in order
@@ -53,7 +53,7 @@ end
 
 function MODEL:WriteInitialSync()
 	self:WriteBool(true) --true because the maps being written are in order
-	self:WriteUInt(#PYRITION.MapList - 1, PYRITION.NetEnumerationBits.Map)
+	self:WriteUInt(#PYRITION.MapList - 1, PYRITION.NetEnumerationBits.PyritionMap)
 
 	for index, map in ipairs(PYRITION.MapList) do write_map(self, update_maps, map) end
 end

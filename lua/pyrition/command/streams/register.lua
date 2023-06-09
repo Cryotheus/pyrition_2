@@ -3,7 +3,7 @@ local MODEL = {Priority = 60}
 function MODEL:InitialSync() return next(PYRITION.CommandRegistry) ~= nil end
 
 function MODEL:Read()
-	for index = 0, self:ReadUInt(PYRITION.NetEnumerationBits.CommandSignature) do
+	for index = 0, self:ReadUInt(PYRITION.NetEnumerationBits.PyritionCommandSignature) do
 		local arguments = {}
 
 		local command_signature = self:ReadEnumeratedString("PyritionCommandSignature")
@@ -28,7 +28,7 @@ function MODEL:Read()
 end
 
 function MODEL:Write()
-	self:WriteUInt(table.Count(PYRITION.CommandRegistry) - 1, PYRITION.NetEnumerationBits.CommandSignature)
+	self:WriteUInt(table.Count(PYRITION.CommandRegistry) - 1, PYRITION.NetEnumerationBits.PyritionCommandSignature)
 
 	for command_signature, command_table in pairs(PYRITION.CommandRegistry) do
 		self:WriteEnumeratedString("PyritionCommandSignature", command_signature)

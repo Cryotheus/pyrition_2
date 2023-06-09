@@ -299,13 +299,10 @@ function stream_methods:NetWrite(length)
 	local segment = string_sub(self.Data, bytes_sent + 1)
 	local segment_length = #segment
 
-	if self.EnumerateClass then --TODO: remove this debug false
+	if self.EnumerateClass then
 		net_WriteBool(true)
-		print("Enumerated", self, self.Class, self.Player)
 		PYRITION:NetWriteEnumeratedString("NetStream", self.Class, self.Player)
 	else
-		print("Typical", self, self.Class, self.Player)
-
 		net_WriteBool(false)
 		net_WriteString(self.Class)
 	end
@@ -1072,23 +1069,25 @@ end, "PyritionNetStream")
 hook.Add("Think", "PyritionNetStream", function() if next(stream_send_queue) then PYRITION:NetStreamThink() end end)
 
 net.Receive("pyrition_stream", function(_length, ply)
-	--[[local streams_completed = {}
+	--[[this caused issues with enumerated strings as we read before the bits were put into their tables
+		local streams_completed = {}
 
-	repeat
-		local stream = PYRITION:NetStreamIncoming(
-			net_ReadBool() and PYRITION:NetReadEnumeratedString("NetStream", ply) or net_ReadString(),
-			net_ReadUInt(32) + 1,
-			ply
-		)
+		repeat
+			local stream = PYRITION:NetStreamIncoming(
+				net_ReadBool() and PYRITION:NetReadEnumeratedString("NetStream", ply) or net_ReadString(),
+				net_ReadUInt(32) + 1,
+				ply
+			)
 
-		if stream then table_insert(streams_completed, stream) end
-	until not net_ReadBool()
+			if stream then table_insert(streams_completed, stream) end
+		until not net_ReadBool()
 
-	for index, stream in ipairs(streams_completed) do
-		if stream.OnComplete then stream:OnComplete(ply) end
+		for index, stream in ipairs(streams_completed) do
+			if stream.OnComplete then stream:OnComplete(ply) end
 
-		stream:Read(ply)
-	end]]
+			stream:Read(ply)
+		end
+	--]]
 
 	repeat
 		local stream = PYRITION:NetStreamIncoming(
