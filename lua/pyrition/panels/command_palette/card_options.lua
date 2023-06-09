@@ -1,9 +1,11 @@
 local PANEL = {}
 
-function PANEL:Init()
-	self.Choices = {}
+local function entry_clicked(self) self.IndexingParent:Submit(self, self.Value) end
 
-	self:SetPaintBackgroundEnabled(false)
+function PANEL:Init()
+	self.Panels = {}
+
+	--self:SetPaintBackgroundEnabled(false)
 
 	do --text entry
 		local text_entry = vgui.Create("DTextEntry", self)
@@ -44,31 +46,38 @@ function PANEL:Focus()
 	self.TextEntry:RequestFocus()
 end
 
+function PANEL:OnSubmit(_value) end
+
 function PANEL:SearchInternal(needle)
 	--results should be a list of tuples
 	--the tuple is {id: string, text: string}
-	local choices = self.Choices
+	local choices = self.Panels
 	local maximum_index = 0
 	local results = self:Search(needle or "")
 	local scroller = self.Scroller
 
 	for index, result in ipairs(results) do
-		local entry = choices[index]
-		local _id = result[1]
+		local panel = choices[index]
 		local text = result[2]
 		maximum_index = index
 
-		if not entry then
-			entry = vgui.Create("DButton", self)
-			choices[index] = entry
+		if not panel then
+			panel = vgui.Create("DButton", self)
+			panel.DoClick = entry_clicked
+			choices[index] = panel
 
-			entry:Dock(TOP)
-			entry:SetAutoStretchVertical(true)
-			entry:SetFont("Trebuchet24")
-			scroller:AddItem(entry)
+			panel:Dock(TOP)
+			panel:SetAutoStretchVertical(true)
+			panel:SetHeight(100)
+			panel:SetFont("ChatFont")
+			--panel:SetTextColor(Color(0, 255, 0))
+			--panel:SetWrap(true)
+			scroller:AddItem(panel)
 		end
 
-		entry:SetText(text)
+		panel.Value = result
+
+		panel:SetText(">|||" .. text .. "|||<")
 	end
 
 	for index = maximum_index + 1, #choices do
@@ -83,14 +92,15 @@ end
 function PANEL:Search(_needle) return {} end
 function PANEL:SetPlaceholderText(text) self.TextEntry:SetPlaceholderText(text) end
 
-function PANEL:Submit(choice)
-	if not choice then
-		choice = self.Choices[1]
+function PANEL:Submit(panel, value)
+	if not panel then
+		panel = self.Panels[1]
 
-		if not choice then return end
+		if panel then value = panel.Value
+		else return end
 	end
 
-	self:OnSubmit(choice)
+	self:OnSubmit(value)
 end
 
 derma.DefineControl(

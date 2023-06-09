@@ -68,7 +68,7 @@ end
 function PANEL:Paint(_width, _height)
 	--surface.SetDrawColor(0, 0, 0, 96)
 	--surface.DrawRect(0, 0, width, height)
-	self:DrawBlur(math.min((RealTime() - self.CreationTime) / 0.15, 1))
+	--self:DrawBlur(math.min((RealTime() - self.CreationTime) / 0.15, 1))
 end
 
 function PANEL:PerformLayout(width, height)
@@ -86,6 +86,7 @@ end
 function PANEL:PushCard(class, ...)
 	local stage = self.Stage
 	local card = vgui.Create(class, stage)
+	card.CommandPalette = self
 
 	card:Dock(LEFT)
 	card:SetCardID(tostring(table.insert(self.Cards, card)))
@@ -96,6 +97,8 @@ function PANEL:PushCard(class, ...)
 	card:InvalidateLayout(true)
 
 	card:Focus()
+
+	return card
 end
 
 function PANEL:Think() if gui.IsGameUIVisible() then self:Remove() end end

@@ -37,6 +37,8 @@ local config = {
 			client = true,
 		},
 
+		font = "client",
+
 		gfx = {
 			material_design = "client",
 		},
@@ -58,8 +60,10 @@ local config = {
 		panels = {
 			command_palette = {"client",
 				card = "client",
+				card_command_signatures = "client",
 				card_commands = "client",
 				card_options = "client",
+				card_simple_options = "client",
 				stage = "client",
 			},
 
@@ -239,7 +243,7 @@ local config = {
 				register = "shared",
 			},
 		},
-		
+
 		language = {
 			stream = "shared",
 		},

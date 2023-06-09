@@ -12,6 +12,7 @@ end
 PYRITION.CommandHaystack = PYRITION.CommandHaystack or {}
 PYRITION.CommandHaystackCache = PYRITION.CommandHaystackCache or {}
 PYRITION.CommandLastHaystackNeedle = PYRITION.CommandLastHaystackNeedle or {}
+PYRITION.CommandLocalizationKeys = PYRITION.CommandLocalizationKeys or {}
 PYRITION.CommandRegistry = PYRITION.CommandRegistry or {}
 
 function PYRITION:Command(command_signature, arguments)
@@ -25,6 +26,7 @@ end
 
 function PYRITION:CommandFindSignatures(needle, namespace)
 	local finds = {}
+	local localization_keys = self.CommandLocalizationKeys
 	local upper_needle = string.upper(needle)
 
 	if namespace then --progressively optimizing search
@@ -45,27 +47,53 @@ function PYRITION:CommandFindSignatures(needle, namespace)
 			self.CommandHaystackCache[namespace] = nil
 		else haystack = self.CommandHaystackCache[namespace] or table.Copy(self.CommandHaystack) end
 
-		for key, signatures in pairs(haystack) do
-			local upper_key = string.upper(key)
+		for name, signatures in pairs(haystack) do
+			local upper_localization = self:LanguageGetPhrase(localization_keys[name])
+			local upper_name = string.upper(name)
 
-			if upper_key == upper_needle then table.insert(finds, {key, signatures, 100})
-			elseif string.StartsWith(upper_key, upper_needle) then table.insert(finds, {key, signatures, 50})
-			else table.insert(removals, key) end
+			if upper_localization then upper_localization = string.upper(upper_localization) end
+
+			if upper_name == upper_localization then table.insert(finds, {name, signatures, 100})
+			elseif string.StartsWith(upper_localization, upper_needle) then table.insert(finds, {name, signatures, 60})
+			elseif upper_name == upper_needle or string.StartsWith(upper_name, upper_needle) then table.insert(finds, {name, signatures, 30})
+			else table.insert(removals, name) end
 		end
 
-		for index, key in ipairs(removals) do haystack[key] = nil end
+		for index, name in ipairs(removals) do haystack[name] = nil end
 	else --simple search
-		for key, signatures in pairs(self.CommandHaystack) do
-			local upper_key = string.upper(key)
+		for name, signatures in pairs(self.CommandHaystack) do
+			local upper_localization = self:LanguageGetPhrase(localization_keys[name])
+			local upper_name = string.upper(name)
 
-			if upper_key == upper_needle then table.insert(finds, {key, signatures, 100})
-			elseif string.StartsWith(upper_key, upper_needle) then table.insert(finds, {key, signatures, 50})  end
+			if upper_localization then upper_localization = string.upper(upper_localization) end
+
+			if upper_name == upper_localization then table.insert(finds, {name, signatures, 100})
+			elseif string.StartsWith(upper_localization, upper_needle) then table.insert(finds, {name, signatures, 60})
+			elseif upper_name == upper_needle or string.StartsWith(upper_name, upper_needle) then table.insert(finds, {name, signatures, 30}) end
 		end
 	end
 
 	table.sort(finds, finds_sorter)
 
 	return finds
+end
+
+function PYRITION:CommandRegisterFinalization(name, command_signature, command_table)
+	--"soft" update for the command palette's cache
+	if next(self.CommandHaystackCache) then table.Empty(self.CommandHaystackCache) end
+
+	local command_haystack = self.CommandHaystack[name]
+	local localization_key = "pyrition.commands." .. rebuild_camel_case(name, ".")
+	command_table.LocalizationKey = localization_key
+	self.CommandLocalizationKeys[name] = localization_key
+	self.CommandRegistry[command_signature] = command_table
+
+	if command_haystack then duplex.Insert(command_haystack, command_signature)
+	else self.CommandHaystack[name] = {command_signature, [command_signature] = 1} end
+
+	if SERVER then self:NetAddEnumeratedString("CommandSignature", command_signature) end
+
+	return command_table
 end
 
 function PYRITION:CommandSplitSignature(command_signature)
@@ -110,23 +138,6 @@ function PYRITION:HOOK_CommandRegister(name, command_table)
 	command_table.Signature = command_signature
 
 	return self:CommandRegisterFinalization(name, command_signature, command_table)
-end
-
-function PYRITION:CommandRegisterFinalization(name, command_signature, command_table)
-	--"soft" update for the command palette's cache
-	if next(self.CommandHaystackCache) then table.Empty(self.CommandHaystackCache) end
-
-	local command_haystack = self.CommandHaystack[name]
-	command_table.LocalizationKey = "pyrition.commands." .. rebuild_camel_case(name, ".")
-
-	if command_haystack then duplex.Insert(command_haystack, command_signature)
-	else self.CommandHaystack[name] = {command_signature, [command_signature] = 1} end
-
-	self.CommandRegistry[command_signature] = command_table
-
-	if SERVER then self:NetAddEnumeratedString("CommandSignature", command_signature) end
-
-	return command_table
 end
 
 PYRITION:GlobalHookCreate("CommandRegister")
