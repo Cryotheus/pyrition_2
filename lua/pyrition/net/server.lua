@@ -42,7 +42,6 @@ local function read_enumerated_string(namespace, ply, text, enumeration)
 	return enumerations[enumeration]
 end
 
-
 local function recipient_pairs(recipients)
 	local players = recipient_iterable(recipients)
 

@@ -245,7 +245,7 @@ function PYRITION:HOOK_PlayerBadgeRegister(class, badge, base_class)
 	end
 
 	--server side task
-	if SERVER then self:NetAddEnumeratedString("Badge", class) end
+	if SERVER then self:NetAddEnumeratedString("PyritionBadge", class) end
 
 	return badge
 end

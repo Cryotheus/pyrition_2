@@ -58,7 +58,7 @@ function PYRITION:PlayerBadgeSync(ply, badge)
 		return true
 	end
 
-	return self:NetStreamModelGet("Badge", ply)(badge)
+	return self:NetStreamModelGet("PyritionBadge", ply)(badge)
 end
 
 function PYRITION:PlayerBadgesSave(ply, transaction)

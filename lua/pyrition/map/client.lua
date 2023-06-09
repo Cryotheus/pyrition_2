@@ -203,7 +203,7 @@ net.Receive("pyrition_map", function()
 	if net.ReadBool() then
 		local change_time = net.ReadFloat()
 		local delay = math.Round(change_time - CurTime())
-		local map_name = PYRITION:NetReadEnumeratedString("Map")
+		local map_name = PYRITION:NetReadEnumeratedString("PyritionMap")
 
 		PYRITION.MapChanging = true
 		PYRITION.MapChanges = change_time

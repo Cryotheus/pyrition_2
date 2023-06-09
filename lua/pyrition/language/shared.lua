@@ -323,7 +323,7 @@ function PYRITION:HOOK_LanguageRegisterOption(option, operation, colored) --opti
 
 	if CLIENT then return end
 
-	self:NetAddEnumeratedString("LanguageOptions", option)
+	self:NetAddEnumeratedString("PyritionLanguageOptions", option)
 end
 
 function PYRITION:HOOK_LanguageRegisterTieve(tieve_function, ...)

@@ -19,7 +19,7 @@ function MODEL:InitialSync()
 	return false
 end
 
-function MODEL:Read() while self:ReadBool() do PYRITION:PlayerBadgeSet(self:ReadPlayer(), self:ReadEnumeratedString("Badge"), self:ReadULong()) end end
+function MODEL:Read() while self:ReadBool() do PYRITION:PlayerBadgeSet(self:ReadPlayer(), self:ReadEnumeratedString("PyritionBadge"), self:ReadULong()) end end
 
 function MODEL:Write(_ply, badge)
 	--POST: look into rewriting unsent data
@@ -36,7 +36,7 @@ function MODEL:Write(_ply, badge)
 
 	self:WriteBool(true) --signify we have a badge written
 	self:WritePlayer(badge.Player) --the owner
-	self:WriteEnumeratedString("Badge", badge.Class) --the badge
+	self:WriteEnumeratedString("PyritionBadge", badge.Class) --the badge
 	self:WriteULong(badge.Level) --the level
 end
 
@@ -48,4 +48,4 @@ function MODEL:WriteInitialSync(target_player)
 	end
 end
 
-PYRITION:NetStreamModelRegister("Badge", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("PyritionBadge", CLIENT, MODEL)

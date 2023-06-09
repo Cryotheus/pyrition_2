@@ -15,7 +15,7 @@ function PYRITION:PlayerStorageRead(stream, ply, key)
 	--read the value of each field now
 	--starting from zero instead of one so we run the missing +1 iteration
 	for index = 0, stream:ReadUInt(stream_methods._CountBits) do
-		local field = stream:ReadEnumeratedString("StorageField")
+		local field = stream:ReadEnumeratedString("PyritionStorageField")
 		player_storage[field] = stream[stream_methods[field]](stream)
 	end
 end

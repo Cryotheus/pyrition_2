@@ -50,4 +50,4 @@ end
 
 hook.Add("PlayerDisconnected", "PyritionPlayerTeleport", function(ply) teleport_history[ply] = nil end)
 
-PYRITION:NetAddEnumeratedString("TeleportType", "bring", "goto", "send")
+PYRITION:NetAddEnumeratedString("PyritionTeleportType", "bring", "goto", "send")

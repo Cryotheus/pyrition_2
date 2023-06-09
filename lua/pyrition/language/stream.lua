@@ -4,7 +4,7 @@ function MODEL:Initialize() if SERVER then self:Send() end end
 
 function MODEL:Read()
 	while self:ReadBool() do
-		local option = self:ReadEnumeratedString("LanguageOptions")
+		local option = self:ReadEnumeratedString("PyritionLanguageOptions")
 		local phrases
 		local key = self:ReadString()
 
@@ -33,7 +33,7 @@ function MODEL:Write(_ply, key, phrases, option)
 	self:WriteBool(true)
 
 	--write key and method of delivery
-	self:WriteEnumeratedString("LanguageOptions", option)
+	self:WriteEnumeratedString("PyritionLanguageOptions", option)
 	self:WriteString(key)
 
 	if phrases then
@@ -70,4 +70,4 @@ function MODEL:Write(_ply, key, phrases, option)
 	self:WriteBool(false)
 end
 
-PYRITION:NetStreamModelRegister("Language", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("PyritionLanguage", CLIENT, MODEL)

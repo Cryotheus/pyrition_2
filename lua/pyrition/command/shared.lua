@@ -91,7 +91,7 @@ function PYRITION:CommandRegisterFinalization(name, command_signature, command_t
 	if command_haystack then duplex.Insert(command_haystack, command_signature)
 	else self.CommandHaystack[name] = {command_signature, [command_signature] = 1} end
 
-	if SERVER then self:NetAddEnumeratedString("CommandSignature", command_signature) end
+	if SERVER then self:NetAddEnumeratedString("PyritionCommandSignature", command_signature) end
 
 	return command_table
 end

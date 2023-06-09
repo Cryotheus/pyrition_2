@@ -299,11 +299,12 @@ function stream_methods:NetWrite(length)
 	local segment = string_sub(self.Data, bytes_sent + 1)
 	local segment_length = #segment
 
-	if self.EnumerateClass and false then --TODO: remove this debug false
+	if self.EnumerateClass then --TODO: remove this debug false
 		net_WriteBool(true)
-		PYRITION:NetWriteEnumeratedString("Stream", self, self.Class, self.Player)
+		print("Enumerated", self, self.Class, self.Player)
+		PYRITION:NetWriteEnumeratedString("NetStream", self.Class, self.Player)
 	else
-		--print("writing that stream class", self, self.Class, self.Player)
+		print("Typical", self, self.Class, self.Player)
 
 		net_WriteBool(false)
 		net_WriteString(self.Class)
@@ -1071,11 +1072,11 @@ end, "PyritionNetStream")
 hook.Add("Think", "PyritionNetStream", function() if next(stream_send_queue) then PYRITION:NetStreamThink() end end)
 
 net.Receive("pyrition_stream", function(_length, ply)
-	local streams_completed = {}
+	--[[local streams_completed = {}
 
 	repeat
 		local stream = PYRITION:NetStreamIncoming(
-			net_ReadBool() and PYRITION:NetReadEnumeratedString("Stream", ply) or net_ReadString(),
+			net_ReadBool() and PYRITION:NetReadEnumeratedString("NetStream", ply) or net_ReadString(),
 			net_ReadUInt(32) + 1,
 			ply
 		)
@@ -1087,7 +1088,17 @@ net.Receive("pyrition_stream", function(_length, ply)
 		if stream.OnComplete then stream:OnComplete(ply) end
 
 		stream:Read(ply)
-	end
+	end]]
+
+	repeat
+		local stream = PYRITION:NetStreamIncoming(
+			net_ReadBool() and PYRITION:NetReadEnumeratedString("NetStream", ply) or net_ReadString(),
+			net_ReadUInt(32) + 1,
+			ply
+		)
+
+		if stream then stream:Read(ply) end
+	until not net_ReadBool()
 end)
 
 PYRITION:GlobalHookCreate("NetStreamRegisterClass")

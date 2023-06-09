@@ -9,7 +9,7 @@ function MODEL:Read()
 		teleport_history[index] = {
 			Note = self:ReadBool() and self:ReadPlayer() or self:ReadString(),
 			Position = self:ReadVector(),
-			Type = self:ReadEnumeratedString("TeleportType"),
+			Type = self:ReadEnumeratedString("PyritionTeleportType"),
 			Unix = self:ReadUInt(32),
 		}
 	end
@@ -34,7 +34,7 @@ function MODEL:Write(ply)
 		end
 
 		self:WriteVector(data.Position)
-		self:WriteEnumeratedString("TeleportType", data.Type)
+		self:WriteEnumeratedString("PyritionTeleportType", data.Type)
 		self:WriteUInt(data.Unix, 32)
 	end
 

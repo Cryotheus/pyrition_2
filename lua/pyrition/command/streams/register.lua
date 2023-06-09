@@ -6,7 +6,7 @@ function MODEL:Read()
 	for index = 0, self:ReadUInt(PYRITION.NetEnumerationBits.CommandSignature) do
 		local arguments = {}
 
-		local command_signature = self:ReadEnumeratedString("CommandSignature")
+		local command_signature = self:ReadEnumeratedString("PyritionCommandSignature")
 		local name, argument_classes, argument_signature = PYRITION:CommandSplitSignature(command_signature)
 
 		for index, class in ipairs(argument_classes) do
@@ -31,7 +31,7 @@ function MODEL:Write()
 	self:WriteUInt(table.Count(PYRITION.CommandRegistry) - 1, PYRITION.NetEnumerationBits.CommandSignature)
 
 	for command_signature, command_table in pairs(PYRITION.CommandRegistry) do
-		self:WriteEnumeratedString("CommandSignature", command_signature)
+		self:WriteEnumeratedString("PyritionCommandSignature", command_signature)
 
 		for index, argument in ipairs(command_table.Arguments) do
 			if argument.WriteSettings then argument:WriteSettings(self) end

@@ -5,7 +5,7 @@ local max_players_bits = PYRITION.NetMaxPlayerBits
 local MODEL = {Priority = 20}
 
 local function read_map(self, index)
-	local map = self:ReadEnumeratedString("Map")
+	local map = self:ReadEnumeratedString("PyritionMap")
 	map_status[index] = self:ReadBool()
 
 	local votes = self:ReadUInt(max_players_bits)
@@ -15,7 +15,7 @@ local function read_map(self, index)
 end
 
 local function write_map(self, _update_maps, map)
-	self:WriteEnumeratedString("Map", map)
+	self:WriteEnumeratedString("PyritionMap", map)
 	self:WriteBool(map_status[map])
 	self:WriteUInt(map_votes[map] or 0, max_players_bits)
 end
@@ -58,4 +58,4 @@ function MODEL:WriteInitialSync()
 	for index, map in ipairs(PYRITION.MapList) do write_map(self, update_maps, map) end
 end
 
-PYRITION:NetStreamModelRegister("Map", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("PyritionMap", CLIENT, MODEL)
