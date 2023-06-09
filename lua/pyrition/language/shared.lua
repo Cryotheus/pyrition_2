@@ -264,6 +264,12 @@ function PYRITION:LanguageFormatColor(key, phrases) return phrases and replace_t
 function PYRITION:LanguageFormatColorTranslated(text, phrases) return phrases and replace_tags(self, text, phrases, true) or {color_default, text} end
 function PYRITION:LanguageFormatTranslated(text, phrases) return phrases and replace_tags(self, text, phrases) or text end
 
+function PYRITION:LanguageGetPhrase(key)
+	local phrase = language.GetPhrase(key)
+
+	return phrase ~= key and phrase
+end
+
 function PYRITION:LanguageList(items)
 	if items.IsPlayerList then return self:LanguageListPlayers(items) end
 
