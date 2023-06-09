@@ -10,6 +10,8 @@ local config = {
 	},
 
 	{ --global component and modules
+		client = true,
+		
 		global = {
 			enumerations = "shared",
 			hook = "shared",
@@ -21,6 +23,9 @@ local config = {
 			language = "server",
 			math = "shared",
 		},
+
+		server = true,
+		shared = true,
 	},
 
 	{ --dependency free files
@@ -29,8 +34,6 @@ local config = {
 			path_follower = "server",
 			vector = "shared",
 		},
-
-		client = true,
 
 		command = {
 			argument = "shared",
@@ -97,9 +100,6 @@ local config = {
 				shared = true,
 			},
 		},
-
-		server = true,
-		shared = true,
 
 		spawnmenu = {
 			client = true,
