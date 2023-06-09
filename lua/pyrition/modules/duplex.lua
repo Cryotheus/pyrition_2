@@ -8,6 +8,7 @@ local pairs = pairs
 local table_Copy = table.Copy
 local table_Count = table.Count
 local table_insert = table.insert
+local table_maxn = table.maxn
 local table_remove = table.remove
 local table_sort = table.sort
 local type = type
@@ -15,7 +16,38 @@ local type = type
 --no need for package.seall, we're not using many globals
 module("duplex")
 
-function Destroy(duplex) --turn a duplex into a list
+function Collapse(duplex)
+	---ARGUMENTS: table
+	---RETURNS: table
+	---Shifts values down to make a sequential duplex, modifying the original table.
+	---Basically: "turns a fooplex into a duplex"
+	local maximum = table_maxn(duplex)
+	local shift
+
+	for index = 1, maximum do
+		local value = duplex[index]
+
+		if value == nil then
+			index = index + 1
+
+			if shift then shift = shift + 1
+			else shift = 1 end
+		elseif shift then
+			local new_index = index - shift
+			duplex[new_index] = value
+			duplex[value] = new_index
+		end
+
+		index = index + 1
+	end
+
+	--remove all shifted values
+	for index = maximum - shift + 1, maximum do duplex[index] = nil end
+
+	return duplex
+end
+
+function Destroy(duplex)
 	---ARGUMENTS: table
 	---RETURNS: table
 	---Turns the duplex into a list, modifying the original table.
@@ -24,7 +56,7 @@ function Destroy(duplex) --turn a duplex into a list
 	return duplex
 end
 
-function Extract(duplex) --get a list from a duplex
+function Extract(duplex)
 	---ARGUMENTS: table
 	---RETURNS: table
 	--Creates a list from the duplex, without touching the original.
@@ -59,7 +91,7 @@ function Insert(duplex, value, set_value)
 	return index
 end
 
-function IsFooplex(duplex) --check duplex for "holes"
+function IsFooplex(duplex)
 	---ARGUMENTS: table
 	---RETURNS: boolean
 	---Returns true if the duplex is not sequential, false otherwise.
