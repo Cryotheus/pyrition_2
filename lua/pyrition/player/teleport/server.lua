@@ -14,7 +14,7 @@ local function teleport(self, ply, destination)
 	if ply:InVehicle() then ply:ExitVehicle() end
 
 	ply:SetPos(destination)
-	self:NetStreamModelGet("Teleport", ply)()
+	self:NetStreamModelGet("PyritionTeleport", ply):Write(ply)
 end
 
 function PYRITION:PlayerTeleport(ply, destination, teleport_type, note)

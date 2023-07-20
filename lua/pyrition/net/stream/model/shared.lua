@@ -111,6 +111,9 @@ function PYRITION:HOOK_NetStreamModelRegister(class, realm, model)
 
 	self:NetStreamRegisterClass(class, realm, enumerate == nil or enumerate)
 
+	model.__name = model.__name or model_class_meta.__name
+	model.__tostring = model.__tostring or model_class_meta.__tostring
+
 	stream_model_classes[class] = setmetatable(model, model_class_meta)
 	stream_models_active[class] = stream_models_active[class] or {}
 

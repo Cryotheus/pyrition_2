@@ -47,4 +47,4 @@ function MODEL:Write()
 	self:Complete()]]
 end
 
-PYRITION:NetStreamModelRegister("EnumerationBits", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("PyritionEnumerationBits", CLIENT, MODEL)

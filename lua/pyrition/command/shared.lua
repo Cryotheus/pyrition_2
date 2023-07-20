@@ -15,13 +15,25 @@ PYRITION.CommandLastHaystackNeedle = PYRITION.CommandLastHaystackNeedle or {}
 PYRITION.CommandLocalizationKeys = PYRITION.CommandLocalizationKeys or {}
 PYRITION.CommandRegistry = PYRITION.CommandRegistry or {}
 
-function PYRITION:Command(command_signature, arguments)
-
-end
-
 function PYRITION:CommandClearHaystackCache(namespace)
 	self.CommandHaystackCache[namespace] = nil
 	self.CommandLastHaystackNeedle[namespace] = nil
+end
+
+function PYRITION:CommandExecute(command_signature, arguments, executor)
+	local command_table = self.CommandRegistry[command_signature]
+
+	if CLIENT and command_table.Downloaded then return self:CommandSend(command_signature, arguments)
+	else
+		local success, phrases, message = command_table:Execute(executor or LocalPlayer(), unpack(arguments))
+
+		print("executed", success, phrases, message)
+
+		if istable(phrases) then
+			print("phrases")
+			PrintTable(phrases)
+		end
+	end
 end
 
 function PYRITION:CommandFindSignatures(needle, namespace)

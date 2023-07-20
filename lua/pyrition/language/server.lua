@@ -51,7 +51,7 @@ function PYRITION:LanguageQueue(ply, key, phrases, option)
 	if ply == nil or ply == game.GetWorld() or ply:EntIndex() == 0 then return self:LanguageDisplay(false, key, phrases) end
 
 	--get an existing stream model or create one, then write the message to it
-	self:NetStreamModelGet("PyritionLanguage", ply)(key, phrases, option or "Chat")
+	self:NetStreamModelGet("PyritionLanguage", ply):Write(ply, key, phrases, option or "Chat")
 end
 
 function PYRITION:LanguageRegister(key) self:NetAddEnumeratedString("PyritionLanguage", key) end

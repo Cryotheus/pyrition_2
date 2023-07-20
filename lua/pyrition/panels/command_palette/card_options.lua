@@ -64,6 +64,7 @@ function PANEL:SearchInternal(needle)
 		if not panel then
 			panel = vgui.Create("DButton", self)
 			panel.DoClick = entry_clicked
+			panel.IndexingParent = self
 			choices[index] = panel
 
 			panel:Dock(TOP)
@@ -77,7 +78,7 @@ function PANEL:SearchInternal(needle)
 
 		panel.Value = result
 
-		panel:SetText(">|||" .. text .. "|||<")
+		panel:SetText(text)
 	end
 
 	for index = maximum_index + 1, #choices do

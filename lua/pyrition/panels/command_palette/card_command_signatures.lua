@@ -1,5 +1,7 @@
 local PANEL = {}
 
+--PyritionCommandPaletteCardCommand
+
 function PANEL:Init()
 	self.Panels = {}
 
@@ -20,8 +22,9 @@ function PANEL:SetDetails(_command_name, command_signatures)
 	local scroller = self.Scroller
 
 	for index, command_signature in ipairs(command_signatures) do
+		local argument_classes = select(2, PYRITION:CommandSplitSignature(command_signature))
 		local panel = panels[index]
-		local text = command_signature
+		local text = table.concat(argument_classes, ", ")
 		maximum_index = index
 
 		if not panel then
@@ -30,11 +33,12 @@ function PANEL:SetDetails(_command_name, command_signatures)
 
 			panel:Dock(TOP)
 			panel:SetAutoStretchVertical(true)
-			panel:SetFont("Trebuchet24")
+			panel:SetFont("ChatFont")
 			scroller:AddItem(panel)
 		end
 
-		panel:SetText(">" .. text .. "<")
+		if text == "" then panel:SetText("None")
+		else panel:SetText(text) end
 	end
 
 	self:InvalidateLayout(true)

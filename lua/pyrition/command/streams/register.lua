@@ -41,4 +41,4 @@ function MODEL:Write()
 	self:Complete()
 end
 
-PYRITION:NetStreamModelRegister("CommandRegister", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("PyritionCommandRegister", CLIENT, MODEL)

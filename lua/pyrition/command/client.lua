@@ -7,6 +7,14 @@ function PYRITION:CommandOpenPalette()
 	end
 end
 
+function PYRITION:CommandSend(command_signature, arguments)
+	local stream = self:NetStreamModelGet("PyritionCommandExecute")
+
+	print("CommandSend", command_signature, arguments, tostring(stream))
+
+	stream:Write(command_signature, arguments)
+end
+
 function PYRITION:HOOK_CommandDownload(name, command_table)
 	command_table.Downloaded = true
 

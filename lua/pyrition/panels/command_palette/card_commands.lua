@@ -14,9 +14,7 @@ function PANEL:OnSubmit(value)
 
 	if #command_haystack == 1 then
 
-	else
-		self:PushCard("PyritionCommandPaletteCardSimpleOptions", value[1], value[3])
-	end
+	else self:PushCard("PyritionCommandPaletteCardCommandSignatures", value[1], value[3]) end
 end
 
 function PANEL:Search(needle)

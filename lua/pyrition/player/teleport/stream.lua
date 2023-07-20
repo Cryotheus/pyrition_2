@@ -41,4 +41,4 @@ function MODEL:Write(ply)
 	self:Complete()
 end
 
-PYRITION:NetStreamModelRegister("Teleport", CLIENT, MODEL)
+PYRITION:NetStreamModelRegister("PyritionTeleport", CLIENT, MODEL)

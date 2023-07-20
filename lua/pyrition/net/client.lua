@@ -57,11 +57,6 @@ end
 
 function PYRITION:HOOK_NetClientInitialized(_ply) end
 
-concommand.Add("pd", function(_ply, _command, _arguments, _arguments_string)
-	net.Start("pyrition")
-	net.SendToServer()
-end, nil, "Pyrition's debug command. If you are reading this and you're not on a test server, please report it.")
-
 hook.Add("InitPostEntity", "PyritionNet", function()
 	--we use a timer because everyone else in the entire world also sends net messages here
 	--this is jerry's sole purpose

@@ -11,7 +11,7 @@ local config = {
 
 	{ --global component and modules
 		client = true,
-		
+
 		global = {
 			enumerations = "shared",
 			hook = "shared",
@@ -61,8 +61,13 @@ local config = {
 		},
 
 		panels = {
+			command_argument = {"client",
+				integer = "client",
+			},
+
 			command_palette = {"client",
 				card = "client",
+				card_command = "client",
 				card_command_signatures = "client",
 				card_commands = "client",
 				card_options = "client",
@@ -71,6 +76,8 @@ local config = {
 			},
 
 			emergency_exit = "client",
+			labeled_slider = "client",
+			slider = "client",
 		},
 
 		player = {
@@ -110,6 +117,10 @@ local config = {
 		},
 
 		time = "shared",
+
+		wiki = {
+			"shared developer",
+		},
 	},
 
 	{
@@ -240,6 +251,7 @@ local config = {
 		--starting from this load order, all net functionality is available
 		command = {
 			streams = {
+				execute = "shared",
 				register = "shared",
 			},
 		},
