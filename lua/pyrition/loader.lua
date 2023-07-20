@@ -40,6 +40,7 @@ local config = {
 			client = true,
 		},
 
+		download = "shared",
 		font = "client",
 
 		gfx = {
