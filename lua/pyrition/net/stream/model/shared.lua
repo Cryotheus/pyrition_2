@@ -18,7 +18,7 @@ local model_class_meta = {
 }
 
 local function dequeue_model(model, ...)
-	model(...)
+	model:Write(model.Player, ...)
 	model:Complete()
 end
 
