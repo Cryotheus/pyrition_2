@@ -105,7 +105,7 @@ function PYRITION:GFXMaterialDesignGet(icon_name, size)
 end
 
 function PYRITION:GFXMaterialDesignRender()
-	local render_hooks = hook.GetTable().HUDPaint
+	local render_hooks = hook.GetTable().DrawOverlay
 
 	--don't create the hook if it's already rendering
 	if render_hooks and render_hooks.PyritionGFXMaterialDesign then return end
@@ -116,14 +116,14 @@ function PYRITION:GFXMaterialDesignRender()
 	local render_queue_index = 1
 	local wait
 
-	--PreRender wasn't working on all computers, so we're using HUDPaint which seems to work fine
-	hook.Add("HUDPaint", "PyritionGFXMaterialDesign", function()
+	--PreRender wasn't working on all computers, so we're using DrawOverlay which seems to work fine
+	hook.Add("DrawOverlay", "PyritionGFXMaterialDesign", function()
 		if not PYRITION.PastThink then return end
 
 		local real_time = RealTime()
 
 		--despite the html being loaded, it will still be blank for a few frames
-		if wait and wait < real_time then return
+		if wait and real_time > wait then return
 		else wait = nil end
 
 		local queue_info = self.GFXMaterialDesignRenderQueue[render_queue_index]
@@ -198,7 +198,7 @@ function PYRITION:GFXMaterialDesignRender()
 
 			for index = 1, render_queue_index - 1 do queue[index] = nil end
 
-			hook.Remove("HUDPaint", "PyritionGFXMaterialDesign")
+			hook.Remove("DrawOverlay", "PyritionGFXMaterialDesign")
 
 			--remove the html panel in case the queue was shortened and we had yet to remove it or something
 			if html_panel then html_panel:Remove() end
@@ -206,7 +206,8 @@ function PYRITION:GFXMaterialDesignRender()
 	end)
 end
 
---[[concommand.Add("mdi_debug", function()
+--[[
+concommand.Add("mdi_debug", function()
 	--create a dframe that is 75% of the screen's width and height
 	local frame = vgui.Create("DFrame")
 
@@ -245,4 +246,4 @@ end
 			render.PopFilterMin()
 		end
 	end
-end)]]
+end) --]]
