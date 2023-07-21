@@ -65,9 +65,10 @@ function PYRITION:CommandFindSignatures(needle, namespace)
 
 			if upper_localization then upper_localization = string.upper(upper_localization) end
 
-			if upper_name == upper_localization then table.insert(finds, {name, signatures, 100})
-			elseif string.StartsWith(upper_localization, upper_needle) then table.insert(finds, {name, signatures, 60})
-			elseif upper_name == upper_needle or string.StartsWith(upper_name, upper_needle) then table.insert(finds, {name, signatures, 30})
+			if needle == upper_localization then table.insert(finds, {name, signatures, 100})
+			elseif needle == upper_name then table.insert(finds, {name, signatures, 75})
+			elseif string.StartsWith(upper_localization, upper_needle) then table.insert(finds, {name, signatures, 50})
+			elseif upper_name == upper_needle or string.StartsWith(upper_name, upper_needle) then table.insert(finds, {name, signatures, 25})
 			else table.insert(removals, name) end
 		end
 
@@ -79,9 +80,10 @@ function PYRITION:CommandFindSignatures(needle, namespace)
 
 			if upper_localization then upper_localization = string.upper(upper_localization) end
 
-			if upper_name == upper_localization then table.insert(finds, {name, signatures, 100})
-			elseif string.StartsWith(upper_localization, upper_needle) then table.insert(finds, {name, signatures, 60})
-			elseif upper_name == upper_needle or string.StartsWith(upper_name, upper_needle) then table.insert(finds, {name, signatures, 30}) end
+			if needle == upper_localization then table.insert(finds, {name, signatures, 100})
+			elseif needle == upper_name then table.insert(finds, {name, signatures, 75})
+			elseif string.StartsWith(upper_localization, upper_needle) then table.insert(finds, {name, signatures, 50})
+			elseif upper_name == upper_needle or string.StartsWith(upper_name, upper_needle) then table.insert(finds, {name, signatures, 25}) end
 		end
 	end
 
