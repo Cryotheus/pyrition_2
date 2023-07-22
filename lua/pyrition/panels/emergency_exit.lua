@@ -3,7 +3,7 @@ local PANEL = {}
 function PANEL:DoClick() self:GetParent():Remove() end
 
 function PANEL:Init()
-	self:SetFont("DermaLarge")
+	self:PyritionSetFont("PyritionDermaLarge")
 	self:SetText("EMERGENCY EXIT")
 	self:SetZPos(32767)
 

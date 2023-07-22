@@ -26,19 +26,20 @@ function PANEL:SetChoices(choices)
 
 	for index, result in ipairs(choices) do
 		local panel = panels[index]
-		local _id = result[1]
-		local text = result[2]
+		local text = result[1]
+		local value = result[2]
 		maximum_index = index
 
 		if not panel then
 			panel = vgui.Create("DButton", self)
 			panel.DoClick = entry_clicked
 			panel.IndexingParent = self
+			panel.Value = value
 			panels[index] = panel
 
 			panel:Dock(TOP)
+			panel:PyritionSetFont("PyritionDermaMedium")
 			panel:SetAutoStretchVertical(true)
-			panel:SetFont("Trebuchet24")
 			scroller:AddItem(panel)
 		end
 

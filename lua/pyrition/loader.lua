@@ -11,6 +11,7 @@ local config = {
 
 	{ --global component and modules
 		client = true,
+		font = "client",
 
 		global = {
 			enumerations = "shared",
@@ -41,7 +42,7 @@ local config = {
 		},
 
 		download = "shared",
-		font = "client",
+		fonts = "client",
 
 		gfx = {
 			material_design = "client",

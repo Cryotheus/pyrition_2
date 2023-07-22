@@ -13,7 +13,7 @@ PYRITION.CommandHaystack = PYRITION.CommandHaystack or {}
 PYRITION.CommandHaystackCache = PYRITION.CommandHaystackCache or {}
 PYRITION.CommandLastHaystackNeedle = PYRITION.CommandLastHaystackNeedle or {}
 PYRITION.CommandLocalizationKeys = PYRITION.CommandLocalizationKeys or {}
-PYRITION.CommandRegistry = PYRITION.CommandRegistry or {}
+PYRITION.CommandRegistry = PYRITION.CommandRegistry or {} --dictionary[command_signature] = command_table
 
 function PYRITION:CommandClearHaystackCache(namespace)
 	self.CommandHaystackCache[namespace] = nil

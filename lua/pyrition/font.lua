@@ -41,8 +41,8 @@ function PYRITION:FontRegister(name, font_data)
 	font_data = table.Copy(font_data)
 	font_data.size = size
 	font_data.weight = PYRITION:FontScale(font_data.weight)
-	font_lookup[name] = font_name
-	fonts[size] = true
+	self.FontLookup[name] = font_name
+	self.Fonts[size] = true
 
 	surface.CreateFont(font_name, font_data)
 end
