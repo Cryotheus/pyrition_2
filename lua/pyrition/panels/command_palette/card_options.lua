@@ -1,5 +1,7 @@
 local PANEL = {}
 
+AccessorFunc(PANEL, "EntryPanel", "EntryPanel", FORCE_STRING)
+
 local function entry_clicked(self) self.IndexingParent:Submit(self, self.Value) end
 
 function PANEL:Init()
@@ -52,6 +54,7 @@ function PANEL:SearchInternal(needle)
 	--results should be a list of tuples
 	--the tuple is {id: string, text: string}
 	local choices = self.Panels
+	local entry_panel = self.EntryPanel
 	local maximum_index = 0
 	local results = self:Search(needle or "")
 	local scroller = self.Scroller
@@ -61,24 +64,34 @@ function PANEL:SearchInternal(needle)
 		local text = result[2]
 		maximum_index = index
 
-		if not panel then
-			panel = vgui.Create("DButton", self)
-			panel.DoClick = entry_clicked
-			panel.IndexingParent = self
-			choices[index] = panel
+		if entry_panel then
+			if not panel then
+				local panel = vgui.Create(entry_panel)
+				panel.DoClick = entry_clicked
+				panel.IndexingParent = self
 
-			panel:Dock(TOP)
-			panel:SetAutoStretchVertical(true)
-			panel:SetHeight(100)
-			panel:PyritionSetFont("PyritionDermaMedium")
-			--panel:SetTextColor(Color(0, 255, 0))
-			--panel:SetWrap(true)
-			scroller:AddItem(panel)
+				panel:Dock(TOP)
+				panel:PyritionSetFont("PyritionDermaMedium")
+				panel:SetValue(value)
+				scroller:AddItem(panel)
+			else panel:SetValue(value) end
+		else
+			if not panel then
+				panel = vgui.Create("DButton", self)
+				panel.DoClick = entry_clicked
+				panel.IndexingParent = self
+				panels[index] = panel
+
+				panel:Dock(TOP)
+				panel:PyritionSetFont("PyritionDermaMedium")
+				panel:SetAutoStretchVertical(true)
+				scroller:AddItem(panel)
+			end
+
+			panel.Value = value
+
+			panel:SetText(text)
 		end
-
-		panel.Value = result
-
-		panel:SetText(text)
 	end
 
 	for index = maximum_index + 1, #choices do

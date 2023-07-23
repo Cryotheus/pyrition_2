@@ -1,5 +1,7 @@
 local PANEL = {}
 
+AccessorFunc(PANEL, "EntryPanel", "EntryPanel", FORCE_STRING)
+
 local function entry_clicked(self) self.IndexingParent:Submit(self, self.Value) end
 
 function PANEL:Init()
@@ -20,6 +22,7 @@ end
 function PANEL:OnSubmit(_value) end
 
 function PANEL:SetChoices(choices)
+	local entry_panel = self.EntryPanel
 	local panels = self.Panels
 	local maximum_index = 0
 	local scroller = self.Scroller
@@ -30,20 +33,34 @@ function PANEL:SetChoices(choices)
 		local value = result[2]
 		maximum_index = index
 
-		if not panel then
-			panel = vgui.Create("DButton", self)
-			panel.DoClick = entry_clicked
-			panel.IndexingParent = self
+		if entry_panel then
+			if not panel then
+				local panel = vgui.Create(entry_panel)
+				panel.DoClick = entry_clicked
+				panel.IndexingParent = self
+
+				panel:Dock(TOP)
+				panel:PyritionSetFont("PyritionDermaMedium")
+				panel:SetValue(value)
+				scroller:AddItem(panel)
+			else panel:SetValue(value) end
+		else
+			if not panel then
+				panel = vgui.Create("DButton", self)
+				panel.DoClick = entry_clicked
+				panel.IndexingParent = self
+				panels[index] = panel
+
+				panel:Dock(TOP)
+				panel:PyritionSetFont("PyritionDermaMedium")
+				panel:SetAutoStretchVertical(true)
+				scroller:AddItem(panel)
+			end
+
 			panel.Value = value
-			panels[index] = panel
 
-			panel:Dock(TOP)
-			panel:PyritionSetFont("PyritionDermaMedium")
-			panel:SetAutoStretchVertical(true)
-			scroller:AddItem(panel)
+			panel:SetText(text)
 		end
-
-		panel:SetText(text)
 	end
 
 	for index = maximum_index + 1, #panels do
