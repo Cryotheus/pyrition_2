@@ -66,7 +66,7 @@ function PANEL:Init()
 
 	hook.Add("OnScreenSizeChanged", self, self.FillParent)
 	self:Think()
-	vgui.Create("PyritionEmergencyExit"):SetParent(self) --TODO: remove emergency exit
+	vgui.Create("PyritionEmergencyExit"):SetParent(self) --DEBUG!
 
 	self:PushCard("PyritionCommandPaletteCardCommands")
 end
@@ -147,6 +147,8 @@ function PANEL:PopCard()
 		next_card.ManualPaint = nil
 
 		next_card:SetPaintedManually(false)
+		previous_card:SetKeyboardInputEnabled(true)
+		previous_card:SetMouseInputEnabled(true)
 	end
 end
 
@@ -160,6 +162,8 @@ function PANEL:PushCard(class, ...)
 	if previous_card then
 		previous_card.ManualPaint = true
 
+		previous_card:SetKeyboardInputEnabled(false)
+		previous_card:SetMouseInputEnabled(false)
 		previous_card:SetPaintedManually(true)
 	end
 

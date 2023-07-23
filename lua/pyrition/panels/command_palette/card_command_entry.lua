@@ -34,6 +34,7 @@ function PANEL:Init()
 	end
 
 	do --spacer
+		--HACK: spacer panel since Panel:SizeToChildren doesn't care about bottom or right dock margins
 		local spacer = vgui.Create("Panel", self)
 		self.SpacerPanel = spacer
 

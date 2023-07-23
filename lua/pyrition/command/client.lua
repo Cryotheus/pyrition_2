@@ -1,6 +1,6 @@
 --pyrition functions
 function PYRITION:CommandOpenPalette()
-	if gui.IsGameUIVisible() then self:LanguageDisplay("Console", "pyrition.command.palette.blocked")
+	if gui.IsGameUIVisible() or not LocalPlayer():IsValid() then self:LanguageDisplay("Console", "pyrition.command.palette.blocked") --LOCALIZE
 	else
 		if self.CommandPalette then self.CommandPalette:Remove()
 		else vgui.Create("PyritionCommandPalette") end

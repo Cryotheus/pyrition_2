@@ -1,7 +1,7 @@
 local PANEL = {}
 
 function PANEL:Init()
-	--TODO: more for PyritionCommandPaletteStage
+	--more?
 end
 
 function PANEL:PerformLayout() self:SizeToChildren(true) end

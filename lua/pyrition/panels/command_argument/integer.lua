@@ -1,12 +1,11 @@
 local PANEL = {}
 
-function PANEL:Init()
+function PANEL:PerformLayout()
 
+	self:SizeToChildren(false, true)
 end
 
-function PANEL:PerformLayout() self:SizeToChildren(false, true) end
-
-function PANEL:SetCommandArgument(argument_settings, hint)
+function PANEL:SetCommandArgument(argument_settings)
 	local maximum = argument_settings.Maximum
 	local minimum = argument_settings.Minimum or not argument_settings.Signed and 0
 
@@ -17,12 +16,22 @@ function PANEL:SetCommandArgument(argument_settings, hint)
 		slider:Dock(TOP)
 		slider:SetRange(maximum, minimum)
 	else
-		
+		do --validated text entry
+			local local_player = LocalPlayer()
+			local validated_entry = vgui.Create("PyritionValidatedTextEntry", self)
+	
+			function validated_entry:DoValidate(text) return argument_settings:Filter(local_player, text) end
+	
+			validated_entry:Dock(TOP)
+			validated_entry:PyritionSetFont("PyritionDermaMedium")
+			validated_entry:SetPlaceholderText(argument_settings.Class) --LOCALIZE: undefined argument entry
+		end
 
 		if maximum or minimum then
 			local label = vgui.Create("DLabel", self)
 
 			label:Dock(TOP)
+			label:PyritionSetFont("PyritionDermaMedium")
 			label:SetAutoStretchVertical(true)
 			label:SetContentAlignment(4)
 			label:SetWrap(true)

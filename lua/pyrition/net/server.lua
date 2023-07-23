@@ -129,7 +129,7 @@ function PYRITION:NetThinkServer()
 
 	if next(net_enumeration_updates) then
 		for index, ply in ipairs(self.NetLoadedPlayers) do
-			--TODO: try using PYRITION:NetStreamModelQueue
+			--RELEASE: try using PYRITION:NetStreamModelQueue
 			local model = self:NetStreamModelCreate("PyritionEnumerationBits", ply)
 
 			model.Bits = net_enumeration_updates

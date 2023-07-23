@@ -1,8 +1,8 @@
 local ARGUMENT = {
 	ParseSettingMacros = {
-		Default = "Present",
-		Selfless = "Present",
-		Single = "Present",
+		Selfless = "Present", --disallow targetting the executor
+		Single = "Present", --limit targetting to a single player
+		TargetConsole = "Present", --allow targetting console
 	},
 }
 
@@ -17,7 +17,6 @@ end
 --[[
 	Complete - return a list of strings for possible completions
 	Filter - turns a string into a success bool and a value of the appropriate type
-	GetDefault
 	Read
 	ReadSettings
 	Write
@@ -56,13 +55,38 @@ function ARGUMENT:Complete(executor, argument)
 		end
 	end
 
-	return completions, language.GetPhrase(self.Single and "pyrition.command.argument.player" or "pyrition.command.argument.players")
+	return completions
 end
 
-function ARGUMENT:Filter(_executor, argument)
+function ARGUMENT:Filter(executor, argument)
 	--should return a value for if the filter passed
 	--and a second value of the filtered result
 	--eg. we convert ` : string -> success: boolean, player: Player`
+
+	if istable(argument) then --validate a player lsit
+		--don't allow invalid players
+		if self.TargetConsole then for index, member in ipairs(argument) do if not member:IsValid() or not member:IsPlayerOrWorld() then return false end end
+		else for index, member in ipairs(argument) do if not member:IsValid() or not member:IsPlayer() then return false end end end
+
+		argument.IsPlayerList = true
+
+		return true, argument
+	end
+
+	if IsEntity(argument) then --validate a player entity
+		--valid player, and is player entity
+		if argument:IsValid() and argument:IsPlayerOrWorld() then return true, argument end
+
+		return false
+	end
+
+	if isstring(argument) then --otherwise, find a player
+		--RELEASE: prevent this from being used as an exploit
+		--if a player has a different name than what the client sees
+		local find, message = PYRITION:PlayerFind(argument, executor, self.Single, self.Selfless)
+
+		return find and true, find, message
+	end
 
 	return false
 end
@@ -74,9 +98,9 @@ function ARGUMENT:Read(stream) --called when we are reading a command argument f
 end
 
 function ARGUMENT:ReadSettings(stream) --called when we are reading a settings table from a stream
-	self.Default = stream:ReadBool()
 	self.Selfless = stream:ReadBool()
 	self.Single = stream:ReadBool()
+	self.TargetConsole = stream:ReadBool()
 end
 
 function ARGUMENT:Write(stream, argument) --called when we are writing a command argument to a stream
@@ -86,9 +110,9 @@ function ARGUMENT:Write(stream, argument) --called when we are writing a command
 end
 
 function ARGUMENT:WriteSettings(stream) --called when we are writing a settings table to a stream
-	stream:WriteBool(self.Default or false)
 	stream:WriteBool(self.Selfless or false)
 	stream:WriteBool(self.Single or false)
+	stream:WriteBool(self.TargetConsole or false)
 end
 
 PYRITION:CommandArgumentRegister("Player", ARGUMENT)

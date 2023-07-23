@@ -65,6 +65,7 @@ local config = {
 		panels = {
 			command_argument = {"client",
 				integer = "client",
+				undefined = "client",
 			},
 
 			command_palette = {"client",
@@ -90,6 +91,7 @@ local config = {
 			},
 
 			slider = "client",
+			validated_text_entry = "client",
 		},
 
 		player = {
@@ -131,7 +133,7 @@ local config = {
 		time = "shared",
 
 		wiki = {
-			"shared developer",
+			shared = "shared developer",
 		},
 	},
 
@@ -169,12 +171,10 @@ local config = {
 		},
 	},
 
-	{ --net stream & language
-		command = {
-			commands = {
-				heal = "server",
-				health = "server",
-			},
+	{ --net stream, language, and commands
+		commands = {
+			heal = "server",
+			health = "server",
 		},
 
 		language = {

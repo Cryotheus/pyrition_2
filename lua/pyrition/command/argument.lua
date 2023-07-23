@@ -85,6 +85,7 @@ function PYRITION:CommandArgumentParseSettings(settings)
 end
 
 function PYRITION:HOOK_CommandArgumentRegister(name, argument_table)
+	--RELEASE: when a command argument is re-registered, run through all commands and update the Arguments table
 	assert(isstring(name), "CommandArgumentRegister argument #1 must be a string.")
 	assert(istable(argument_table), "CommandArgumentRegister argument #1 must be a table.")
 

@@ -7,14 +7,12 @@ local function entry_clicked(self) self.IndexingParent:Submit(self, self.Value) 
 function PANEL:Init()
 	self.Panels = {}
 
-	--self:SetPaintBackgroundEnabled(false)
-
 	do --text entry
 		local text_entry = vgui.Create("DTextEntry", self)
 		self.TextEntry = text_entry
 
 		text_entry:Dock(TOP)
-		text_entry:SetPlaceholderText("Type to search.")
+		text_entry:SetPlaceholderText("Type to search") --LOCALIZE:
 		text_entry:PyritionSetFont("PyritionDermaLarge")
 		text_entry:SetMultiline(false)
 

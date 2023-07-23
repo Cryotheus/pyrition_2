@@ -1102,7 +1102,7 @@ end)
 
 PYRITION:GlobalHookCreate("NetStreamRegisterClass")
 
-if false then --TODO: remove debug!
+if false then --DEBUG!
 	local banned = {
 		ReadBit = true,
 		ReadByte = true,

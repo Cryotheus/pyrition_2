@@ -89,7 +89,7 @@ function PANEL:SetValue(...) return self.Slider:SetValue(...) end
 
 derma.DefineControl("PyritionLabeledSlider", "Pyrition's slider panel with an automatically toggling label.", PANEL, "DSizeToContents")
 
---TODO: remove debug
+--DEBUG!
 concommand.Add("pdp", function()
 	local frame = vgui.Create("DFrame")
 
