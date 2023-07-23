@@ -54,6 +54,7 @@ end
 
 function PANEL:SetValue(command_signature)
 	local command_table = PYRITION.CommandRegistry[command_signature]
+	self.Value = command_signature
 
 	if command_table.Arguments[1] then
 		self.NoCommandArguments = false

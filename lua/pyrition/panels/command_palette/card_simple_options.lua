@@ -78,7 +78,7 @@ function PANEL:Submit(panel, value)
 		else return end
 	end
 
-	self:OnSubmit(value)
+	self:OnSubmit(value, panel)
 end
 
 derma.DefineControl(

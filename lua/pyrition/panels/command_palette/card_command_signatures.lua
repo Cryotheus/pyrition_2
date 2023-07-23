@@ -2,7 +2,7 @@ local PANEL = {}
 
 function PANEL:Init() self:SetEntryPanel("PyritionCommandPaletteCardCommandEntry") end
 
-function PANEL:OnSubmit(panel, command_signature)
+function PANEL:OnSubmit(command_signature, panel)
 	local command_table = PYRITION.CommandRegistry[command_signature]
 
 	if panel.NoCommandArguments then --execute!
