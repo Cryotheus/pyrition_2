@@ -10,8 +10,6 @@ function PANEL:OnSubmit(value)
 	local command_name = value[1]
 	local command_haystack = PYRITION.CommandHaystack[command_name]
 
-	PYRITION:CommandClearHaystackCache(self.CardID)
-
 	if #command_haystack == 1 then
 
 	else self:PushCard("PyritionCommandPaletteCardCommandSignatures", value[1], value[3]) end
