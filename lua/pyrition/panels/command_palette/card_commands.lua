@@ -1,19 +1,16 @@
 local PANEL = {}
 
-function PANEL:Init()
-
-end
-
 function PANEL:OnRemove() PYRITION:CommandClearHaystackCache(self.CardID) end
 
-function PANEL:OnSubmit(value)
-	local command_name = value[1]
+function PANEL:OnSubmit(command_name)
 	local command_haystack = PYRITION.CommandHaystack[command_name]
 
 	if #command_haystack == 1 then
 
-	else self:PushCard("PyritionCommandPaletteCardCommandSignatures", value[1], value[3]) end
+	else self:PushCard("PyritionCommandPaletteCardCommandSignatures", command_haystack) end
 end
+
+function PANEL:OnSubmitEmpty() self.CommandPalette:Remove() end
 
 function PANEL:Search(needle)
 	local finds = PYRITION:CommandFindSignatures(needle, self.CardID)
@@ -25,8 +22,7 @@ function PANEL:Search(needle)
 
 		table.insert(results, {
 			command_name,
-			PYRITION:LanguageGetPhrase(localization_keys[command_name]) or command_name,
-			finding[2]
+			PYRITION:LanguageGetPhrase(localization_keys[command_name]) or command_name
 		})
 	end
 

@@ -27,10 +27,8 @@ function PANEL:SetChoices(choices)
 	local maximum_index = 0
 	local scroller = self.Scroller
 
-	for index, result in ipairs(choices) do
+	for index, pair in ipairs(choices) do
 		local panel = panels[index]
-		local text = result[1]
-		local value = result[2]
 		maximum_index = index
 
 		if entry_panel then
@@ -41,9 +39,9 @@ function PANEL:SetChoices(choices)
 
 				panel:Dock(TOP)
 				panel:PyritionSetFont("PyritionDermaMedium")
-				panel:SetValue(value)
+				panel:SetValue(pair)
 				scroller:AddItem(panel)
-			else panel:SetValue(value) end
+			else panel:SetValue(pair) end
 		else
 			if not panel then
 				panel = vgui.Create("DButton", self)
@@ -57,9 +55,9 @@ function PANEL:SetChoices(choices)
 				scroller:AddItem(panel)
 			end
 
-			panel.Value = value
+			panel.Value = pair[1]
 
-			panel:SetText(text)
+			panel:SetText(pair[2])
 		end
 	end
 

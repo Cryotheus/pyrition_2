@@ -24,8 +24,11 @@ function PANEL:Init()
 		function text_entry:OnEnter(value)
 			local parent = self:GetParent()
 
-			parent:SearchInternal(value)
-			parent:Submit()
+			if parent.OnSubmitEmpty then parent:OnSubmitEmpty()
+			else
+				parent:SearchInternal(value)
+				parent:Submit()
+			end
 		end
 
 		function text_entry:OnChange() self:GetParent():SearchInternal(self:GetValue()) end
@@ -52,29 +55,31 @@ function PANEL:OnSubmit(_value) end
 
 function PANEL:SearchInternal(needle)
 	--results should be a list of tuples
-	--the tuple is {id: string, text: string}
-	local choices = self.Panels
+	--the tuple is {value: any, text: string}
+	--if you used SetEntryPanel, then SetValue is called on a panel of that type
+	--and the tuple (or whatever value you want) is passed in directly
 	local entry_panel = self.EntryPanel
 	local maximum_index = 0
+	local panels = self.Panels
 	local results = self:Search(needle or "")
 	local scroller = self.Scroller
 
-	for index, result in ipairs(results) do
-		local panel = choices[index]
-		local text = result[2]
+	for index, pair in ipairs(results) do
+		local panel = panels[index]
 		maximum_index = index
 
 		if entry_panel then
 			if not panel then
-				local panel = vgui.Create(entry_panel)
+				local panel = vgui.Create(entry_panel, self)
 				panel.DoClick = entry_clicked
 				panel.IndexingParent = self
+				panels[index] = panel
 
 				panel:Dock(TOP)
 				panel:PyritionSetFont("PyritionDermaMedium")
-				panel:SetValue(value)
+				panel:SetValue(pair)
 				scroller:AddItem(panel)
-			else panel:SetValue(value) end
+			else panel:SetValue(pair) end
 		else
 			if not panel then
 				panel = vgui.Create("DButton", self)
@@ -88,16 +93,16 @@ function PANEL:SearchInternal(needle)
 				scroller:AddItem(panel)
 			end
 
-			panel.Value = value
+			panel.Value = pair[1]
 
-			panel:SetText(text)
+			panel:SetText(pair[2])
 		end
 	end
 
-	for index = maximum_index + 1, #choices do
-		choices[index]:Remove()
+	for index = maximum_index + 1, #panels do
+		panels[index]:Remove()
 
-		choices[index] = nil
+		panels[index] = nil
 	end
 
 	self:InvalidateLayout(true)

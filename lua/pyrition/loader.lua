@@ -70,6 +70,7 @@ local config = {
 			command_palette = {"client",
 				card = "client",
 				card_command = "client",
+				card_command_entry = "client",
 				card_command_signatures = "client",
 				card_commands = "client",
 				card_options = "client",
