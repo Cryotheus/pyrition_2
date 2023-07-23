@@ -80,6 +80,15 @@ local config = {
 
 			emergency_exit = "client",
 			labeled_slider = "client",
+
+			material_design = {
+				icon = "client",
+				icon_button = "client",
+				icon_scaler = "client",
+				icon_scaler_button = "client",
+				icon_volume = "client",
+			},
+
 			slider = "client",
 		},
 
